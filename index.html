@@ -1,0 +1,224 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>TUGGA IT SOLUTIONS - NIN Portal</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <style>
+    .register-form{display:none}
+    .pw-wrap{position:relative}
+    .pw-wrap input{padding-right:42px}
+    .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:var(--gray);padding:0 4px}
+    .forgot-link{display:block;text-align:right;font-size:0.82rem;color:var(--primary);cursor:pointer;margin-top:-0.6rem;margin-bottom:1rem;text-decoration:underline}
+    .btn-loader{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .forgot-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;padding:1rem}
+    .forgot-modal.open{display:flex}
+    .forgot-box{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
+    .forgot-box h3{color:var(--primary);margin-bottom:0.5rem}
+    .forgot-box p{color:var(--gray);font-size:0.85rem;margin-bottom:1.2rem}
+    .demo-hint{text-align:center;color:rgba(255,255,255,0.6);font-size:0.78rem;margin-top:1rem}
+  </style>
+</head>
+<body>
+<div class="hero">
+  <div class="login-card">
+    <div class="brand">
+      <div class="logo-icon">&#128737;</div>
+      <h1>TUGGA <span>IT SOLUTIONS</span></h1>
+      <p>National Identity &amp; BVN Services Portal</p>
+    </div>
+    <div class="tabs">
+      <button class="active" onclick="switchTab('login')">Login</button>
+      <button onclick="switchTab('register')">Register</button>
+    </div>
+    <div id="loginForm">
+      <div id="loginAlert"></div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="loginEmail" placeholder="Enter your email"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPassword" placeholder="Enter your password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('loginPassword',this)">Show</button>
+        </div>
+      </div>
+      <span class="forgot-link" onclick="openForgot()">Forgot password?</span>
+      <button class="btn-primary" id="loginBtn" onclick="doLogin()">Login to Portal</button>
+    </div>
+    <div id="registerForm" class="register-form">
+      <div id="regAlert"></div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="regName" placeholder="Enter full name"/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="regEmail" placeholder="Enter email"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="regPhone" placeholder="08XXXXXXXXX"/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="regPassword" placeholder="Create password (min 6 chars)"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('regPassword',this)">Show</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Confirm Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="regConfirm" placeholder="Confirm your password"/>
+          <button class="pw-toggle" type="button" onclick="togglePw('regConfirm',this)">Show</button>
+        </div>
+      </div>
+      <button class="btn-primary btn-accent" id="regBtn" onclick="doRegister()">Create Account</button>
+    </div>
+  </div>
+</div>
+<div class="forgot-modal" id="forgotModal">
+  <div class="forgot-box">
+    <h3>Reset Password</h3>
+    <p>Enter your email and we will send you a reset link.</p>
+    <div id="forgotAlert"></div>
+    <div class="form-group">
+      <label>Email Address</label>
+      <input type="email" id="forgotEmail" placeholder="Enter your email"/>
+    </div>
+    <button class="btn-primary" id="forgotBtn" onclick="doForgot()">Send Reset Link</button>
+    <button onclick="closeForgot()" style="width:100%;margin-top:0.5rem;padding:10px;background:none;border:1px solid #dfe6e9;border-radius:8px;cursor:pointer;color:var(--gray)">Cancel</button>
+  </div>
+</div>
+<script type="module" src="js/firebase.js"></script>
+<script>
+  var _registering = false;
+
+  function switchTab(tab) {
+    document.querySelectorAll(".tabs button").forEach(function(b,i){
+      b.classList.toggle("active",(i===0&&tab==="login")||(i===1&&tab==="register"));
+    });
+    document.getElementById("loginForm").style.display=tab==="login"?"block":"none";
+    document.getElementById("registerForm").style.display=tab==="register"?"block":"none";
+  }
+
+  function togglePw(id,btn){
+    var inp=document.getElementById(id);
+    if(inp.type==="password"){inp.type="text";btn.textContent="Hide";}
+    else{inp.type="password";btn.textContent="Show";}
+  }
+
+  function setLoading(btnId,loading,defaultText){
+    var btn=document.getElementById(btnId);
+    if(!btn)return;
+    btn.disabled=loading;
+    btn.innerHTML=loading?'<span class="btn-loader"></span> Please wait...':defaultText;
+  }
+
+  function waitForFirebase(cb){
+    if(window.fbReady){cb();}else{setTimeout(function(){waitForFirebase(cb);},200);}
+  }
+
+  function doLogin(){
+    var email=document.getElementById("loginEmail").value.trim();
+    var pass=document.getElementById("loginPassword").value;
+    var alertEl=document.getElementById("loginAlert");
+    alertEl.innerHTML="";
+    if(!email||!pass){alertEl.innerHTML='<div class="alert alert-error">Please fill all fields.</div>';return;}
+    setLoading("loginBtn",true,"Login to Portal");
+    waitForFirebase(function(){
+      window.fbSignIn(window.fbAuth,email,pass).then(function(cred){
+        return window.fbGetDoc(window.fbDoc(window.fbDB,"users",cred.user.uid)).then(function(snap){
+          if(snap.exists()){
+            var u=snap.data();
+            localStorage.setItem("tugga_user",JSON.stringify(Object.assign({},u,{uid:cred.user.uid})));
+            window.location.href=u.role==="admin"?"admin/dashboard.html":"user/dashboard.html";
+          }else{
+            alertEl.innerHTML='<div class="alert alert-error">User profile not found. Please register.</div>';
+            setLoading("loginBtn",false,"Login to Portal");
+          }
+        });
+      }).catch(function(err){
+        console.error("Login error:",err.code,err.message);
+        var msg="Invalid email or password.";
+        if(err.code==="auth/too-many-requests")msg="Too many attempts. Try again later.";
+        if(err.code==="auth/user-not-found")msg="No account found. Please register.";
+        if(err.code==="auth/network-request-failed")msg="Network error. Check your connection.";
+        alertEl.innerHTML='<div class="alert alert-error">'+msg+'</div>';
+        setLoading("loginBtn",false,"Login to Portal");
+      });
+    });
+  }
+
+  function doRegister(){
+    var name=document.getElementById("regName").value.trim();
+    var email=document.getElementById("regEmail").value.trim();
+    var phone=document.getElementById("regPhone").value.trim();
+    var pass=document.getElementById("regPassword").value;
+    var confirm=document.getElementById("regConfirm").value;
+    var alertEl=document.getElementById("regAlert");
+    alertEl.innerHTML="";
+    if(!name||!email||!phone||!pass||!confirm){alertEl.innerHTML='<div class="alert alert-error">Please fill all fields.</div>';return;}
+    if(pass.length<6){alertEl.innerHTML='<div class="alert alert-error">Password must be at least 6 characters.</div>';return;}
+    if(pass!==confirm){alertEl.innerHTML='<div class="alert alert-error">Passwords do not match.</div>';return;}
+    setLoading("regBtn",true,"Create Account");
+    _registering=true;
+    waitForFirebase(function(){
+      window.fbCreateUser(window.fbAuth,email,pass).then(function(cred){
+        var userData={
+          id:cred.user.uid,name:name,email:email,phone:phone,
+          role:"user",wallet:0,nin:"",
+          registeredAt:new Date().toLocaleDateString("en-GB")
+        };
+        return window.fbSetDoc(window.fbDoc(window.fbDB,"users",cred.user.uid),userData).then(function(){
+          localStorage.setItem("tugga_user",JSON.stringify(Object.assign({},userData,{uid:cred.user.uid})));
+          _registering=false;
+          alertEl.innerHTML='<div class="alert alert-success">Account created! Redirecting...</div>';
+          setTimeout(function(){window.location.href="user/dashboard.html";},1200);
+        });
+      }).catch(function(err){
+        _registering=false;
+        console.error("Register error:",err.code,err.message);
+        var msg="Registration failed: "+err.message;
+        if(err.code==="auth/email-already-in-use")msg="Email already registered. Please login.";
+        if(err.code==="auth/invalid-email")msg="Invalid email address.";
+        if(err.code==="auth/weak-password")msg="Password too weak. Use at least 6 characters.";
+        if(err.code==="auth/network-request-failed")msg="Network error. Check your connection.";
+        alertEl.innerHTML='<div class="alert alert-error">'+msg+'</div>';
+        setLoading("regBtn",false,"Create Account");
+      });
+    });
+  }
+
+  function openForgot(){
+    document.getElementById("forgotModal").classList.add("open");
+    document.getElementById("forgotAlert").innerHTML="";
+    document.getElementById("forgotEmail").value=document.getElementById("loginEmail").value||"";
+  }
+  function closeForgot(){document.getElementById("forgotModal").classList.remove("open");}
+
+  function doForgot(){
+    var email=document.getElementById("forgotEmail").value.trim();
+    var alertEl=document.getElementById("forgotAlert");
+    alertEl.innerHTML="";
+    if(!email){alertEl.innerHTML='<div class="alert alert-error">Please enter your email.</div>';return;}
+    setLoading("forgotBtn",true,"Send Reset Link");
+    waitForFirebase(function(){
+      window.fbResetPassword(window.fbAuth,email).then(function(){
+        alertEl.innerHTML='<div class="alert alert-success">Reset link sent! Check your email.</div>';
+        setLoading("forgotBtn",false,"Send Reset Link");
+      }).catch(function(err){
+        var msg="Failed to send reset email.";
+        if(err.code==="auth/user-not-found")msg="No account found with this email.";
+        alertEl.innerHTML='<div class="alert alert-error">'+msg+'</div>';
+        setLoading("forgotBtn",false,"Send Reset Link");
+      });
+    });
+  }
+</script>
+</body>
+</html>

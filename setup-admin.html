@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Setup</title>
+  <link rel="stylesheet" href="css/style.css"/>
+</head>
+<body>
+<div class="hero">
+  <div class="login-card">
+    <div class="brand">
+      <div class="logo-icon">⚙️</div>
+      <h1>TUGGA <span>SETUP</span></h1>
+      <p>One-time admin account creation</p>
+    </div>
+    <div id="setupAlert"></div>
+    <div class="form-group">
+      <label>Admin Email</label>
+      <input type="email" id="adminEmail" value="admin@tugga.com"/>
+    </div>
+    <div class="form-group">
+      <label>Admin Password</label>
+      <input type="password" id="adminPass" value="admin123"/>
+    </div>
+    <div class="form-group">
+      <label>Admin Name</label>
+      <input type="text" id="adminName" value="Admin User"/>
+    </div>
+    <button class="btn-primary" id="setupBtn" onclick="createAdmin()">Create Admin Account</button>
+    <p style="text-align:center;font-size:0.8rem;color:var(--gray);margin-top:1rem">Delete this file after setup is complete.</p>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const app = initializeApp({
+  apiKey: "AIzaSyDX31m2k1OOzedDQHAbpvgP15mxLjBRdwc",
+  authDomain: "tugga-nin.firebaseapp.com",
+  projectId: "tugga-nin",
+  storageBucket: "tugga-nin.firebasestorage.app",
+  messagingSenderId: "63922868228",
+  appId: "1:63922868228:web:45bfadf123e9b493b82551"
+});
+
+const auth = getAuth(app);
+const db   = getFirestore(app);
+
+window.createAdmin = function() {
+  var email = document.getElementById("adminEmail").value.trim();
+  var pass  = document.getElementById("adminPass").value;
+  var name  = document.getElementById("adminName").value.trim();
+  var al    = document.getElementById("setupAlert");
+  al.innerHTML = "";
+
+  var btn = document.getElementById("setupBtn");
+  btn.disabled = true;
+  btn.textContent = "Creating...";
+
+  createUserWithEmailAndPassword(auth, email, pass)
+    .then(function(cred) {
+      var uid = cred.user.uid;
+      var userData = {
+        id: uid, name: name, email: email,
+        phone: "08098765432", role: "admin",
+        wallet: 0, nin: "",
+        registeredAt: new Date().toLocaleDateString("en-GB")
+      };
+      return setDoc(doc(db, "users", uid), userData).then(function() {
+        al.innerHTML = '<div class="alert alert-success">Admin account created successfully! UID: ' + uid + '<br><br>You can now <a href="index.html" style="color:var(--primary)">login here</a>.<br><br><strong>Please delete setup-admin.html from GitHub now.</strong></div>';
+        btn.textContent = "Done";
+      });
+    })
+    .catch(function(err) {
+      var msg = err.message;
+      if (err.code === "auth/email-already-in-use") msg = "Admin email already exists. Try logging in directly.";
+      al.innerHTML = '<div class="alert alert-error">' + msg + '</div>';
+      btn.disabled = false;
+      btn.textContent = "Create Admin Account";
+    });
+};
+</script>
+</body>
+</html>

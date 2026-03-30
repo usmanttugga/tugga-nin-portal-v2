@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Dashboard – TUGGA IT SOLUTIONS</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<nav>
+  <div class="logo">🛡️ TUGGA <span>IT SOLUTIONS</span> <span style="font-size:0.7rem;background:var(--accent);padding:2px 8px;border-radius:4px;margin-left:8px">ADMIN</span></div>
+  <div class="nav-links">
+    <a href="#" class="active">Admin Panel</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar" style="background:#e84118">A</div>
+    <span id="adminName">Admin</span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="dashboard">
+  <aside class="sidebar">
+    <div class="menu-section">
+      <h4>Overview</h4>
+      <a href="#" class="active" data-section="sec-overview" onclick="showSection('sec-overview')"><span class="icon">📊</span> Overview</a>
+      <a href="#" data-section="sec-users" onclick="showSection('sec-users')"><span class="icon">👥</span> Users</a>
+      <a href="#" data-section="sec-transactions" onclick="showSection('sec-transactions')"><span class="icon">📋</span> Transactions</a>
+    </div>
+    <div class="menu-section">
+      <h4>Services</h4>
+      <a href="#" data-section="sec-nin-admin" onclick="showSection('sec-nin-admin')"><span class="icon">🪪</span> NIN Services</a>
+      <a href="#" data-section="sec-bvn-admin" onclick="showSection('sec-bvn-admin')"><span class="icon">🏦</span> BVN Services</a>
+      <a href="#" data-section="sec-utility-admin" onclick="showSection('sec-utility-admin')"><span class="icon">📞</span> Airtime & Data</a>
+    </div>
+    <div class="menu-section">
+      <h4>Settings</h4>
+      <a href="#" data-section="sec-pricing" onclick="showSection('sec-pricing')"><span class="icon">💲</span> Pricing</a>
+      <a href="#" data-section="sec-availability" onclick="showSection('sec-availability')"><span class="icon">🔧</span> Availability</a>
+      <a href="#" data-section="sec-settings" onclick="showSection('sec-settings')"><span class="icon">⚙️</span> Settings</a>
+    </div>
+  </aside>
+
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <section id="sec-overview" class="content-section">
+      <p class="page-title">Admin Overview</p>
+      <p class="page-sub">Platform statistics and activity summary.</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon bg-blue">👥</div><div class="stat-info"><h3 id="statUsers">1</h3><p>Total Users</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-green">📋</div><div class="stat-info"><h3 id="statTxns">0</h3><p>Total Transactions</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-orange">✅</div><div class="stat-info"><h3 id="statSuccess">0</h3><p>Successful</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-red">💰</div><div class="stat-info"><h3 id="statRevenue">₦0</h3><p>Total Revenue</p></div></div>
+      </div>
+      <p class="page-title" style="font-size:1rem;margin-bottom:1rem">Recent Transactions</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ref</th><th>User</th><th>Service</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="recentTxnTable"><tr><td colspan="6" style="text-align:center;color:#999">No transactions</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- USERS -->
+    <section id="sec-users" class="content-section section-hidden">
+      <div class="admin-header">
+        <div><p class="page-title">User Management</p><p class="page-sub">Manage registered users.</p></div>
+        <button class="btn-primary" style="width:auto;padding:10px 20px" onclick="openModal('addUserModal')">+ Add User</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Wallet</th><th>Status</th><th>Action</th></tr></thead>
+          <tbody id="usersTable"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- TRANSACTIONS -->
+    <section id="sec-transactions" class="content-section section-hidden">
+      <div class="admin-header">
+        <div><p class="page-title">All Transactions</p><p class="page-sub">Full transaction log.</p></div>
+        <div class="search-bar">
+          <input type="text" id="txnSearch" placeholder="Search by ref or service..." oninput="filterTxns()"/>
+          <button onclick="filterTxns()">Search</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ref</th><th>User ID</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="allTxnTable"><tr><td colspan="7" style="text-align:center;color:#999">No transactions</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- NIN ADMIN -->
+    <section id="sec-nin-admin" class="content-section section-hidden">
+      <p class="page-title">NIN Services Management</p>
+      <p class="page-sub">Monitor and process NIN service requests.</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon bg-blue">🪪</div><div class="stat-info"><h3 id="ninVerCount">0</h3><p>NIN Verifications</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-green">✔️</div><div class="stat-info"><h3 id="ninValCount">0</h3><p>NIN Validations</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-red">✏️</div><div class="stat-info"><h3 id="ninModCount">0</h3><p>Modifications</p></div></div>
+      </div>
+      <div class="table-wrap" style="margin-top:1rem">
+        <table>
+          <thead><tr><th>Ref</th><th>Service</th><th>NIN/Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="ninTxnTable"><tr><td colspan="6" style="text-align:center;color:#999">No NIN transactions</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- BVN ADMIN -->
+    <section id="sec-bvn-admin" class="content-section section-hidden">
+      <p class="page-title">BVN Services Management</p>
+      <p class="page-sub">Monitor and process BVN service requests.</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon bg-blue">🏦</div><div class="stat-info"><h3 id="bvnVerCount">0</h3><p>BVN Verifications</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-green">🔍</div><div class="stat-info"><h3 id="bvnRetCount">0</h3><p>BVN Retrievals</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-orange">🔧</div><div class="stat-info"><h3 id="bvnModCount">0</h3><p>Modifications</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-red">👤</div><div class="stat-info"><h3 id="bvnUserCount">0</h3><p>BVN User Lookups</p></div></div>
+      </div>
+      <div class="table-wrap" style="margin-top:1rem">
+        <table>
+          <thead><tr><th>Ref</th><th>Service</th><th>BVN/Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="bvnTxnTable"><tr><td colspan="6" style="text-align:center;color:#999">No BVN transactions</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- UTILITY ADMIN -->
+    <section id="sec-utility-admin" class="content-section section-hidden">
+      <p class="page-title">Airtime & Data Management</p>
+      <p class="page-sub">Monitor airtime and data purchases.</p>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon bg-blue">📞</div><div class="stat-info"><h3 id="airtimeCount">0</h3><p>Airtime Purchases</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-green">📶</div><div class="stat-info"><h3 id="dataCount">0</h3><p>Data Purchases</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-orange">💰</div><div class="stat-info"><h3 id="utilityRevenue">₦0</h3><p>Utility Revenue</p></div></div>
+      </div>
+      <div class="table-wrap" style="margin-top:1rem">
+        <table>
+          <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="utilityTxnTable"><tr><td colspan="6" style="text-align:center;color:#999">No utility transactions</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- PRICING -->
+    <section id="sec-pricing" class="content-section section-hidden">
+      <p class="page-title">Service Pricing</p>
+      <p class="page-sub">Manage service fees.</p>
+      <div style="background:var(--white);border-radius:12px;padding:2rem;box-shadow:var(--card-shadow)">
+        <div id="pricingAlert"></div>
+        <div style="display:flex;flex-direction:column;gap:1.5rem">
+
+          <!-- NIN Verification group -->
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🔍 NIN Verification</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+              <div class="form-group"><label>Verify with NIN (₦)</label><input type="number" id="p_verify_nin" value="200"/></div>
+              <div class="form-group"><label>Phone Number Verification (₦)</label><input type="number" id="p_phone_verify" value="150"/></div>
+              <div class="form-group"><label>Bio Data Verification (₦)</label><input type="number" id="p_bio_data" value="300"/></div>
+              <div class="form-group"><label>FingerPrint Verification (₦)</label><input type="number" id="p_fingerprint" value="200"/></div>
+            </div>
+          </div>
+
+          <!-- NIN Validation group -->
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">✔️ NIN Validation</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+              <div class="form-group"><label>No Record Found (₦)</label><input type="number" id="p_no_record" value="150"/></div>
+              <div class="form-group"><label>Bank Validation (₦)</label><input type="number" id="p_bank_val" value="150"/></div>
+              <div class="form-group"><label>Photograph Error (₦)</label><input type="number" id="p_photo_err" value="150"/></div>
+              <div class="form-group"><label>SIM Validation (₦)</label><input type="number" id="p_sim_val" value="150"/></div>
+            </div>
+          </div>
+
+          <!-- Other NIN Services -->
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">✏️ NIN Modification</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+              <div class="form-group"><label>Name Modification (₦)</label><input type="number" id="p_name_mod" value="500"/></div>
+              <div class="form-group"><label>Phone Number Modification (₦)</label><input type="number" id="p_phone_mod" value="500"/></div>
+              <div class="form-group"><label>Address Modification (₦)</label><input type="number" id="p_address_mod" value="500"/></div>
+              <div class="form-group"><label>Date of Birth Modification (₦)</label><input type="number" id="p_dob_mod" value="500"/></div>
+            </div>
+          </div>
+
+          <!-- Other NIN Services -->
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🪪 Other NIN Services</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+              <div class="form-group"><label>NIN Modification (₦)</label><input type="number" id="p_ninmod" value="500"/></div>
+              <div class="form-group"><label>NIN Personalization (₦)</label><input type="number" id="p_ninpers" value="1000"/></div>
+              <div class="form-group"><label>VNIN Slip (₦)</label><input type="number" id="p_vnin" value="250"/></div>
+            </div>
+          </div>
+
+          <!-- IPE Clearance group -->
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">✅ IPE Clearance</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+              <div class="form-group"><label>Normal Clearance (₦)</label><input type="number" id="p_ipe_normal" value="400"/></div>
+              <div class="form-group"><label>Modification Clearance (₦)</label><input type="number" id="p_ipe_mod" value="400"/></div>
+              <div class="form-group"><label>Other Error (₦)</label><input type="number" id="p_ipe_other" value="400"/></div>
+            </div>
+          </div>
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🏦 BVN Services</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+              <div class="form-group"><label>BVN Verification (₦)</label><input type="number" id="p_bvnver" value="200"/></div>
+              <div class="form-group"><label>BVN Retrieval (₦)</label><input type="number" id="p_bvnret" value="150"/></div>
+              <div class="form-group"><label>BVN Modification (₦)</label><input type="number" id="p_bvnmod" value="500"/></div>
+              <div class="form-group"><label>BVN User (₦)</label><input type="number" id="p_bvnuser" value="200"/></div>
+            </div>
+          </div>
+
+        </div>
+        <button class="btn-primary" style="width:auto;padding:10px 24px;margin-top:1rem" onclick="savePricing()">Save Pricing</button>
+      </div>
+    </section>
+
+    <!-- SERVICE AVAILABILITY -->
+    <section id="sec-availability" class="content-section section-hidden">
+      <p class="page-title">Service Availability</p>
+      <p class="page-sub">Toggle services on or off for users.</p>
+      <div style="background:var(--white);border-radius:12px;padding:2rem;box-shadow:var(--card-shadow)">
+        <div id="availabilityAlert"></div>
+        <div id="availabilityGroups" style="display:flex;flex-direction:column;gap:1.5rem"></div>
+        <button class="btn-primary" style="width:auto;padding:10px 24px;margin-top:1.5rem" onclick="saveAvailability()">Save Availability</button>
+      </div>
+    </section>
+
+    <!-- SETTINGS -->
+
+    <!-- SETTINGS -->
+    <section id="sec-settings" class="content-section section-hidden">
+      <p class="page-title">Platform Settings</p>
+      <p class="page-sub">Configure platform details.</p>
+      <div style="background:var(--white);border-radius:12px;padding:2rem;max-width:560px;box-shadow:var(--card-shadow)">
+        <div id="settingsAlert"></div>
+        <div class="form-group"><label>Company Name</label><input type="text" id="s_company" value="TUGGA IT SOLUTIONS"/></div>
+        <div class="form-group"><label>Support Email</label><input type="email" id="s_email" placeholder="support@tugga.com"/></div>
+        <div class="form-group"><label>Support Phone</label><input type="tel" id="s_phone" placeholder="+234XXXXXXXXXX"/></div>
+        <div class="form-group"><label>Platform Status</label>
+          <select id="s_status"><option>Active</option><option>Maintenance</option></select>
+        </div>
+        <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="saveSettings()">Save Settings</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ADD USER MODAL -->
+<div class="modal-overlay" id="addUserModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Add New User</h3>
+      <button class="modal-close" onclick="closeModal('addUserModal')">✕</button>
+    </div>
+    <div id="addUserAlert"></div>
+    <div class="form-group"><label>Full Name</label><input type="text" id="nu_name" placeholder="Full name"/></div>
+    <div class="form-group"><label>Email</label><input type="email" id="nu_email" placeholder="Email address"/></div>
+    <div class="form-group"><label>Phone</label><input type="tel" id="nu_phone" placeholder="Phone number"/></div>
+    <div class="form-group"><label>Role</label>
+      <select id="nu_role"><option value="user">User</option><option value="admin">Admin</option></select>
+    </div>
+    <div class="form-group"><label>Password</label><input type="password" id="nu_pass" placeholder="Set password"/></div>
+    <button class="btn-primary" onclick="addUser()">Create User</button>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script type="module" src="../js/firebase.js"></script>
+<script>
+  const admin = requireAuth("admin");
+  if (admin) document.getElementById("adminName").textContent = admin.name;
+
+  const MOCK_USERS = [
+    { id: 1, name: "John Doe", email: "user@tugga.com", role: "user", wallet: 5000, status: "Active" }
+  ];
+
+  function loadOverview() {
+    const txns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    document.getElementById("statTxns").textContent = txns.length;
+    document.getElementById("statSuccess").textContent = txns.filter(t => t.status === "success").length;
+    document.getElementById("statRevenue").textContent = fmt(txns.reduce((s, t) => s + t.amount, 0));
+    const tbody = document.getElementById("recentTxnTable");
+    if (!txns.length) return;
+    tbody.innerHTML = txns.slice(0, 10).map(t => `
+      <tr><td>${t.id}</td><td>User #${t.userId}</td><td>${t.service}</td>
+      <td>${fmt(t.amount)}</td>
+      <td><span class="badge badge-${t.status === 'success' ? 'success' : 'failed'}">${t.status}</span></td>
+      <td>${t.date}</td></tr>`).join("");
+  }
+
+  function loadUsers() {
+    const users = window._fbUsers || MOCK_USERS;
+    document.getElementById("statUsers").textContent = users.length;
+    document.getElementById("usersTable").innerHTML = users.map(u => `
+      <tr><td>${u.id||u.uid}</td><td>${u.name}</td><td>${u.email}</td>
+      <td><span class="badge badge-${u.role === 'admin' ? 'pending' : 'success'}">${u.role}</span></td>
+      <td>${fmt(u.wallet||0)}</td>
+      <td><span class="badge badge-success">${u.status||'Active'}</span></td>
+      <td><button onclick="toast('User suspended')" style="background:var(--accent);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem">Suspend</button></td></tr>`).join("");
+  }
+
+  function loadAllTxns(filter = "") {
+    const txns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const filtered = filter ? txns.filter(t => t.id.includes(filter) || t.service.toLowerCase().includes(filter.toLowerCase())) : txns;
+    const tbody = document.getElementById("allTxnTable");
+    if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999">No transactions</td></tr>'; return; }
+    tbody.innerHTML = filtered.map(t => `
+      <tr><td>${t.id}</td><td>#${t.userId}</td><td>${t.service}</td><td>${t.details}</td>
+      <td>${fmt(t.amount)}</td>
+      <td><span class="badge badge-${t.status === 'success' ? 'success' : 'failed'}">${t.status}</span></td>
+      <td>${t.date}</td></tr>`).join("");
+  }
+
+  function filterTxns() { loadAllTxns(document.getElementById("txnSearch").value); }
+
+  function loadNINStats() {
+    const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const ninVerSvcs = ["Verify with NIN", "Phone Number Verification", "Bio Data Verification", "FingerPrint Verification"];
+    const ninValSvcs = ["No Record Found", "Bank Validation", "Photograph Error", "SIM Validation"];
+    const ninModSvcs = ["Name Modification", "Phone Number Modification", "Address Modification", "Date of Birth Modification"];
+    const ninIpeSvcs = ["Normal Clearance", "Modification Clearance", "Other Error"];
+    const nin = allTxns.filter(t =>
+      t.service.includes("NIN") || t.service.includes("VNIN") || t.service.includes("IPE") ||
+      ninVerSvcs.includes(t.service) || ninValSvcs.includes(t.service) ||
+      ninModSvcs.includes(t.service) || ninIpeSvcs.includes(t.service)
+    );
+    document.getElementById("ninVerCount").textContent  = nin.filter(t =>
+      t.service === "NIN Verification" || ninVerSvcs.includes(t.service)).length;
+    document.getElementById("ninValCount").textContent  = nin.filter(t =>
+      t.service === "NIN Validation" || ninValSvcs.includes(t.service)).length;
+    document.getElementById("ninModCount").textContent  = nin.filter(t =>
+      t.service === "NIN Modification" || ninModSvcs.includes(t.service)).length;
+    const tbody = document.getElementById("ninTxnTable");
+    if (!nin.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No NIN transactions</td></tr>'; return; }
+    tbody.innerHTML = nin.map(t => `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-success">${t.status}</span></td><td>${t.date}</td></tr>`).join("");
+  }
+
+  function loadBVNStats() {
+    const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const bvn = allTxns.filter(t => t.service.includes("BVN"));
+    document.getElementById("bvnVerCount").textContent  = bvn.filter(t => t.service === "BVN Verification").length;
+    document.getElementById("bvnRetCount").textContent  = bvn.filter(t => t.service === "BVN Retrieval").length;
+    document.getElementById("bvnModCount").textContent  = bvn.filter(t => t.service === "BVN Modification").length;
+    document.getElementById("bvnUserCount").textContent = bvn.filter(t => t.service === "BVN User").length;
+    const tbody = document.getElementById("bvnTxnTable");
+    if (!bvn.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No BVN transactions</td></tr>'; return; }
+    tbody.innerHTML = bvn.map(t => `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-success">${t.status}</span></td><td>${t.date}</td></tr>`).join("");
+  }
+
+  function loadUtilityStats() {
+    const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const util = allTxns.filter(t => t.service.includes("Airtime") || t.service.includes("Data"));
+    document.getElementById("airtimeCount").textContent  = util.filter(t => t.service.includes("Airtime")).length;
+    document.getElementById("dataCount").textContent     = util.filter(t => t.service.includes("Data")).length;
+    document.getElementById("utilityRevenue").textContent = fmt(util.reduce((s, t) => s + t.amount, 0));
+    const tbody = document.getElementById("utilityTxnTable");
+    if (!util.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No utility transactions</td></tr>'; return; }
+    tbody.innerHTML = util.map(t => `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-success">${t.status}</span></td><td>${t.date}</td></tr>`).join("");
+  }
+
+  function addUser() {
+    const name  = document.getElementById("nu_name").value.trim();
+    const email = document.getElementById("nu_email").value.trim();
+    const phone = document.getElementById("nu_phone").value.trim();
+    const pass  = document.getElementById("nu_pass").value;
+    const role  = document.getElementById("nu_role").value;
+    const alertEl = document.getElementById("addUserAlert");
+    if (!name || !email || !pass) { alertEl.innerHTML = '<div class="alert alert-error">Name, email and password are required.</div>'; return; }
+    if (pass.length < 6) { alertEl.innerHTML = '<div class="alert alert-error">Password must be at least 6 characters.</div>'; return; }
+    alertEl.innerHTML = '<div class="alert alert-info">Creating user...</div>';
+
+    function waitFB(cb){ if(window.fbReady){cb();}else{setTimeout(function(){waitFB(cb);},200);} }
+    waitFB(function() {
+      window.fbCreateUser(window.fbAuth, email, pass).then(function(cred) {
+        var userData = {
+          id: cred.user.uid, name: name, email: email,
+          phone: phone || '', role: role, wallet: 0, nin: '',
+          registeredAt: new Date().toLocaleDateString('en-GB')
+        };
+        return window.fbSetDoc(window.fbDoc(window.fbDB, 'users', cred.user.uid), userData).then(function() {
+          closeModal('addUserModal');
+          toast('User ' + name + ' created successfully!');
+          loadUsers();
+        });
+      }).catch(function(err) {
+        var msg = err.message || 'Failed to create user.';
+        if (err.code === 'auth/email-already-in-use') msg = 'Email already registered.';
+        alertEl.innerHTML = '<div class="alert alert-error">' + msg + '</div>';
+      });
+    });
+  }
+
+  function savePricing() {
+    const pricing = {
+      ninmod:       parseInt(document.getElementById("p_ninmod").value) || 500,
+      ninpers:      parseInt(document.getElementById("p_ninpers").value) || 1000,
+      vnin:         parseInt(document.getElementById("p_vnin").value) || 250,
+      ipe_normal:   parseInt(document.getElementById("p_ipe_normal").value) || 400,
+      ipe_mod:      parseInt(document.getElementById("p_ipe_mod").value) || 400,
+      ipe_other:    parseInt(document.getElementById("p_ipe_other").value) || 400,
+      bvnver:       parseInt(document.getElementById("p_bvnver").value) || 200,
+      bvnret:       parseInt(document.getElementById("p_bvnret").value) || 150,
+      bvnmod:       parseInt(document.getElementById("p_bvnmod").value) || 500,
+      bvnuser:      parseInt(document.getElementById("p_bvnuser").value) || 200,
+      verify_nin:   parseInt(document.getElementById("p_verify_nin").value) || 200,
+      phone_verify: parseInt(document.getElementById("p_phone_verify").value) || 150,
+      bio_data:     parseInt(document.getElementById("p_bio_data").value) || 300,
+      fingerprint:  parseInt(document.getElementById("p_fingerprint").value) || 200,
+      no_record:    parseInt(document.getElementById("p_no_record").value) || 150,
+      bank_val:     parseInt(document.getElementById("p_bank_val").value) || 150,
+      photo_err:    parseInt(document.getElementById("p_photo_err").value) || 150,
+      sim_val:      parseInt(document.getElementById("p_sim_val").value) || 150,
+      name_mod:     parseInt(document.getElementById("p_name_mod").value) || 500,
+      phone_mod:    parseInt(document.getElementById("p_phone_mod").value) || 500,
+      address_mod:  parseInt(document.getElementById("p_address_mod").value) || 500,
+      dob_mod:      parseInt(document.getElementById("p_dob_mod").value) || 500
+    };
+    localStorage.setItem("tugga_pricing", JSON.stringify(pricing));
+    // Save to Firebase
+    if (window.fbReady) {
+      window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "pricing"), pricing)
+        .then(() => console.log("Pricing saved to Firebase"))
+        .catch(e => console.error("Firebase pricing error:", e));
+    }
+    document.getElementById("pricingAlert").innerHTML = '<div class="alert alert-success">Pricing updated successfully!</div>';
+    setTimeout(() => document.getElementById("pricingAlert").innerHTML = "", 3000);
+  }
+
+  function loadPricingFields() {
+    function applyPricing(saved) {
+      const defaults = { ninmod:500, ninpers:1000, vnin:250, ipe_normal:400, ipe_mod:400, ipe_other:400, bvnver:200, bvnret:150, bvnmod:500, bvnuser:200, verify_nin:200, phone_verify:150, bio_data:300, fingerprint:200, no_record:150, bank_val:150, photo_err:150, sim_val:150, name_mod:500, phone_mod:500, address_mod:500, dob_mod:500 };
+      const p = Object.assign({}, defaults, saved);
+      document.getElementById("p_ninmod").value       = p.ninmod;
+      document.getElementById("p_ninpers").value      = p.ninpers;
+      document.getElementById("p_vnin").value         = p.vnin;
+      document.getElementById("p_ipe_normal").value   = p.ipe_normal;
+      document.getElementById("p_ipe_mod").value      = p.ipe_mod;
+      document.getElementById("p_ipe_other").value    = p.ipe_other;
+      document.getElementById("p_bvnver").value       = p.bvnver;
+      document.getElementById("p_bvnret").value       = p.bvnret;
+      document.getElementById("p_bvnmod").value       = p.bvnmod;
+      document.getElementById("p_bvnuser").value      = p.bvnuser;
+      document.getElementById("p_verify_nin").value   = p.verify_nin;
+      document.getElementById("p_phone_verify").value = p.phone_verify;
+      document.getElementById("p_bio_data").value     = p.bio_data;
+      document.getElementById("p_fingerprint").value  = p.fingerprint;
+      document.getElementById("p_no_record").value    = p.no_record;
+      document.getElementById("p_bank_val").value     = p.bank_val;
+      document.getElementById("p_photo_err").value    = p.photo_err;
+      document.getElementById("p_sim_val").value      = p.sim_val;
+      document.getElementById("p_name_mod").value     = p.name_mod;
+      document.getElementById("p_phone_mod").value    = p.phone_mod;
+      document.getElementById("p_address_mod").value  = p.address_mod;
+      document.getElementById("p_dob_mod").value      = p.dob_mod;
+    }
+    if (window.fbReady) {
+      window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "pricing")).then(function(snap) {
+        const data = snap.exists() ? snap.data() : {};
+        localStorage.setItem("tugga_pricing", JSON.stringify(data));
+        applyPricing(data);
+      }).catch(function() {
+        applyPricing(JSON.parse(localStorage.getItem("tugga_pricing") || "{}"));
+      });
+    } else {
+      applyPricing(JSON.parse(localStorage.getItem("tugga_pricing") || "{}"));
+    }
+  }ob_mod;
+  }
+
+  function saveSettings() {
+    const settings = {
+      companyName:    document.getElementById("s_company").value.trim() || "TUGGA IT SOLUTIONS",
+      supportEmail:   document.getElementById("s_email").value.trim(),
+      supportPhone:   document.getElementById("s_phone").value.trim(),
+      platformStatus: document.getElementById("s_status").value
+    };
+    localStorage.setItem("tugga_settings", JSON.stringify(settings));
+    if (window.fbReady) {
+      window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "platform"), settings)
+        .then(function() { console.log("Settings saved to Firebase"); })
+        .catch(function(e) { console.error("Settings save error:", e); });
+    }
+    document.getElementById("settingsAlert").innerHTML = '<div class="alert alert-success">Settings saved successfully!</div>';
+    setTimeout(function() { document.getElementById("settingsAlert").innerHTML = ""; }, 3000);
+  }
+
+  function loadSettingsFields() {
+    function applySettings(s) {
+      if (!s) return;
+      if (s.companyName)    document.getElementById("s_company").value = s.companyName;
+      if (s.supportEmail)   document.getElementById("s_email").value   = s.supportEmail;
+      if (s.supportPhone)   document.getElementById("s_phone").value   = s.supportPhone;
+      if (s.platformStatus) document.getElementById("s_status").value  = s.platformStatus;
+    }
+    // Load from Firebase first, fallback to localStorage
+    if (window.fbReady) {
+      window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "platform")).then(function(snap) {
+        if (snap.exists()) {
+          localStorage.setItem("tugga_settings", JSON.stringify(snap.data()));
+          applySettings(snap.data());
+        } else {
+          applySettings(JSON.parse(localStorage.getItem("tugga_settings") || "{}"));
+        }
+      }).catch(function() {
+        applySettings(JSON.parse(localStorage.getItem("tugga_settings") || "{}"));
+      });
+    } else {
+      applySettings(JSON.parse(localStorage.getItem("tugga_settings") || "{}"));
+    }
+  }
+
+  // Override showSection to load data on demand
+  const _showSection = showSection;
+  window.showSection = function(id) {
+    _showSection(id);
+    if (id === "sec-overview") loadOverview();
+    if (id === "sec-users") loadUsers();
+    if (id === "sec-transactions") loadAllTxns();
+    if (id === "sec-nin-admin") loadNINStats();
+    if (id === "sec-bvn-admin") loadBVNStats();
+    if (id === "sec-utility-admin") loadUtilityStats();
+    if (id === "sec-pricing") loadPricingFields();
+    if (id === "sec-availability") loadAvailabilityFields();
+    if (id === "sec-settings") loadSettingsFields();
+  };
+
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  // Close sidebar on section click (mobile)
+  document.querySelectorAll('.sidebar a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      if (window.innerWidth <= 768) toggleSidebar();
+    });
+  });
+
+  // ── Firebase real-time sync (admin) ───────────────
+  function initAdminFirebaseSync() {
+    if (!window.fbReady) { setTimeout(initAdminFirebaseSync, 300); return; }
+
+    // Real-time transactions
+    window.fbOnSnapshot(window.fbCollection(window.fbDB, "transactions"), function(snap) {
+      const txns = snap.docs.map(d => d.data()).sort((a,b) => b.id > a.id ? 1 : -1);
+      localStorage.setItem('tugga_txns', JSON.stringify(txns));
+      const active = document.querySelector('.sidebar a.active');
+      if (active) {
+        const id = active.getAttribute('data-section');
+        if (id === 'sec-nin-admin') loadNINStats();
+        if (id === 'sec-bvn-admin') loadBVNStats();
+        if (id === 'sec-utility-admin') loadUtilityStats();
+        if (id === 'sec-overview') loadOverview();
+        if (id === 'sec-transactions') loadAllTxns();
+      }
+    });
+
+    // Real-time users
+    window.fbOnSnapshot(window.fbCollection(window.fbDB, "users"), function(snap) {
+      const users = snap.docs.map(d => ({ ...d.data(), uid: d.id })).filter(u => u.role === 'user');
+      window._fbUsers = users;
+      document.getElementById("statUsers").textContent = users.length;
+      if (document.getElementById('usersTable').innerHTML !== '') loadUsers();
+    });
+
+    // Real-time platform settings
+    window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "platform"), function(snap) {
+      if (snap.exists()) {
+        const s = snap.data();
+        localStorage.setItem("tugga_settings", JSON.stringify(s));
+        // Apply company name to nav logo
+        if (s.companyName) {
+          const logoEl = document.querySelector('nav .logo');
+          if (logoEl) logoEl.innerHTML = '🛡️ ' + s.companyName.split(' ')[0] + ' <span>' + (s.companyName.split(' ').slice(1).join(' ') || 'IT SOLUTIONS') + '</span> <span style="font-size:0.7rem;background:var(--accent);padding:2px 8px;border-radius:4px;margin-left:8px">ADMIN</span>';
+        }
+      }
+    });
+  }
+  initAdminFirebaseSync();
+
+  // Initial load
+  loadOverview();
+  loadUsers();
+
+  // ── Service Availability ───────────────────────────
+  function getAvailability() {
+    return JSON.parse(localStorage.getItem('tugga_availability') || '{}');
+  }
+
+  const SERVICE_GROUPS = [
+    { label: '🔍 NIN Verification', key: 'grp_nin_verify', services: ['Verify with NIN','Phone Number Verification','Bio Data Verification','FingerPrint Verification'] },
+    { label: '✔️ NIN Validation',   key: 'grp_nin_val',    services: ['No Record Found','Bank Validation','Photograph Error','SIM Validation'] },
+    { label: '✏️ NIN Modification', key: 'grp_nin_mod',    services: ['Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification'] },
+    { label: '🪪 Other NIN',        key: 'grp_nin_other',  services: ['NIN Personalization','VNIN Slip'] },
+    { label: '✅ IPE Clearance',    key: 'grp_ipe',        services: ['Normal Clearance','Modification Clearance','Other Error'] },
+    { label: '🏦 BVN Services',     key: 'grp_bvn',        services: ['BVN Verification','BVN Retrieval','BVN Modification','BVN User'] },
+    { label: '📞 Airtime & Data',   key: 'grp_utility',    services: ['Buy Airtime','Buy Data'] }
+  ];
+
+  function loadAvailabilityFields() {
+    const av = getAvailability();
+    const container = document.getElementById('availabilityGroups');
+    let html = '';
+    SERVICE_GROUPS.forEach(function(g) {
+      const grpOn = av[g.key] !== false;
+      let svcsHtml = '';
+      g.services.forEach(function(svc) {
+        const svcKey = svc.replace(/\s+/g,'_');
+        const svcOn = grpOn && av[svc] !== false;
+        svcsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid #f8fafc">' +
+          '<span style="font-size:0.88rem;color:var(--gray)">' + svc + '</span>' +
+          '<label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer">' +
+          '<input type="checkbox" id="av_' + svcKey + '" ' + (svcOn ? 'checked' : '') + ' ' + (!grpOn ? 'disabled' : '') + ' style="width:15px;height:15px;cursor:pointer" onchange="updateSvcLabel(\'' + svcKey + '\')" />' +
+          '<span id="av_' + svcKey + '_lbl" style="font-size:0.78rem;color:' + (svcOn ? 'var(--primary)' : 'var(--accent)') + '">' + (svcOn ? 'On' : 'Off') + '</span>' +
+          '</label></div>';
+      });
+      html += '<div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">' +
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem">' +
+        '<p style="font-weight:700;color:var(--dark);margin:0">' + g.label + '</p>' +
+        '<label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">' +
+        '<input type="checkbox" id="av_' + g.key + '" ' + (grpOn ? 'checked' : '') + ' style="width:18px;height:18px;cursor:pointer" onchange="toggleGroup(\'' + g.key + '\')" />' +
+        '<span id="av_' + g.key + '_lbl" style="font-size:0.85rem;font-weight:600;color:' + (grpOn ? 'var(--primary)' : 'var(--accent)') + '">' + (grpOn ? 'Available' : 'Unavailable') + '</span>' +
+        '</label></div>' +
+        '<div style="display:flex;flex-direction:column;gap:0.5rem;padding-left:0.5rem" id="grp_children_' + g.key + '">' +
+        svcsHtml + '</div></div>';
+    });
+    container.innerHTML = html;
+  }
+
+  function toggleGroup(grpKey) {
+    const grpCb = document.getElementById('av_' + grpKey);
+    const grpOn = grpCb.checked;
+    const lbl = document.getElementById('av_' + grpKey + '_lbl');
+    lbl.textContent = grpOn ? 'Available' : 'Unavailable';
+    lbl.style.color = grpOn ? 'var(--primary)' : 'var(--accent)';
+    const g = SERVICE_GROUPS.find(g => g.key === grpKey);
+    if (!g) return;
+    g.services.forEach(svc => {
+      const key = svc.replace(/\s+/g,'_');
+      const cb = document.getElementById('av_' + key);
+      const sl = document.getElementById('av_' + key + '_lbl');
+      if (cb) {
+        cb.disabled = !grpOn;
+        if (!grpOn) { cb.checked = false; }
+        if (sl) { sl.textContent = cb.checked ? 'On' : 'Off'; sl.style.color = cb.checked ? 'var(--primary)' : 'var(--accent)'; }
+      }
+    });
+  }
+
+  function updateSvcLabel(key) {
+    const cb = document.getElementById('av_' + key);
+    const lbl = document.getElementById('av_' + key + '_lbl');
+    if (cb && lbl) { lbl.textContent = cb.checked ? 'On' : 'Off'; lbl.style.color = cb.checked ? 'var(--primary)' : 'var(--accent)'; }
+  }
+
+  function saveAvailability() {
+    const av = {};
+    SERVICE_GROUPS.forEach(g => {
+      const grpCb = document.getElementById('av_' + g.key);
+      av[g.key] = grpCb ? grpCb.checked : true;
+      g.services.forEach(svc => {
+        const key = svc.replace(/\s+/g,'_');
+        const cb = document.getElementById('av_' + key);
+        av[svc] = av[g.key] && (cb ? cb.checked : true);
+      });
+    });
+    localStorage.setItem('tugga_availability', JSON.stringify(av));
+    // Save to Firebase
+    if (window.fbReady) {
+      window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "availability"), av)
+        .then(() => console.log("Availability saved to Firebase"))
+        .catch(e => console.error("Firebase availability error:", e));
+    }
+    document.getElementById('availabilityAlert').innerHTML = '<div class="alert alert-success">Availability saved successfully!</div>';
+    setTimeout(() => document.getElementById('availabilityAlert').innerHTML = '', 3000);
+  }
+</script>
+</body>
+</html>

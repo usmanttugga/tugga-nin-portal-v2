@@ -1,0 +1,1967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Dashboard – TUGGA IT SOLUTIONS</title>
+  <link rel="stylesheet" href="../css/style.css"/>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">🛡️ TUGGA <span>IT SOLUTIONS</span></div>
+  <div class="nav-links">
+    <a href="#" class="active">Dashboard</a>
+    <a href="#" onclick="showSection('sec-history')">History</a>
+    <a href="#" onclick="showSection('sec-wallet')">Wallet</a>
+  </div>
+  <div class="nav-user">
+    <div class="avatar" id="userAvatar" onclick="openModal('profileModal')" style="cursor:pointer">U</div>
+    <span id="userName" onclick="openModal('profileModal')" style="cursor:pointer">User</span>
+    <button class="btn-logout" onclick="logout()">Logout</button>
+  </div>
+  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+<div class="dashboard">
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="menu-section">
+      <h4>Overview</h4>
+      <a href="#" class="active" data-section="sec-home" onclick="showSection('sec-home')"><span class="icon">🏠</span> Dashboard</a>
+      <a href="#" data-section="sec-wallet" onclick="showSection('sec-wallet')"><span class="icon">💰</span> Wallet</a>
+      <a href="#" data-section="sec-history" onclick="showSection('sec-history')"><span class="icon">📋</span> History</a>
+    </div>
+    <div class="menu-section">
+      <h4>NIN Services</h4>
+      <a href="#" data-section="sec-nin" onclick="showSection('sec-nin')"><span class="icon">🪪</span> NIN Services</a>
+      <a href="#" data-section="sec-nin-verify" onclick="showSection('sec-nin-verify')"><span class="icon">🔍</span> NIN Verification</a>
+      <a href="#" data-section="sec-nin-validation" onclick="showSection('sec-nin-validation')"><span class="icon">✔️</span> NIN Validation</a>
+      <a href="#" data-section="sec-nin-modification" onclick="showSection('sec-nin-modification')"><span class="icon">✏️</span> NIN Modification</a>
+      <a href="#" data-section="sec-ipe" onclick="showSection('sec-ipe')"><span class="icon">✅</span> IPE Clearance</a>
+    </div>
+    <div class="menu-section">
+      <h4>BVN Services</h4>
+      <a href="#" data-section="sec-bvn" onclick="showSection('sec-bvn')"><span class="icon">🏦</span> BVN Services</a>
+    </div>
+    <div class="menu-section">
+      <h4>Airtime & Data</h4>
+      <a href="#" data-section="sec-airtime" onclick="showSection('sec-airtime')"><span class="icon">📞</span> Buy Airtime</a>
+      <a href="#" data-section="sec-data" onclick="showSection('sec-data')"><span class="icon">📶</span> Buy Data</a>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+
+    <!-- HOME -->
+    <section id="sec-home" class="content-section">
+      <p class="page-title">Welcome back, <span id="greetName">User</span> 👋</p>
+      <p class="page-sub">Manage your NIN, BVN and utility services from one place.</p>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon bg-blue">🪪</div><div class="stat-info"><h3 id="statNin">0</h3><p>NIN Requests</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-green">🏦</div><div class="stat-info"><h3 id="statBvn">0</h3><p>BVN Requests</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-orange">📞</div><div class="stat-info"><h3 id="statAirtime">0</h3><p>Airtime Bought</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-red">💰</div><div class="stat-info"><h3 id="statWallet">₦0</h3><p>Wallet Balance</p></div></div>
+      </div>
+
+      <p class="page-title" style="font-size:1rem;margin-bottom:1rem;">Quick Services</p>
+      <div class="services-grid">
+        <div class="service-card" onclick="showSection('sec-nin-verify')"><div class="svc-icon">🪪</div><h4>NIN Verification</h4><p>Verify NIN instantly</p></div>
+        <div class="service-card" onclick="showSection('sec-nin-validation')"><div class="svc-icon">✔️</div><h4>NIN Validation</h4><p>Validate NIN details</p></div>
+        <div class="service-card" onclick="showSection('sec-nin-modification')"><div class="svc-icon">✏️</div><h4>NIN Modification</h4><p>Update NIN data</p></div>
+        <div class="service-card" data-svc="NIN Personalization" onclick="openNinPersonModal()"><div class="svc-icon">🎨</div><h4>NIN Personalization</h4><p>Personalize NIN card</p></div>
+        <div class="service-card" data-svc="VNIN Slip" onclick="openServiceModal('VNIN Slip','Generate virtual NIN slip','nin', String(_p.vnin||250))"><div class="svc-icon">📱</div><h4>VNIN Slip</h4><p>Get virtual NIN slip</p></div>
+        <div class="service-card" onclick="showSection('sec-ipe')"><div class="svc-icon">✅</div><h4>IPE Clearance</h4><p>Identity pre-enrollment</p></div>
+        <div class="service-card" data-svc="BVN Verification" onclick="showSection('sec-bvn')"><div class="svc-icon">🏦</div><h4>BVN Verification</h4><p>Verify BVN details</p><div class="price">₦200</div></div>
+        <div class="service-card" data-svc="BVN Retrieval" onclick="showSection('sec-bvn')"><div class="svc-icon">🔍</div><h4>BVN Retrieval</h4><p>Retrieve your BVN</p><div class="price">₦150</div></div>
+        <div class="service-card" data-svc="BVN Modification" onclick="showSection('sec-bvn')"><div class="svc-icon">🔧</div><h4>BVN Modification</h4><p>Update BVN records</p><div class="price">₦500</div></div>
+        <div class="service-card" data-svc="Buy Airtime" onclick="showSection('sec-airtime')"><div class="svc-icon">📞</div><h4>Buy Airtime</h4><p>All networks</p><div class="price">Face value</div></div>
+        <div class="service-card" data-svc="Buy Data" onclick="showSection('sec-data')"><div class="svc-icon">📶</div><h4>Buy Data</h4><p>All networks</p><div class="price">From ₦200</div></div>
+      </div>
+    </section>
+
+    <!-- WALLET -->
+    <section id="sec-wallet" class="content-section section-hidden">
+      <p class="page-title">My Wallet</p>
+      <p class="page-sub">Fund your wallet to access all services.</p>
+      <div class="wallet-card">
+        <div><h4>Available Balance</h4><div class="balance" id="walletBal">₦0.00</div></div>
+        <button class="btn-fund" onclick="openModal('fundModal')">+ Fund Wallet</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
+          <tbody id="walletTxnTable"><tr><td colspan="4" style="text-align:center;color:#999">No transactions yet</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section id="sec-history" class="content-section section-hidden">
+      <p class="page-title">Transaction History</p>
+      <p class="page-sub">All your service requests.</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="historyTable"><tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- NIN SERVICES -->
+    <section id="sec-nin" class="content-section section-hidden">
+      <p class="page-title">NIN Services</p>
+      <p class="page-sub">National Identity Number services.</p>
+      <div class="services-grid">
+        <div class="service-card" onclick="showSection('sec-nin-verify')">
+          <div class="svc-icon">🪪</div><h4>NIN Verification</h4><p>Verify NIN instantly</p>
+        </div>
+        <div class="service-card" onclick="showSection('sec-nin-validation')">
+          <div class="svc-icon">✔️</div><h4>NIN Validation</h4><p>Validate NIN details</p>
+        </div>
+        <div class="service-card" onclick="showSection('sec-nin-modification')">
+          <div class="svc-icon">✏️</div><h4>NIN Modification</h4><p>Update NIN data</p>
+        </div>
+        <div class="service-card" onclick="showSection('sec-ipe')">
+          <div class="svc-icon">✅</div><h4>IPE Clearance</h4><p>Identity pre-enrollment</p>
+        </div>
+        <div class="service-card" data-svc="VNIN Slip" onclick="openServiceModal('VNIN Slip','Generate virtual NIN slip','nin', String(_p.vnin||250))">
+          <div class="svc-icon">📱</div><h4>VNIN Slip</h4><p>Get virtual NIN slip</p>
+        </div>
+        <div class="service-card" data-svc="NIN Personalization" onclick="openNinPersonModal()">
+          <div class="svc-icon">🎨</div><h4>NIN Personalization</h4><p>Personalize NIN card</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- NIN VERIFICATION SUB-SERVICES -->
+    <section id="sec-nin-verify" class="content-section section-hidden">
+      <p class="page-title">NIN Verification</p>
+      <p class="page-sub">Verify identity using NIN, phone number, or bio data.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="Verify with NIN" onclick="openNinVerifyModal('verify-nin')">
+          <div class="svc-icon">🪪</div><h4>NIN</h4><p>Verify with NIN</p><div class="price" id="price-verify-nin">₦200</div>
+        </div>
+        <div class="service-card" data-svc="Phone Number Verification" onclick="openNinVerifyModal('phone-verify')">
+          <div class="svc-icon">📞</div><h4>Phone Number</h4><p>Verify via phone number</p><div class="price" id="price-phone-verify">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Bio Data Verification" onclick="openNinVerifyModal('bio-data')">
+          <div class="svc-icon">🧬</div><h4>Bio Data</h4><p>Verify bio data match</p><div class="price" id="price-bio-data">₦300</div>
+        </div>
+        <div class="service-card" data-svc="FingerPrint Verification" onclick="openFingerprintModal()">
+          <div class="svc-icon">👆</div><h4>FingerPrint</h4><p>Verify via fingerprint</p><div class="price" id="price-fingerprint">₦200</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NIN VALIDATION SUB-SERVICES -->
+    <section id="sec-nin-validation" class="content-section section-hidden">
+      <p class="page-title">NIN Validation</p>
+      <p class="page-sub">Select a validation type to proceed.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="No Record Found" onclick="openServiceModal('No Record Found','Validate NIN with no record found status','nin', String(_p.no_record||150))">
+          <div class="svc-icon">🔎</div><h4>No Record Found</h4><p>NIN record not found validation</p><div class="price" id="price-no-record">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Bank Validation" onclick="openServiceModal('Bank Validation','Validate NIN against bank records','nin', String(_p.bank_val||150))">
+          <div class="svc-icon">🏦</div><h4>Bank Validation</h4><p>Validate NIN via bank records</p><div class="price" id="price-bank-val">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Photograph Error" onclick="openServiceModal('Photograph Error','Validate NIN with photograph error','nin', String(_p.photo_err||150))">
+          <div class="svc-icon">📷</div><h4>Photograph Error</h4><p>Fix NIN photograph error</p><div class="price" id="price-photo-err">₦150</div>
+        </div>
+        <div class="service-card" data-svc="SIM Validation" onclick="openServiceModal('SIM Validation','Validate NIN against SIM registration','nin', String(_p.sim_val||150))">
+          <div class="svc-icon">📲</div><h4>SIM Validation</h4><p>Validate NIN via SIM</p><div class="price" id="price-sim-val">₦150</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NIN MODIFICATION SUB-SERVICES -->
+    <section id="sec-nin-modification" class="content-section section-hidden">
+      <p class="page-title">NIN Modification</p>
+      <p class="page-sub">Select the data you want to modify on your NIN record.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="Name Modification" onclick="openNameModModal()">
+          <div class="svc-icon">✏️</div><h4>Name Modification</h4><p>Update name on NIN</p><div class="price" id="price-name-mod">₦500</div>
+        </div>
+        <div class="service-card" data-svc="Phone Number Modification" onclick="openPhoneModModal()">
+          <div class="svc-icon">📞</div><h4>Phone Number Modification</h4><p>Update phone on NIN</p><div class="price" id="price-phone-mod">₦500</div>
+        </div>
+        <div class="service-card" data-svc="Address Modification" onclick="openAddressModModal()">
+          <div class="svc-icon">🏠</div><h4>Address Modification</h4><p>Update address on NIN</p><div class="price" id="price-address-mod">₦500</div>
+        </div>
+        <div class="service-card" data-svc="Date of Birth Modification" onclick="openDobModModal()">
+          <div class="svc-icon">📅</div><h4>Date of Birth Modification</h4><p>Update DOB on NIN</p><div class="price" id="price-dob-mod">₦500</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- IPE -->
+    <section id="sec-ipe" class="content-section section-hidden">
+      <p class="page-title">IPE Clearance</p>
+      <p class="page-sub">Select the type of IPE clearance you need.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="Normal Clearance" onclick="openTrackingModal('Normal Clearance', _p.ipe_normal||400)">
+          <div class="svc-icon">✅</div><h4>Normal Clearance</h4><p>Standard IPE clearance</p><div class="price" id="price-ipe-normal">₦400</div>
+        </div>
+        <div class="service-card" data-svc="Modification Clearance" onclick="openModClearanceModal()">
+          <div class="svc-icon">✏️</div><h4>Modification Clearance</h4><p>Clearance for modifications</p><div class="price" id="price-ipe-mod">₦400</div>
+        </div>
+        <div class="service-card" data-svc="Other Error" onclick="openOtherErrorModal()">
+          <div class="svc-icon">⚠️</div><h4>Other Error</h4><p>Clearance for other errors</p><div class="price" id="price-ipe-other">₦400</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- BVN SERVICES -->
+    <section id="sec-bvn" class="content-section section-hidden">
+      <p class="page-title">BVN Services</p>
+      <p class="page-sub">Bank Verification Number services.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="BVN Verification" onclick="openServiceModal('BVN Verification','Verify BVN and linked bank details','bvn','200')">
+          <div class="svc-icon">🏦</div><h4>BVN Verification</h4><p>Verify BVN details</p><div class="price">₦200</div>
+        </div>
+        <div class="service-card" data-svc="BVN Retrieval" onclick="openServiceModal('BVN Retrieval','Retrieve your BVN number','bvn','150')">
+          <div class="svc-icon">🔍</div><h4>BVN Retrieval</h4><p>Retrieve your BVN</p><div class="price">₦150</div>
+        </div>
+        <div class="service-card" data-svc="BVN Modification" onclick="openServiceModal('BVN Modification','Update or correct BVN records','bvn','500')">
+          <div class="svc-icon">🔧</div><h4>BVN Modification</h4><p>Update BVN records</p><div class="price">₦500</div>
+        </div>
+        <div class="service-card" onclick="openServiceModal('BVN User','Get BVN user profile details','bvn','200')">
+          <div class="svc-icon">👤</div><h4>BVN User</h4><p>BVN user profile</p><div class="price">₦200</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- AIRTIME -->
+    <section id="sec-airtime" class="content-section section-hidden">
+      <p class="page-title">Buy Airtime</p>
+      <p class="page-sub">Recharge any network instantly.</p>
+      <div style="background:var(--white);border-radius:12px;padding:2rem;max-width:480px;box-shadow:var(--card-shadow)">
+        <div id="airtimeAlert"></div>
+        <div class="form-group">
+          <label>Network</label>
+          <select id="airtimeNetwork">
+            <option value="">Select Network</option>
+            <option>MTN</option><option>Airtel</option><option>Glo</option><option>9mobile</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="airtimePhone" placeholder="08XXXXXXXXX"/>
+        </div>
+        <div class="form-group">
+          <label>Amount (₦)</label>
+          <input type="number" id="airtimeAmount" placeholder="e.g. 500" min="50"/>
+        </div>
+        <button class="btn-primary" onclick="buyAirtime()">Buy Airtime</button>
+      </div>
+    </section>
+
+    <!-- DATA -->
+    <section id="sec-data" class="content-section section-hidden">
+      <p class="page-title">Buy Data</p>
+      <p class="page-sub">Purchase data bundles for any network.</p>
+      <div style="background:var(--white);border-radius:12px;padding:2rem;max-width:480px;box-shadow:var(--card-shadow)">
+        <div id="dataAlert"></div>
+        <div class="form-group">
+          <label>Network</label>
+          <select id="dataNetwork" onchange="loadDataPlans()">
+            <option value="">Select Network</option>
+            <option>MTN</option><option>Airtel</option><option>Glo</option><option>9mobile</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Data Plan</label>
+          <select id="dataPlan">
+            <option value="">Select a network first</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="dataPhone" placeholder="08XXXXXXXXX"/>
+        </div>
+        <button class="btn-primary" onclick="buyData()">Buy Data</button>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- FINGERPRINT MODAL -->
+<div class="modal-overlay" id="fingerprintModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3>👆 FingerPrint Verification</h3>
+      <button class="modal-close" onclick="closeModal('fingerprintModal')">✕</button>
+    </div>
+    <div id="fingerprintAlert"></div>
+    <div class="form-group">
+      <label>Select Finger</label>
+      <select id="fp_finger">
+        <option value="">-- Select finger --</option>
+        <optgroup label="Right Hand">
+          <option>Right Thumb</option>
+          <option>Right Index Finger</option>
+          <option>Right Middle Finger</option>
+          <option>Right Ring Finger</option>
+          <option>Right Little Finger</option>
+        </optgroup>
+        <optgroup label="Left Hand">
+          <option>Left Thumb</option>
+          <option>Left Index Finger</option>
+          <option>Left Middle Finger</option>
+          <option>Left Ring Finger</option>
+          <option>Left Little Finger</option>
+        </optgroup>
+      </select>
+      <span id="fp_finger_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div class="form-group">
+      <label>Finger Image</label>
+      <input type="file" id="fp_image" accept="image/*"/>
+      <span id="fp_image_err" style="color:var(--accent);font-size:0.8rem"></span>
+      <div id="fp_preview" style="margin-top:0.5rem;display:none">
+        <img id="fp_preview_img" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #e2e8f0" alt="Finger preview"/>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="fingerprintPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitFingerprint()">Verify NIN</button>
+    </div>
+  </div>
+</div>
+
+<!-- OTHER ERROR MODAL -->
+<div class="modal-overlay" id="otherErrorModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3>⚠️ Other Error</h3>
+      <button class="modal-close" onclick="closeModal('otherErrorModal')">✕</button>
+    </div>
+    <div id="otherErrorAlert"></div>
+    <div class="form-group">
+      <label>State the Error</label>
+      <textarea id="oe_error" placeholder="Describe the error clearly..." rows="3" style="width:100%;padding:10px;border:1px solid #e2e8f0;border-radius:8px;font-size:0.9rem;resize:vertical"></textarea>
+      <span id="oe_error_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div class="form-group">
+      <label>New Tracking ID</label>
+      <input type="text" id="oe_tracking" placeholder="Enter your New Tracking ID"/>
+      <span id="oe_tracking_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="otherErrorPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitOtherError()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODIFICATION CLEARANCE MODAL -->
+<div class="modal-overlay" id="modClearanceModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3>✏️ Modification Clearance</h3>
+      <button class="modal-close" onclick="closeModal('modClearanceModal')">✕</button>
+    </div>
+    <div id="modClearanceAlert"></div>
+    <div class="form-group">
+      <label>New Tracking ID</label>
+      <input type="text" id="mc_tracking" placeholder="Enter your New Tracking ID"/>
+      <span id="mc_tracking_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="modClearancePrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitModClearance()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- TRACKING ID MODAL (shared for IPE Clearance sub-services) -->
+<div class="modal-overlay" id="trackingModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3 id="trackingModalTitle">Service</h3>
+      <button class="modal-close" onclick="closeModal('trackingModal')">✕</button>
+    </div>
+    <div id="trackingModalAlert"></div>
+    <div class="form-group">
+      <label>Tracking ID</label>
+      <input type="text" id="tracking_id_input" placeholder="Enter your Tracking ID"/>
+      <span id="tracking_id_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="trackingModalPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitTrackingModal()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- NIN PERSONALIZATION MODAL -->
+<div class="modal-overlay" id="ninPersonModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>🎨 NIN Personalization</h3>
+      <button class="modal-close" onclick="closeModal('ninPersonModal')">✕</button>
+    </div>
+    <div style="background:#fff8e1;border:1px solid #f59e0b;border-radius:8px;padding:0.8rem 1rem;margin-bottom:1.2rem;font-size:0.85rem;color:#92400e">
+      ⚠️ <strong>Warning:</strong> This service is non-refundable if the Tracking ID is rejected.
+    </div>
+    <div id="ninPersonAlert"></div>
+    <div class="form-group">
+      <label>Tracking ID</label>
+      <input type="text" id="np_tracking" placeholder="Enter your Tracking ID"/>
+      <span id="np_tracking_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="ninPersonPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitNinPerson()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal-overlay" id="profileModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>My Profile</h3>
+      <button class="modal-close" onclick="closeModal('profileModal')">✕</button>
+    </div>
+    <div style="display:flex;flex-direction:column;align-items:center;padding:1rem 0 1.5rem">
+      <div style="width:72px;height:72px;border-radius:50%;background:var(--primary);display:flex;align-items:center;justify-content:center;font-size:2rem;color:#fff;font-weight:700;margin-bottom:1rem" id="profileAvatar">U</div>
+      <h3 id="profileName" style="margin:0;font-size:1.2rem"></h3>
+      <span id="profileRole" style="font-size:0.8rem;background:var(--primary);color:#fff;padding:2px 10px;border-radius:20px;margin-top:4px"></span>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:0;padding:0 0.5rem">
+      <div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid #f1f5f9">
+        <span style="color:var(--gray);font-size:0.9rem">Email</span>
+        <span id="profileEmail" style="font-weight:500;font-size:0.9rem"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid #f1f5f9">
+        <span style="color:var(--gray);font-size:0.9rem">Phone Number</span>
+        <span id="profilePhone" style="font-weight:500;font-size:0.9rem"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid #f1f5f9">
+        <span style="color:var(--gray);font-size:0.9rem">NIN</span>
+        <span id="profileNin" style="font-weight:500;font-size:0.9rem"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid #f1f5f9">
+        <span style="color:var(--gray);font-size:0.9rem">Wallet Balance</span>
+        <span id="profileWallet" style="font-weight:500;font-size:0.9rem;color:var(--primary)"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:0.6rem 0;border-bottom:1px solid #f1f5f9">
+        <span style="color:var(--gray);font-size:0.9rem">Total Transactions</span>
+        <span id="profileTxns" style="font-weight:500;font-size:0.9rem"></span>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:0.6rem 0">
+        <span style="color:var(--gray);font-size:0.9rem">Member Since</span>
+        <span id="profileSince" style="font-weight:500;font-size:0.9rem"></span>
+      </div>
+    </div>
+    <div style="display:flex;gap:0.8rem;margin-top:1.5rem">
+      <button class="btn-primary" style="flex:1" onclick="closeModal('profileModal');showSection('sec-wallet')">Fund Wallet</button>
+      <button class="btn-primary" style="flex:1;background:var(--gray)" onclick="closeModal('profileModal');openModal('changePwdModal')">Change Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- CHANGE PASSWORD MODAL -->
+<div class="modal-overlay" id="changePwdModal">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <h3>Change Password</h3>
+      <button class="modal-close" onclick="closeModal('changePwdModal')">✕</button>
+    </div>
+    <div id="changePwdAlert"></div>
+    <div class="form-group">
+      <label>Current Password</label>
+      <input type="password" id="pwd_current" placeholder="Enter current password"/>
+      <span id="pwd_current_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div class="form-group">
+      <label>New Password</label>
+      <input type="password" id="pwd_new" placeholder="Enter new password"/>
+      <span id="pwd_new_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div class="form-group">
+      <label>Confirm New Password</label>
+      <input type="password" id="pwd_confirm" placeholder="Confirm new password"/>
+      <span id="pwd_confirm_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <button class="btn-primary" onclick="submitChangePassword()">Update Password</button>
+  </div>
+</div>
+
+<!-- DATE OF BIRTH MODIFICATION MODAL -->
+<div class="modal-overlay" id="dobModModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3>📅 Date of Birth Modification</h3>
+      <button class="modal-close" onclick="closeModal('dobModModal')">✕</button>
+    </div>
+    <div id="dobModAlert"></div>
+
+    <div class="form-group">
+      <label>NIN Number</label>
+      <input type="text" id="dm_nin" placeholder="11-digit NIN" maxlength="11"/>
+      <span id="dm_nin_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+
+    <!-- Personal Details -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">PERSONAL DETAILS</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group">
+          <label>Surname</label>
+          <input type="text" id="dm_surname" placeholder="Surname"/>
+          <span id="dm_surname_err" style="color:var(--accent);font-size:0.8rem"></span>
+        </div>
+        <div class="form-group">
+          <label>First Name</label>
+          <input type="text" id="dm_firstname" placeholder="First name"/>
+          <span id="dm_firstname_err" style="color:var(--accent);font-size:0.8rem"></span>
+        </div>
+        <div class="form-group">
+          <label>Middle Name</label>
+          <input type="text" id="dm_middlename" placeholder="Middle name (optional)"/>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="dm_phone" placeholder="e.g. 08012345678"/>
+          <span id="dm_phone_err" style="color:var(--accent);font-size:0.8rem"></span>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:0.5rem">
+        <div class="form-group">
+          <label>Sex</label>
+          <select id="dm_sex">
+            <option value="">Select</option>
+            <option>Male</option>
+            <option>Female</option>
+          </select>
+          <span id="dm_sex_err" style="color:var(--accent);font-size:0.8rem"></span>
+        </div>
+        <div class="form-group">
+          <label>Marital Status</label>
+          <select id="dm_marital">
+            <option value="">Select</option>
+            <option>Single</option>
+            <option>Married</option>
+            <option>Divorced</option>
+            <option>Widowed</option>
+          </select>
+          <span id="dm_marital_err" style="color:var(--accent);font-size:0.8rem"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Date of Birth Target -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">DATE OF BIRTH TARGET</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group">
+          <label>Old DOB (Current)</label>
+          <input type="date" id="dm_old_dob"/>
+          <span id="dm_old_dob_err" style="color:var(--accent);font-size:0.8rem"></span>
+        </div>
+        <div class="form-group">
+          <label>New DOB (Target)</label>
+          <input type="date" id="dm_new_dob"/>
+          <span id="dm_new_dob_err" style="color:var(--accent);font-size:0.8rem"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Origin & Birth -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">ORIGIN & BIRTH</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>State of Origin</label><input type="text" id="dm_state_origin" placeholder="State of origin"/></div>
+        <div class="form-group"><label>LGA of Origin</label><input type="text" id="dm_lga_origin" placeholder="LGA of origin"/></div>
+        <div class="form-group"><label>Town/Village of Origin</label><input type="text" id="dm_town_origin" placeholder="Town or village"/></div>
+        <div class="form-group"><label>Place of Birth</label><input type="text" id="dm_place_birth" placeholder="Place of birth"/></div>
+        <div class="form-group"><label>State of Birth</label><input type="text" id="dm_state_birth" placeholder="State of birth"/></div>
+        <div class="form-group"><label>LGA of Birth</label><input type="text" id="dm_lga_birth" placeholder="LGA of birth"/></div>
+      </div>
+    </div>
+
+    <!-- Contact & Work -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">CONTACT & WORK</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>Current Residential Address</label><input type="text" id="dm_res_address" placeholder="Residential address"/></div>
+        <div class="form-group"><label>Highest Level of Education</label><input type="text" id="dm_education" placeholder="e.g. B.Sc, HND"/></div>
+        <div class="form-group"><label>Occupation</label><input type="text" id="dm_occupation" placeholder="Occupation"/></div>
+        <div class="form-group"><label>Address of Place of Work</label><input type="text" id="dm_work_address" placeholder="Work address"/></div>
+        <div class="form-group" style="grid-column:span 2"><label>Requesting Body Address (Company/School/Embassy)</label><input type="text" id="dm_req_body" placeholder="Requesting body address"/></div>
+      </div>
+    </div>
+
+    <!-- Father's Details -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">FATHER'S DETAILS</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>Surname</label><input type="text" id="dm_f_surname" placeholder="Father's surname"/></div>
+        <div class="form-group"><label>First Name</label><input type="text" id="dm_f_firstname" placeholder="Father's first name"/></div>
+        <div class="form-group"><label>State of Origin</label><input type="text" id="dm_f_state" placeholder="State of origin"/></div>
+        <div class="form-group"><label>LGA of Origin</label><input type="text" id="dm_f_lga" placeholder="LGA of origin"/></div>
+        <div class="form-group"><label>Village/Town</label><input type="text" id="dm_f_town" placeholder="Village or town"/></div>
+      </div>
+    </div>
+
+    <!-- Mother's Details -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">MOTHER'S DETAILS</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>Surname</label><input type="text" id="dm_m_surname" placeholder="Mother's surname"/></div>
+        <div class="form-group"><label>First Name</label><input type="text" id="dm_m_firstname" placeholder="Mother's first name"/></div>
+        <div class="form-group"><label>Maiden Name</label><input type="text" id="dm_m_maiden" placeholder="Maiden name"/></div>
+        <div class="form-group"><label>State of Origin</label><input type="text" id="dm_m_state" placeholder="State of origin"/></div>
+        <div class="form-group"><label>LGA of Origin</label><input type="text" id="dm_m_lga" placeholder="LGA of origin"/></div>
+        <div class="form-group"><label>Village/Town</label><input type="text" id="dm_m_town" placeholder="Village or town"/></div>
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">DOCUMENTS & AUTHENTICATION</p>
+      <div class="form-group">
+        <label>Upload Documents</label>
+        <div id="dm_doc_list" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.5rem"></div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <input type="file" id="dm_doc_input" accept="image/*,.pdf" style="flex:1"/>
+          <button type="button" onclick="addDobModDoc()" style="background:var(--primary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;white-space:nowrap">+ Add</button>
+        </div>
+        <span id="dm_doc_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="dobModPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitDobMod()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- ADDRESS MODIFICATION MODAL -->
+<div class="modal-overlay" id="addressModModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>🏠 Address Modification</h3>
+      <button class="modal-close" onclick="closeModal('addressModModal')">✕</button>
+    </div>
+    <div id="addressModAlert"></div>
+    <div class="form-group">
+      <label>NIN Number</label>
+      <input type="text" id="am_nin" placeholder="11-digit NIN" maxlength="11"/>
+      <span id="am_nin_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">ADDRESS DETAILS</p>
+      <div class="form-group">
+        <label>Address</label>
+        <input type="text" id="am_address" placeholder="Street address"/>
+        <span id="am_address_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>Town / City</label>
+        <input type="text" id="am_town" placeholder="Town or city"/>
+        <span id="am_town_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>LGA of Origin</label>
+        <input type="text" id="am_lga_origin" placeholder="LGA of origin"/>
+        <span id="am_lga_origin_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>State of Origin</label>
+        <input type="text" id="am_state_origin" placeholder="State of origin"/>
+        <span id="am_state_origin_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>LGA of Residence</label>
+        <input type="text" id="am_lga_res" placeholder="LGA of residence"/>
+        <span id="am_lga_res_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>State of Residence</label>
+        <input type="text" id="am_state_res" placeholder="State of residence"/>
+        <span id="am_state_res_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">DOCUMENTS & AUTHENTICATION</p>
+      <div class="form-group">
+        <label>Upload Documents</label>
+        <div id="am_doc_list" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.5rem"></div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <input type="file" id="am_doc_input" accept="image/*,.pdf" style="flex:1"/>
+          <button type="button" onclick="addAddressModDoc()" style="background:var(--primary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;white-space:nowrap">+ Add</button>
+        </div>
+        <span id="am_doc_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="addressModPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitAddressMod()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHONE NUMBER MODIFICATION MODAL -->
+<div class="modal-overlay" id="phoneModModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>📞 Phone Number Modification</h3>
+      <button class="modal-close" onclick="closeModal('phoneModModal')">✕</button>
+    </div>
+    <div id="phoneModAlert"></div>
+    <div class="form-group">
+      <label>NIN Number</label>
+      <input type="text" id="pm_nin" placeholder="11-digit NIN" maxlength="11"/>
+      <span id="pm_nin_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">NAME DETAILS</p>
+      <div class="form-group">
+        <label>Surname</label>
+        <input type="text" id="pm_surname" placeholder="Surname"/>
+        <span id="pm_surname_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" id="pm_firstname" placeholder="First name"/>
+        <span id="pm_firstname_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>Middle Name</label>
+        <input type="text" id="pm_middlename" placeholder="Middle name (optional)"/>
+      </div>
+      <div class="form-group">
+        <label>New Phone Number</label>
+        <input type="tel" id="pm_phone" placeholder="e.g. 08012345678"/>
+        <span id="pm_phone_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">DOCUMENTS & AUTHENTICATION</p>
+      <div class="form-group">
+        <label>Upload Documents</label>
+        <div id="pm_doc_list" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.5rem"></div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <input type="file" id="pm_doc_input" accept="image/*,.pdf" style="flex:1"/>
+          <button type="button" onclick="addPhoneModDoc()" style="background:var(--primary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;white-space:nowrap">+ Add</button>
+        </div>
+        <span id="pm_doc_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="phoneModPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitPhoneMod()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAME MODIFICATION MODAL -->
+<div class="modal-overlay" id="nameModModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>✏️ Name Modification</h3>
+      <button class="modal-close" onclick="closeModal('nameModModal')">✕</button>
+    </div>
+    <div id="nameModAlert"></div>
+    <div class="form-group">
+      <label>NIN Number</label>
+      <input type="text" id="nm_nin" placeholder="11-digit NIN" maxlength="11"/>
+      <span id="nm_nin_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">NAME DETAILS</p>
+      <div class="form-group">
+        <label>Surname</label>
+        <input type="text" id="nm_surname" placeholder="Surname"/>
+        <span id="nm_surname_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>First Name</label>
+        <input type="text" id="nm_firstname" placeholder="First name"/>
+        <span id="nm_firstname_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+      <div class="form-group">
+        <label>Middle Name</label>
+        <input type="text" id="nm_middlename" placeholder="Middle name (optional)"/>
+      </div>
+      <div class="form-group">
+        <label>Phone Number</label>
+        <input type="tel" id="nm_phone" placeholder="e.g. 08012345678"/>
+        <span id="nm_phone_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+    </div>
+
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">DOCUMENTS & AUTHENTICATION</p>
+      <div class="form-group">
+        <label>Upload Documents</label>
+        <div id="nm_doc_list" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.5rem"></div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <input type="file" id="nm_doc_input" accept="image/*,.pdf" style="flex:1"/>
+          <button type="button" onclick="addNameModDoc()" style="background:var(--primary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;white-space:nowrap">+ Add</button>
+        </div>
+        <span id="nm_doc_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+    </div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="nameModPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitNameMod()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- SERVICE MODAL -->
+<div class="modal-overlay" id="serviceModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Service</h3>
+      <button class="modal-close" onclick="closeModal('serviceModal')">✕</button>
+    </div>
+    <p id="modalDesc" style="color:var(--gray);font-size:0.9rem;margin-bottom:1.2rem"></p>
+    <div id="modalAlert"></div>
+    <div id="modalFields"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="modalPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitService()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- NIN VERIFY MODAL -->
+<div class="modal-overlay" id="ninVerifyModal">
+  <div class="modal" style="max-width:600px">
+    <div class="modal-header">
+      <h3 id="ninVerifyTitle">NIN Verification</h3>
+      <button class="modal-close" onclick="closeModal('ninVerifyModal')">✕</button>
+    </div>
+
+    <!-- STEP 1: Slip Selection -->
+    <div id="ninVerifyStep1">
+      <p style="color:var(--gray);font-size:0.9rem;margin-bottom:1rem">Select the type of slip you want to print after verification:</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-bottom:1rem">
+
+        <!-- Normal Slip -->
+        <div class="slip-choice" onclick="chooseSlip(this,'Normal Slip')" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.6rem;cursor:pointer;transition:all 0.2s">
+          <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">📄 Normal Slip</div>
+          <img src="../img/normal-slip.png" style="width:100%;border-radius:6px;display:block" alt="Normal Slip"/>
+        </div>
+
+        <!-- Verification Info Slip -->
+        <div class="slip-choice" onclick="chooseSlip(this,'Verification Information Slip')" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.6rem;cursor:pointer;transition:all 0.2s">
+          <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">🔍 Verification Info Slip</div>
+          <img src="../img/verification-slip.png" style="width:100%;border-radius:6px;display:block" alt="Verification Info Slip"/>
+        </div>
+
+        <!-- Premium Slip -->
+        <div class="slip-choice" onclick="chooseSlip(this,'Premium Slip')" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.6rem;cursor:pointer;transition:all 0.2s">
+          <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">💎 Premium Slip</div>
+          <img src="../img/premium-slip.png" style="width:100%;border-radius:6px;display:block" alt="Premium Slip"/>
+        </div>
+
+        <!-- Standard Slip -->
+        <div class="slip-choice" onclick="chooseSlip(this,'Standard Slip')" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.6rem;cursor:pointer;transition:all 0.2s">
+          <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">🪪 Standard Slip</div>
+          <img src="../img/standard-slip.PNG.jpg" style="width:100%;border-radius:6px;display:block" alt="Standard Slip"/>
+        </div>
+
+      </div>
+      <div id="slipChoiceErr" style="color:var(--accent);font-size:0.8rem;margin-bottom:0.5rem"></div>
+      <button class="btn-primary" onclick="proceedToVerifyForm()" style="width:100%;padding:10px">Continue to Verification →</button>
+    </div>
+
+    <!-- STEP 2: Verification Form -->
+    <div id="ninVerifyStep2" style="display:none">
+      <div id="ninVerifySlipBadge" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:0.5rem 0.8rem;margin-bottom:1rem;font-size:0.85rem;font-weight:600;color:#1a5c1a"></div>
+      <p id="ninVerifyDesc" style="color:var(--gray);font-size:0.9rem;margin-bottom:1.2rem"></p>
+      <div id="ninVerifyAlert"></div>
+      <div id="ninVerifyFields"></div>
+      <div id="ninVerifyResult" style="display:none;margin-top:1rem;padding:1rem;background:#f0fdf4;border-radius:8px;border:1px solid #bbf7d0"></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+        <span style="font-weight:700;color:var(--accent)" id="ninVerifyPrice"></span>
+        <button class="btn-primary" id="ninVerifyBtn" style="width:auto;padding:10px 24px" onclick="submitNinVerify()">Verify NIN</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FUND MODAL -->
+<div class="modal-overlay" id="fundModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Fund Wallet</h3>
+      <button class="modal-close" onclick="closeModal('fundModal')">✕</button>
+    </div>
+    <div id="fundAlert"></div>
+    <div class="form-group">
+      <label>Amount (₦)</label>
+      <input type="number" id="fundAmount" placeholder="Enter amount" min="100"/>
+    </div>
+    <div class="form-group">
+      <label>Payment Method</label>
+      <select id="fundMethod">
+        <option>Bank Transfer</option>
+        <option>Card Payment</option>
+        <option>USSD</option>
+      </select>
+    </div>
+    <button class="btn-primary" onclick="fundWallet()">Proceed to Pay</button>
+  </div>
+</div>
+
+<script src="../js/app.js"></script>
+<script type="module" src="../js/firebase.js"></script>
+<script>
+  const user = requireAuth("user");
+  let walletBalance = user ? user.wallet : 0;
+  let currentService = {};
+
+  if (user) {
+    document.getElementById("userName").textContent = user.name;
+    document.getElementById("greetName").textContent = user.name.split(" ")[0];
+    document.getElementById("userAvatar").textContent = user.name[0].toUpperCase();
+    updateStats();
+  }
+
+  // ── Firebase real-time sync ────────────────────────
+  function initFirebaseSync() {
+    if (!window.fbReady) { setTimeout(initFirebaseSync, 300); return; }
+
+    // Pricing real-time
+    window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "pricing"), function(snap) {
+      if (snap.exists()) {
+        localStorage.setItem('tugga_pricing', JSON.stringify(snap.data()));
+        refreshPricing();
+      }
+    });
+
+    // Availability real-time
+    window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "availability"), function(snap) {
+      if (snap.exists()) {
+        localStorage.setItem('tugga_availability', JSON.stringify(snap.data()));
+        applyAvailability();
+      }
+    });
+
+    // Transactions real-time
+    window.fbOnSnapshot(window.fbCollection(window.fbDB, "transactions"), function(snap) {
+      const txns = snap.docs.map(d => d.data()).sort((a,b) => b.id > a.id ? 1 : -1);
+      localStorage.setItem('tugga_txns', JSON.stringify(txns));
+      updateStats();
+    });
+
+    // User wallet real-time
+    if (user && user.uid) {
+      window.fbOnSnapshot(window.fbDoc(window.fbDB, "users", user.uid), function(snap) {
+        if (snap.exists()) {
+          const data = snap.data();
+          walletBalance = data.wallet || 0;
+          updateStats();
+        }
+      });
+    }
+    // Real-time platform settings (apply company name)
+    window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "platform"), function(snap) {
+      if (snap.exists()) {
+        const s = snap.data();
+        localStorage.setItem("tugga_settings", JSON.stringify(s));
+        if (s.companyName) {
+          const logoEl = document.querySelector('nav .logo');
+          if (logoEl) logoEl.innerHTML = '🛡️ ' + s.companyName.split(' ')[0] + ' <span>' + (s.companyName.split(' ').slice(1).join(' ') || 'IT SOLUTIONS') + '</span>';
+        }
+      }
+    });
+  }
+  initFirebaseSync();
+
+  // Save wallet to Firebase when deducted
+  function syncWalletToFirebase() {
+    if (window.fbReady && user && user.uid) {
+      window.fbUpdateDoc(window.fbDoc(window.fbDB, "users", user.uid), { wallet: walletBalance })
+        .catch(e => console.error("Wallet sync error:", e));
+    }
+  }
+
+  // Populate profile modal on open
+  const _origOpenModal = openModal;
+  window.openModal = function(id) {
+    if (id === 'profileModal') {
+      document.getElementById('profileAvatar').textContent = user.name[0].toUpperCase();
+      document.getElementById('profileName').textContent   = user.name;
+      document.getElementById('profileRole').textContent   = user.role.toUpperCase();
+      document.getElementById('profileEmail').textContent  = user.email;
+      document.getElementById('profilePhone').textContent  = user.phone || '—';
+      document.getElementById('profileNin').textContent    = user.nin || '—';
+      document.getElementById('profileWallet').textContent = fmt(walletBalance);
+      document.getElementById('profileTxns').textContent   = getUserTransactions(user.id).length;
+      document.getElementById('profileSince').textContent  = user.registeredAt || '—';
+    }
+    if (id === 'changePwdModal') {
+      document.getElementById('changePwdAlert').innerHTML = '';
+      ['pwd_current','pwd_new','pwd_confirm'].forEach(id => { document.getElementById(id).value = ''; });
+      ['pwd_current_err','pwd_new_err','pwd_confirm_err'].forEach(id => { document.getElementById(id).textContent = ''; });
+    }
+    _origOpenModal(id);
+  };
+
+  function submitChangePassword() {
+    const current = document.getElementById('pwd_current').value;
+    const newPwd  = document.getElementById('pwd_new').value;
+    const confirm = document.getElementById('pwd_confirm').value;
+    const alertEl = document.getElementById('changePwdAlert');
+    alertEl.innerHTML = '';
+    let valid = true;
+    if (!current || current !== user.password) { document.getElementById('pwd_current_err').textContent = 'Current password is incorrect'; valid = false; } else document.getElementById('pwd_current_err').textContent = '';
+    if (!newPwd || newPwd.length < 6)           { document.getElementById('pwd_new_err').textContent = 'Password must be at least 6 characters'; valid = false; } else document.getElementById('pwd_new_err').textContent = '';
+    if (newPwd !== confirm)                      { document.getElementById('pwd_confirm_err').textContent = 'Passwords do not match'; valid = false; } else document.getElementById('pwd_confirm_err').textContent = '';
+    if (!valid) return;
+    user.password = newPwd;
+    localStorage.setItem('tugga_user', JSON.stringify(user));
+    alertEl.innerHTML = '<div class="alert alert-success">Password updated successfully!</div>';
+    setTimeout(() => closeModal('changePwdModal'), 1500);
+  }
+
+  function updateStats() {
+    const txns = getUserTransactions(user.id);
+    document.getElementById("statNin").textContent = txns.filter(t => t.service.includes("NIN") || t.service.includes("VNIN") || t.service.includes("IPE")).length;
+    document.getElementById("statBvn").textContent = txns.filter(t => t.service.includes("BVN")).length;
+    document.getElementById("statAirtime").textContent = txns.filter(t => t.service.includes("Airtime")).length;
+    document.getElementById("statWallet").textContent = fmt(walletBalance);
+    document.getElementById("walletBal").textContent = fmt(walletBalance) + ".00";
+    renderHistory();
+  }
+
+  function renderHistory() {
+    const txns = getUserTransactions(user.id);
+    const tbody = document.getElementById("historyTable");
+    const wbody = document.getElementById("walletTxnTable");
+    if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
+    tbody.innerHTML = txns.map(t => `
+      <tr>
+        <td>${t.id}</td><td>${t.service}</td><td>${t.details}</td>
+        <td>${fmt(t.amount)}</td>
+        <td><span class="badge badge-${t.status === 'success' ? 'success' : 'failed'}">${t.status}</span></td>
+        <td>${t.date}</td>
+      </tr>`).join("");
+    wbody.innerHTML = txns.map(t => `
+      <tr><td>${t.date}</td><td>${t.service}</td><td style="color:var(--accent)">-${fmt(t.amount)}</td>
+      <td><span class="badge badge-${t.status === 'success' ? 'success' : 'failed'}">${t.status}</span></td></tr>`).join("");
+  }
+
+  // ── Service Modal ──────────────────────────────────
+  const NIN_FIELDS = `
+    <div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>
+    <div class="form-group"><label>Full Name</label><input type="text" id="f_name" placeholder="As on NIN"/></div>
+    <div class="form-group"><label>Date of Birth</label><input type="date" id="f_dob"/></div>`;
+
+  const NIN_ONLY_FIELDS = `
+    <div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`;
+
+  const BVN_FIELDS = `
+    <div class="form-group"><label>BVN Number</label><input type="text" id="f_bvn" placeholder="11-digit BVN" maxlength="11"/></div>
+    <div class="form-group"><label>Full Name</label><input type="text" id="f_name" placeholder="As on bank records"/></div>
+    <div class="form-group"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="Linked phone number"/></div>`;
+
+  const NIN_ONLY_SVCS = ['No Record Found', 'Bank Validation', 'Photograph Error', 'SIM Validation', 'VNIN Slip'];
+
+  function openServiceModal(title, desc, type, price) {
+    if (!checkAvailable(title)) return;
+    currentService = { title, desc, type, price: parseInt(price) };
+    document.getElementById("modalTitle").textContent = title;
+    document.getElementById("modalDesc").textContent = desc;
+    document.getElementById("modalPrice").textContent = "Fee: " + fmt(price);
+    document.getElementById("modalAlert").innerHTML = "";
+    let fields;
+    if (type === "bvn") fields = BVN_FIELDS;
+    else if (NIN_ONLY_SVCS.includes(title)) fields = NIN_ONLY_FIELDS;
+    else fields = NIN_FIELDS;
+    document.getElementById("modalFields").innerHTML = fields;
+    // Dynamic button label
+    const btnLabels = { 'VNIN Slip': 'Generate Slip' };
+    const btn = document.querySelector('#serviceModal .btn-primary');
+    if (btn) btn.textContent = btnLabels[title] || 'Submit Request';
+    openModal("serviceModal");
+  }
+
+  function submitService() {
+    const alertEl = document.getElementById("modalAlert");
+    if (walletBalance < currentService.price) {
+      alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>';
+      return;
+    }
+    walletBalance -= currentService.price;
+    const details = currentService.type === "nin"
+      ? (document.getElementById("f_nin")?.value || "N/A")
+      : (document.getElementById("f_bvn")?.value || "N/A");
+    addTransaction(user.id, currentService.title, details, currentService.price);
+    closeModal("serviceModal");
+    toast(currentService.title + " request submitted successfully!");
+    updateStats();
+  }
+
+  // ── NIN Verification Sub-Services ─────────────────
+  let _p = JSON.parse(localStorage.getItem("tugga_pricing") || "{}");
+
+  const NIN_VERIFY_SERVICES = {
+    'verify-nin':   { title: 'Verify with NIN',           fee: 200, icon: '🪪', desc: 'Enter an 11-digit NIN to retrieve identity details.' },
+    'phone-verify': { title: 'Phone Number Verification', fee: 150, icon: '📞', desc: 'Enter a Nigerian phone number to retrieve linked NIN bio data.' },
+    'bio-data':     { title: 'Bio Data Verification',     fee: 300, icon: '🧬', desc: 'Enter bio data to confirm identity match.' },
+    'fingerprint':  { title: 'FingerPrint Verification',  fee: 200, icon: '👆', desc: 'Enter an 11-digit NIN to verify via fingerprint.' }
+  };
+
+  let currentNinService = '';
+
+  function refreshPricing() {
+    _p = JSON.parse(localStorage.getItem("tugga_pricing") || "{}");
+    NIN_VERIFY_SERVICES['verify-nin'].fee   = _p.verify_nin   || 200;
+    NIN_VERIFY_SERVICES['phone-verify'].fee = _p.phone_verify || 150;
+    NIN_VERIFY_SERVICES['bio-data'].fee     = _p.bio_data     || 300;
+    NIN_VERIFY_SERVICES['fingerprint'].fee  = _p.fingerprint  || 200;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = fmt(val); };
+    set('price-verify-nin',   _p.verify_nin   || 200);
+    set('price-phone-verify', _p.phone_verify || 150);
+    set('price-bio-data',     _p.bio_data     || 300);
+    set('price-fingerprint',  _p.fingerprint  || 200);
+    set('price-no-record',    _p.no_record    || 150);
+    set('price-bank-val',     _p.bank_val     || 150);
+    set('price-photo-err',    _p.photo_err    || 150);
+    set('price-sim-val',      _p.sim_val      || 150);
+    set('price-name-mod',     _p.name_mod     || 500);
+    set('price-phone-mod',    _p.phone_mod    || 500);
+    set('price-address-mod',  _p.address_mod  || 500);
+    set('price-dob-mod',      _p.dob_mod      || 500);
+    set('price-ipe-normal',   _p.ipe_normal   || 400);
+    set('price-ipe-mod',      _p.ipe_mod      || 400);
+    set('price-ipe-other',    _p.ipe_other    || 400);
+  }
+
+  refreshPricing();
+
+  // Auto-refresh prices when admin saves pricing in another tab
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'tugga_pricing') refreshPricing();
+    if (e.key === 'tugga_availability') applyAvailability();
+  });
+
+  function getAvailability() {
+    return JSON.parse(localStorage.getItem('tugga_availability') || '{}');
+  }
+
+  function isAvailable(svc) {
+    var av = getAvailability();
+    var svcGroups = {
+      'Verify with NIN':'grp_nin_verify','Phone Number Verification':'grp_nin_verify',
+      'Bio Data Verification':'grp_nin_verify','FingerPrint Verification':'grp_nin_verify',
+      'No Record Found':'grp_nin_val','Bank Validation':'grp_nin_val',
+      'Photograph Error':'grp_nin_val','SIM Validation':'grp_nin_val',
+      'Name Modification':'grp_nin_mod','Phone Number Modification':'grp_nin_mod',
+      'Address Modification':'grp_nin_mod','Date of Birth Modification':'grp_nin_mod',
+      'NIN Personalization':'grp_nin_other','VNIN Slip':'grp_nin_other',
+      'Normal Clearance':'grp_ipe','Modification Clearance':'grp_ipe','Other Error':'grp_ipe',
+      'BVN Verification':'grp_bvn','BVN Retrieval':'grp_bvn',
+      'BVN Modification':'grp_bvn','BVN User':'grp_bvn',
+      'Buy Airtime':'grp_utility','Buy Data':'grp_utility'
+    };
+    var grpKey = svcGroups[svc];
+    var grpOn = grpKey ? av[grpKey] !== false : true;
+    return grpOn && av[svc] !== false;
+  }
+
+  function checkAvailable(svcName) {
+    if (!isAvailable(svcName)) {
+      toast('This service is currently unavailable.', 'error');
+      return false;
+    }
+    return true;
+  }
+
+  function applyAvailability() {
+    var av = getAvailability();
+
+    // Group key map: service name → group key
+    var svcGroups = {
+      'Verify with NIN':'grp_nin_verify','Phone Number Verification':'grp_nin_verify',
+      'Bio Data Verification':'grp_nin_verify','FingerPrint Verification':'grp_nin_verify',
+      'No Record Found':'grp_nin_val','Bank Validation':'grp_nin_val',
+      'Photograph Error':'grp_nin_val','SIM Validation':'grp_nin_val',
+      'Name Modification':'grp_nin_mod','Phone Number Modification':'grp_nin_mod',
+      'Address Modification':'grp_nin_mod','Date of Birth Modification':'grp_nin_mod',
+      'NIN Personalization':'grp_nin_other','VNIN Slip':'grp_nin_other',
+      'Normal Clearance':'grp_ipe','Modification Clearance':'grp_ipe','Other Error':'grp_ipe',
+      'BVN Verification':'grp_bvn','BVN Retrieval':'grp_bvn',
+      'BVN Modification':'grp_bvn','BVN User':'grp_bvn',
+      'Buy Airtime':'grp_utility','Buy Data':'grp_utility'
+    };
+
+    document.querySelectorAll('.service-card[data-svc]').forEach(function(card) {
+      var svc = card.getAttribute('data-svc');
+      var grpKey = svcGroups[svc];
+      // Service is available only if both group AND individual service are on
+      var grpOn = grpKey ? av[grpKey] !== false : true;
+      var svcOn = av[svc] !== false;
+      var available = grpOn && svcOn;
+
+      card.style.opacity = available ? '1' : '0.45';
+      card.style.pointerEvents = available ? '' : 'none';
+      card.style.cursor = available ? 'pointer' : 'not-allowed';
+
+      var badge = card.querySelector('.unavailable-badge');
+      if (!available && !badge) {
+        badge = document.createElement('div');
+        badge.className = 'unavailable-badge';
+        badge.style.cssText = 'font-size:0.7rem;color:var(--accent);font-weight:600;margin-top:4px';
+        badge.textContent = 'Unavailable';
+        card.appendChild(badge);
+      } else if (available && badge) {
+        badge.remove();
+      }
+    });
+  }
+
+  // Apply on load
+  applyAvailability();
+
+  function isValidNIN(v) { return /^\d{11}$/.test(v); }
+  function isValidNigerianPhone(v) { return /^(0\d{10}|234\d{10}|\+234\d{10})$/.test(v.trim()); }
+
+  function ninMockLookup(serviceKey, inputs) {
+    const hash = (s) => s.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
+    const names = ['Aminu Bello', 'Fatima Yusuf', 'Chukwuemeka Obi', 'Aisha Musa', 'Tunde Adeyemi'];
+    const dobs  = ['1990-04-12', '1985-07-23', '1992-11-05', '1988-03-17', '1995-09-30'];
+    const genders = ['Male', 'Female', 'Male', 'Female', 'Male'];
+    const idx = hash(inputs.primary || '') % names.length;
+    if (serviceKey === 'bio-data') {
+      const match = inputs.fname && inputs.lname && inputs.dob && inputs.gender;
+      return { match: !!(match && (inputs.fname.charCodeAt(0) + inputs.lname.charCodeAt(0)) % 2 === 0) };
+    }
+    return { name: names[idx], dob: dobs[idx], gender: genders[idx], photo: '📷' };
+  }
+
+  function openNinVerifyModal(serviceKey) {
+    var svcNames = {'verify-nin':'Verify with NIN','phone-verify':'Phone Number Verification','bio-data':'Bio Data Verification','fingerprint':'FingerPrint Verification'};
+    if (!checkAvailable(svcNames[serviceKey])) return;
+    refreshPricing();
+    currentNinService = serviceKey;
+    const svc = NIN_VERIFY_SERVICES[serviceKey];
+    document.getElementById('ninVerifyTitle').textContent = svc.icon + ' ' + svc.title;
+    document.getElementById('ninVerifyAlert').innerHTML = '';
+    document.getElementById('ninVerifyResult').style.display = 'none';
+    document.getElementById('ninVerifyResult').innerHTML = '';
+    // Reset to step 1
+    document.getElementById('ninVerifyStep1').style.display = 'block';
+    document.getElementById('ninVerifyStep2').style.display = 'none';
+    document.querySelectorAll('.slip-choice').forEach(function(c) {
+      c.style.border = '2px solid #e2e8f0';
+      c.style.background = '';
+    });
+    _selectedSlip = '';
+    document.getElementById('slipChoiceErr').textContent = '';
+    openModal('ninVerifyModal');
+  }
+
+  function chooseSlip(el, slipName) {
+    document.querySelectorAll('.slip-choice').forEach(function(c) {
+      c.style.border = '2px solid #e2e8f0';
+    });
+    el.style.border = '2px solid var(--primary)';
+    _selectedSlip = slipName;
+    document.getElementById('slipChoiceErr').textContent = '';
+  }
+
+  function proceedToVerifyForm() {
+    if (!_selectedSlip) {
+      document.getElementById('slipChoiceErr').textContent = 'Please select a slip type to continue.';
+      return;
+    }
+    const svc = NIN_VERIFY_SERVICES[currentNinService];
+    document.getElementById('ninVerifySlipBadge').textContent = '🖨️ Selected: ' + _selectedSlip;
+    document.getElementById('ninVerifyDesc').textContent = svc.desc;
+    document.getElementById('ninVerifyPrice').textContent = 'Fee: ' + fmt(svc.fee);
+    document.getElementById('ninVerifyAlert').innerHTML = '';
+    document.getElementById('ninVerifyResult').style.display = 'none';
+
+    let fields = '';
+    if (currentNinService === 'verify-nin') {
+      fields = '<div class="form-group"><label>NIN Number</label><input type="text" id="nv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="nv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
+    } else if (currentNinService === 'phone-verify') {
+      fields = '<div class="form-group"><label>Phone Number</label><input type="tel" id="nv_phone" placeholder="e.g. 08012345678"/><span id="nv_phone_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
+    } else {
+      fields = '<div class="form-group"><label>First Name</label><input type="text" id="nv_fname" placeholder="First name"/><span id="nv_fname_err" style="color:var(--accent);font-size:0.8rem"></span></div>' +
+        '<div class="form-group"><label>Last Name</label><input type="text" id="nv_lname" placeholder="Last name"/><span id="nv_lname_err" style="color:var(--accent);font-size:0.8rem"></span></div>' +
+        '<div class="form-group"><label>Date of Birth</label><input type="date" id="nv_dob"/><span id="nv_dob_err" style="color:var(--accent);font-size:0.8rem"></span></div>' +
+        '<div class="form-group"><label>Gender</label><select id="nv_gender"><option value="">Select gender</option><option>Male</option><option>Female</option></select><span id="nv_gender_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
+    }
+    document.getElementById('ninVerifyFields').innerHTML = fields;
+    document.getElementById('ninVerifyStep1').style.display = 'none';
+    document.getElementById('ninVerifyStep2').style.display = 'block';
+  }
+
+  function submitNinVerify() {
+    const svc = NIN_VERIFY_SERVICES[currentNinService];
+    const alertEl = document.getElementById('ninVerifyAlert');
+    alertEl.innerHTML = '';
+
+    // Validate inputs
+    let inputs = {};
+    if (currentNinService === 'verify-nin') {
+      const nin = document.getElementById('nv_nin').value.trim();
+      if (!isValidNIN(nin)) {
+        document.getElementById('nv_nin_err').textContent = 'NIN must be exactly 11 digits';
+        return;
+      }
+      document.getElementById('nv_nin_err').textContent = '';
+      inputs = { primary: nin };
+    } else if (currentNinService === 'phone-verify') {
+      const phone = document.getElementById('nv_phone').value.trim();
+      if (!isValidNigerianPhone(phone)) {
+        document.getElementById('nv_phone_err').textContent = 'Enter a valid Nigerian phone number';
+        return;
+      }
+      document.getElementById('nv_phone_err').textContent = '';
+      inputs = { primary: phone };
+    } else {
+      const fname  = document.getElementById('nv_fname').value.trim();
+      const lname  = document.getElementById('nv_lname').value.trim();
+      const dob    = document.getElementById('nv_dob').value;
+      const gender = document.getElementById('nv_gender').value;
+      let valid = true;
+      if (!fname)  { document.getElementById('nv_fname_err').textContent = 'First name is required'; valid = false; } else document.getElementById('nv_fname_err').textContent = '';
+      if (!lname)  { document.getElementById('nv_lname_err').textContent = 'Last name is required'; valid = false; } else document.getElementById('nv_lname_err').textContent = '';
+      if (!dob)    { document.getElementById('nv_dob_err').textContent = 'Date of birth is required'; valid = false; } else document.getElementById('nv_dob_err').textContent = '';
+      if (!gender) { document.getElementById('nv_gender_err').textContent = 'Gender is required'; valid = false; } else document.getElementById('nv_gender_err').textContent = '';
+      if (!valid) return;
+      inputs = { primary: fname + ' ' + lname, fname, lname, dob, gender };
+    }
+
+    // Check balance
+    if (walletBalance < svc.fee) {
+      alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>';
+      return;
+    }
+
+    // Deduct and record
+    walletBalance -= svc.fee;
+    addTransaction(user.id, svc.title, inputs.primary, svc.fee);
+    updateStats();
+    syncWalletToFirebase();
+    window._lastNinInputs = inputs;
+
+    // Show result
+    const result = ninMockLookup(currentNinService, inputs);
+    const resultEl = document.getElementById('ninVerifyResult');
+    if (currentNinService === 'bio-data') {
+      resultEl.innerHTML = result.match
+        ? '<span class="badge badge-success">✅ Match</span> Bio data matches the NIN record.'
+        : '<span class="badge badge-failed">❌ No Match</span> Bio data does not match the NIN record.';
+    } else {
+      resultEl.innerHTML =
+        '<span class="badge badge-success">✅ Verified</span>' +
+        '<div style="margin-top:0.5rem;line-height:1.8">' +
+          '<div><strong>Name:</strong> ' + result.name + '</div>' +
+          '<div><strong>DOB:</strong> ' + result.dob + '</div>' +
+          '<div><strong>Gender:</strong> ' + result.gender + '</div>' +
+          '<div><strong>Photo:</strong> ' + result.photo + '</div>' +
+        '</div>' +
+        '<div style="margin-top:1rem;border-top:1px solid #bbf7d0;padding-top:1rem">' +
+          '<p style="font-weight:600;margin-bottom:0.6rem;font-size:0.9rem">Selected: ' + _selectedSlip + '</p>' +
+          '<button onclick="printSelectedSlip()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">🖨️ Print ' + _selectedSlip + '</button>' +
+        '</div>';
+    }
+    resultEl.style.display = 'block';
+    alertEl.innerHTML = '<div class="alert alert-success">' + svc.title + ' completed successfully!</div>';
+  }
+
+  let _selectedSlip = '';
+  let _lastVerifiedResult = null;
+
+  function selectSlip(el, slipName) {
+    document.querySelectorAll('.slip-option').forEach(function(o) {
+      o.style.border = '2px solid #e2e8f0';
+      o.style.background = '';
+      o.style.color = '';
+    });
+    el.style.border = '2px solid var(--primary)';
+    el.style.background = 'var(--primary)';
+    el.style.color = '#fff';
+    _selectedSlip = slipName;
+    document.getElementById('printSlipBtn').style.display = 'block';
+  }
+
+  function printSelectedSlip() {
+    if (!_selectedSlip) return;
+    const result = ninMockLookup(currentNinService, window._lastNinInputs || {primary:'N/A'});
+    const slipWin = window.open('', '_blank', 'width=800,height=600');
+    slipWin.document.write(buildSlipHTML(_selectedSlip, result));
+    slipWin.document.close();
+    slipWin.focus();
+    setTimeout(function() { slipWin.print(); }, 500);
+  }
+
+  function buildSlipHTML(slipType, result) {
+    const now = new Date().toLocaleDateString('en-GB');
+    const nin = (window._lastNinInputs && window._lastNinInputs.primary) || '***********';
+    if (slipType === 'Normal Slip') {
+      return '<!DOCTYPE html><html><head><title>NIN Slip</title><style>body{font-family:Arial,sans-serif;margin:20px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #333;padding:6px 10px;font-size:13px}.header{text-align:center;margin-bottom:10px}.footer{display:flex;justify-content:space-around;border-top:1px solid #333;padding-top:8px;font-size:11px;margin-top:10px}</style></head><body>' +
+        '<div class="header"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Coat_of_arms_of_Nigeria.svg/60px-Coat_of_arms_of_Nigeria.svg.png" height="50"/><h3 style="margin:4px 0">National Identity Management System</h3><p style="margin:2px 0">Federal Republic of Nigeria</p><p style="margin:2px 0"><strong>National Identification Number Slip (NINS)</strong></p></div>' +
+        '<table><tr><td><strong>Tracking ID:</strong> NIN-INVALIDATED</td><td><strong>Surname:</strong> ' + (result.name ? result.name.split(' ')[1]||'****' : '****') + '</td><td><strong>Address:</strong> ****</td></tr>' +
+        '<tr><td><strong>NIN:</strong> ' + nin + '</td><td><strong>First Name:</strong> ' + (result.name ? result.name.split(' ')[0] : '****') + '</td><td></td></tr>' +
+        '<tr><td></td><td><strong>Middle Name:</strong> ****</td><td></td></tr>' +
+        '<tr><td></td><td><strong>Gender:</strong> ' + (result.gender||'*') + '</td><td></td></tr></table>' +
+        '<p style="font-size:11px;margin-top:8px"><em>Note: The National Identification Number (NIN) is your identity. It is confidential and may only be released to authorised bodies.</em></p>' +
+        '<div class="footer"><span>helpdesk@nimc.gov.ng</span><span>www.nimc.gov.ng</span><span>0700-CALL-NIMC</span><span>National Identity Management Commission</span></div></body></html>';
+    } else if (slipType === 'Verification Information Slip') {
+      return '<!DOCTYPE html><html><head><title>Verified NIN Details</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#222}.header{display:flex;align-items:center;gap:16px;margin-bottom:20px}.verified{color:green;font-size:2rem;font-weight:bold;text-align:right}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:13px}.label{color:#555}.value{font-weight:600}.notes{font-size:11px;margin-top:16px;color:#444}</style></head><body>' +
+        '<div class="header"><div><h2 style="margin:0">Federal Republic of Nigeria</h2><h3 style="margin:4px 0;color:#1a5c1a">Verified NIN Details</h3></div></div>' +
+        '<div style="display:flex;gap:20px"><div class="grid" style="flex:1"><div class="label">First Name:</div><div class="value">' + (result.name?result.name.split(' ')[0]:'****') + '</div><div class="label">Middle Name:</div><div class="value">****</div><div class="label">Last Name:</div><div class="value">' + (result.name?result.name.split(' ')[1]||'****':'****') + '</div><div class="label">Date of Birth:</div><div class="value">' + (result.dob||'****') + '</div><div class="label">Gender:</div><div class="value">' + (result.gender||'*') + '</div><div class="label">NIN Number:</div><div class="value">' + nin + '</div><div class="label">Tracking ID:</div><div class="value">****</div><div class="label">Phone Number:</div><div class="value">****</div></div>' +
+        '<div style="text-align:center;min-width:80px"><div style="width:70px;height:80px;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:2rem">👤</div></div>' +
+        '<div style="max-width:260px;font-size:11px;color:#333"><p style="color:green;font-size:1.4rem;font-weight:bold;margin:0">Verified</p><p>This is a property of National Identity Management Commission (NIMC), Nigeria.</p><ol><li>This NIN slip remains the property of the Federal Republic of Nigeria.</li><li>This NIN slip does not imply nor confer citizenship.</li><li>This NIN slip is valid for the lifetime of the holder and <span style="color:red">DOES NOT EXPIRE</span>.</li></ol></div></div>' +
+        '</body></html>';
+    } else if (slipType === 'Premium Slip') {
+      return '<!DOCTYPE html><html><head><title>Digital NIN Slip</title><style>body{margin:0;font-family:Arial,sans-serif}.card{width:340px;height:210px;background:linear-gradient(135deg,#1a5c1a,#2d8a2d,#a8d5a2);border-radius:12px;padding:14px;color:#fff;position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3)}.card-title{font-size:9px;letter-spacing:1px;text-transform:uppercase;opacity:0.9}.card-main{font-size:11px;margin-top:6px}.photo{width:50px;height:60px;background:rgba(255,255,255,0.3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;float:left;margin-right:10px}.qr{width:60px;height:60px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#333;float:right}.nin-num{font-size:18px;letter-spacing:4px;text-align:center;margin-top:8px;font-weight:bold}</style></head><body>' +
+        '<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="card-title">Federal Republic of Nigeria</div><div style="font-size:8px;opacity:0.8">Digital NIN Slip</div></div><div style="font-size:8px;text-align:right;opacity:0.9">NGA</div></div>' +
+        '<div style="display:flex;margin-top:8px"><div class="photo">👤</div><div class="card-main"><div><strong>SURNAME/NOM</strong><br/>' + (result.name?result.name.split(' ')[1]||'RESIDENT':'RESIDENT') + '</div><div style="margin-top:4px"><strong>GIVEN NAMES</strong><br/>' + (result.name||'PROUD, NIGERIAN') + '</div><div style="margin-top:4px"><strong>DATE OF BIRTH</strong> ' + (result.dob||'01 JAN 1990') + ' &nbsp; <strong>SEX</strong> ' + (result.gender?result.gender[0]:'*') + '</div><div style="margin-top:4px;font-size:9px">ISSUE DATE: ' + now + '</div></div><div class="qr">QR</div></div>' +
+        '<div class="nin-num">' + nin.replace(/(\d{4})(\d{3})(\d{4})/,'$1 $2 $3') + '</div></div></body></html>';
+    } else {
+      return '<!DOCTYPE html><html><head><title>Standard NIN Slip</title><style>body{margin:20px;font-family:Arial,sans-serif}.card{width:340px;border:2px solid #333;border-radius:8px;padding:14px;background:#fff;position:relative}.header{display:flex;justify-content:space-between;align-items:center}.photo{width:50px;height:60px;background:#ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}.qr{width:55px;height:55px;background:#eee;border:1px solid #999;display:flex;align-items:center;justify-content:center;font-size:0.6rem}.nin-num{font-size:20px;letter-spacing:4px;text-align:center;font-weight:bold;margin-top:8px;border-top:1px solid #333;padding-top:6px}</style></head><body>' +
+        '<div class="card"><div class="header"><div class="photo">👤</div><div style="text-align:center;flex:1"><div style="font-size:9px;font-weight:bold">Surname/Nom</div><div>' + (result.name?result.name.split(' ')[1]||'RESIDENT':'RESIDENT') + '</div><div style="font-size:9px;font-weight:bold;margin-top:4px">Given Names/Prénoms</div><div>' + (result.name||'PROUD, NIGERIAN') + '</div><div style="font-size:9px;margin-top:4px">Date of Birth: ' + (result.dob||'01 OCT 1960') + '</div><div style="font-size:9px">Issue Date: ' + now + '</div></div><div class="qr">QR</div></div>' +
+        '<div style="text-align:center;font-size:9px;margin-top:6px;font-weight:bold">National Identification Number (NIN)</div>' +
+        '<div class="nin-num">' + nin.replace(/(\d{4})(\d{3})(\d{4})/,'$1 $2 $3') + '</div></div></body></html>';
+    }
+  }
+
+  // ── Name Modification ─────────────────────────────
+  function openNameModModal() {
+    if (!checkAvailable('Name Modification')) return;
+    refreshPricing();
+    document.getElementById('nameModPrice').textContent = 'Fee: ' + fmt(_p.name_mod || 500);
+    document.getElementById('nameModAlert').innerHTML = '';
+    ['nm_nin','nm_surname','nm_firstname','nm_middlename','nm_phone'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    ['nm_nin_err','nm_surname_err','nm_firstname_err','nm_phone_err','nm_doc_err'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '';
+    });
+    document.getElementById('nm_doc_list').innerHTML = '';
+    document.getElementById('nm_doc_input').value = '';
+    window._nmDocs = [];
+    openModal('nameModModal');
+  }
+
+  function addNameModDoc() {
+    const input = document.getElementById('nm_doc_input');
+    const file = input.files[0];
+    if (!file) return;
+    if (!window._nmDocs) window._nmDocs = [];
+    window._nmDocs.push(file);
+    const idx = window._nmDocs.length - 1;
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:0.85rem';
+    item.id = 'nm_doc_item_' + idx;
+    item.innerHTML = `<span>📄 ${file.name}</span><button type="button" onclick="removeNameModDoc(${idx})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1rem">✕</button>`;
+    document.getElementById('nm_doc_list').appendChild(item);
+    input.value = '';
+    document.getElementById('nm_doc_err').textContent = '';
+  }
+
+  function removeNameModDoc(idx) {
+    window._nmDocs.splice(idx, 1);
+    const item = document.getElementById('nm_doc_item_' + idx);
+    if (item) item.remove();
+  }
+
+  function submitNameMod() {
+    const nin      = document.getElementById('nm_nin').value.trim();
+    const surname  = document.getElementById('nm_surname').value.trim();
+    const fname    = document.getElementById('nm_firstname').value.trim();
+    const phone    = document.getElementById('nm_phone').value.trim();
+    const docs     = window._nmDocs || [];
+    const alertEl  = document.getElementById('nameModAlert');
+    alertEl.innerHTML = '';
+    let valid = true;
+    if (!isValidNIN(nin))             { document.getElementById('nm_nin_err').textContent = 'NIN must be exactly 11 digits'; valid = false; } else document.getElementById('nm_nin_err').textContent = '';
+    if (!surname)                     { document.getElementById('nm_surname_err').textContent = 'Surname is required'; valid = false; } else document.getElementById('nm_surname_err').textContent = '';
+    if (!fname)                       { document.getElementById('nm_firstname_err').textContent = 'First name is required'; valid = false; } else document.getElementById('nm_firstname_err').textContent = '';
+    if (!isValidNigerianPhone(phone)) { document.getElementById('nm_phone_err').textContent = 'Enter a valid Nigerian phone number'; valid = false; } else document.getElementById('nm_phone_err').textContent = '';
+    if (!docs.length)                 { document.getElementById('nm_doc_err').textContent = 'Please upload at least one document'; valid = false; } else document.getElementById('nm_doc_err').textContent = '';
+    if (!valid) return;
+    const fee = _p.name_mod || 500;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, 'Name Modification', nin, fee);
+    updateStats();
+    closeModal('nameModModal');
+    toast('Name Modification request submitted successfully!');
+  }
+
+  // ── Phone Number Modification ──────────────────────
+  function openPhoneModModal() {
+    if (!checkAvailable('Phone Number Modification')) return;
+    refreshPricing();
+    document.getElementById('phoneModPrice').textContent = 'Fee: ' + fmt(_p.phone_mod || 500);
+    document.getElementById('phoneModAlert').innerHTML = '';
+    ['pm_nin','pm_surname','pm_firstname','pm_middlename','pm_phone'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    ['pm_nin_err','pm_surname_err','pm_firstname_err','pm_phone_err','pm_doc_err'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '';
+    });
+    document.getElementById('pm_doc_list').innerHTML = '';
+    document.getElementById('pm_doc_input').value = '';
+    window._pmDocs = [];
+    openModal('phoneModModal');
+  }
+
+  function addPhoneModDoc() {
+    const input = document.getElementById('pm_doc_input');
+    const file = input.files[0];
+    if (!file) return;
+    if (!window._pmDocs) window._pmDocs = [];
+    window._pmDocs.push(file);
+    const idx = window._pmDocs.length - 1;
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:0.85rem';
+    item.id = 'pm_doc_item_' + idx;
+    item.innerHTML = `<span>📄 ${file.name}</span><button type="button" onclick="removePhoneModDoc(${idx})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1rem">✕</button>`;
+    document.getElementById('pm_doc_list').appendChild(item);
+    input.value = '';
+    document.getElementById('pm_doc_err').textContent = '';
+  }
+
+  function removePhoneModDoc(idx) {
+    window._pmDocs.splice(idx, 1);
+    const item = document.getElementById('pm_doc_item_' + idx);
+    if (item) item.remove();
+  }
+
+  function submitPhoneMod() {
+    const nin     = document.getElementById('pm_nin').value.trim();
+    const surname = document.getElementById('pm_surname').value.trim();
+    const fname   = document.getElementById('pm_firstname').value.trim();
+    const phone   = document.getElementById('pm_phone').value.trim();
+    const docs    = window._pmDocs || [];
+    const alertEl = document.getElementById('phoneModAlert');
+    alertEl.innerHTML = '';
+    let valid = true;
+    if (!isValidNIN(nin))             { document.getElementById('pm_nin_err').textContent = 'NIN must be exactly 11 digits'; valid = false; } else document.getElementById('pm_nin_err').textContent = '';
+    if (!surname)                     { document.getElementById('pm_surname_err').textContent = 'Surname is required'; valid = false; } else document.getElementById('pm_surname_err').textContent = '';
+    if (!fname)                       { document.getElementById('pm_firstname_err').textContent = 'First name is required'; valid = false; } else document.getElementById('pm_firstname_err').textContent = '';
+    if (!isValidNigerianPhone(phone)) { document.getElementById('pm_phone_err').textContent = 'Enter a valid Nigerian phone number'; valid = false; } else document.getElementById('pm_phone_err').textContent = '';
+    if (!docs.length)                 { document.getElementById('pm_doc_err').textContent = 'Please upload at least one document'; valid = false; } else document.getElementById('pm_doc_err').textContent = '';
+    if (!valid) return;
+    const fee = _p.phone_mod || 500;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, 'Phone Number Modification', nin, fee);
+    updateStats();
+    closeModal('phoneModModal');
+    toast('Phone Number Modification request submitted successfully!');
+  }
+
+  // ── Address Modification ───────────────────────────
+  function openAddressModModal() {
+    if (!checkAvailable('Address Modification')) return;
+    refreshPricing();
+    document.getElementById('addressModPrice').textContent = 'Fee: ' + fmt(_p.address_mod || 500);
+    document.getElementById('addressModAlert').innerHTML = '';
+    ['am_nin','am_address','am_town','am_lga_origin','am_state_origin','am_lga_res','am_state_res'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    ['am_nin_err','am_address_err','am_town_err','am_lga_origin_err','am_state_origin_err','am_lga_res_err','am_state_res_err','am_doc_err'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '';
+    });
+    document.getElementById('am_doc_list').innerHTML = '';
+    document.getElementById('am_doc_input').value = '';
+    window._amDocs = [];
+    openModal('addressModModal');
+  }
+
+  function addAddressModDoc() {
+    const input = document.getElementById('am_doc_input');
+    const file = input.files[0];
+    if (!file) return;
+    if (!window._amDocs) window._amDocs = [];
+    window._amDocs.push(file);
+    const idx = window._amDocs.length - 1;
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:0.85rem';
+    item.id = 'am_doc_item_' + idx;
+    item.innerHTML = `<span>📄 ${file.name}</span><button type="button" onclick="removeAddressModDoc(${idx})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1rem">✕</button>`;
+    document.getElementById('am_doc_list').appendChild(item);
+    input.value = '';
+    document.getElementById('am_doc_err').textContent = '';
+  }
+
+  function removeAddressModDoc(idx) {
+    window._amDocs.splice(idx, 1);
+    const item = document.getElementById('am_doc_item_' + idx);
+    if (item) item.remove();
+  }
+
+  function submitAddressMod() {
+    const nin        = document.getElementById('am_nin').value.trim();
+    const address    = document.getElementById('am_address').value.trim();
+    const town       = document.getElementById('am_town').value.trim();
+    const lgaOrigin  = document.getElementById('am_lga_origin').value.trim();
+    const stateOrigin= document.getElementById('am_state_origin').value.trim();
+    const lgaRes     = document.getElementById('am_lga_res').value.trim();
+    const stateRes   = document.getElementById('am_state_res').value.trim();
+    const docs       = window._amDocs || [];
+    const alertEl    = document.getElementById('addressModAlert');
+    alertEl.innerHTML = '';
+    let valid = true;
+    const req = [
+      ['am_nin_err',          !isValidNIN(nin),   'NIN must be exactly 11 digits'],
+      ['am_address_err',      !address,            'Address is required'],
+      ['am_town_err',         !town,               'Town/City is required'],
+      ['am_lga_origin_err',   !lgaOrigin,          'LGA of Origin is required'],
+      ['am_state_origin_err', !stateOrigin,        'State of Origin is required'],
+      ['am_lga_res_err',      !lgaRes,             'LGA of Residence is required'],
+      ['am_state_res_err',    !stateRes,           'State of Residence is required'],
+    ];
+    req.forEach(([id, fail, msg]) => {
+      const el = document.getElementById(id);
+      if (fail) { if (el) el.textContent = msg; valid = false; } else { if (el) el.textContent = ''; }
+    });
+    if (!docs.length) { document.getElementById('am_doc_err').textContent = 'Please upload at least one document'; valid = false; } else document.getElementById('am_doc_err').textContent = '';
+    if (!valid) return;
+    const fee = _p.address_mod || 500;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, 'Address Modification', nin, fee);
+    updateStats();
+    closeModal('addressModModal');
+    toast('Address Modification request submitted successfully!');
+  }
+
+  // ── Date of Birth Modification ─────────────────────
+  function openDobModModal() {
+    if (!checkAvailable('Date of Birth Modification')) return;
+    refreshPricing();
+    document.getElementById('dobModPrice').textContent = 'Fee: ' + fmt(_p.dob_mod || 500);
+    document.getElementById('dobModAlert').innerHTML = '';
+    ['dm_nin','dm_surname','dm_firstname','dm_middlename','dm_phone','dm_sex','dm_marital',
+     'dm_old_dob','dm_new_dob','dm_state_origin','dm_lga_origin','dm_town_origin',
+     'dm_place_birth','dm_state_birth','dm_lga_birth','dm_res_address','dm_education',
+     'dm_occupation','dm_work_address','dm_req_body','dm_f_surname','dm_f_firstname',
+     'dm_f_state','dm_f_lga','dm_f_town','dm_m_surname','dm_m_firstname','dm_m_maiden',
+     'dm_m_state','dm_m_lga','dm_m_town'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.value = '';
+    });
+    ['dm_nin_err','dm_surname_err','dm_firstname_err','dm_phone_err','dm_sex_err',
+     'dm_marital_err','dm_old_dob_err','dm_new_dob_err','dm_doc_err'].forEach(id => {
+      const el = document.getElementById(id); if (el) el.textContent = '';
+    });
+    document.getElementById('dm_doc_list').innerHTML = '';
+    document.getElementById('dm_doc_input').value = '';
+    window._dmDocs = [];
+    openModal('dobModModal');
+  }
+
+  function addDobModDoc() {
+    const input = document.getElementById('dm_doc_input');
+    const file = input.files[0];
+    if (!file) return;
+    if (!window._dmDocs) window._dmDocs = [];
+    window._dmDocs.push(file);
+    const idx = window._dmDocs.length - 1;
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:0.85rem';
+    item.id = 'dm_doc_item_' + idx;
+    item.innerHTML = `<span>📄 ${file.name}</span><button type="button" onclick="removeDobModDoc(${idx})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1rem">✕</button>`;
+    document.getElementById('dm_doc_list').appendChild(item);
+    input.value = '';
+    document.getElementById('dm_doc_err').textContent = '';
+  }
+
+  function removeDobModDoc(idx) {
+    window._dmDocs.splice(idx, 1);
+    const item = document.getElementById('dm_doc_item_' + idx);
+    if (item) item.remove();
+  }
+
+  function submitDobMod() {
+    const nin     = document.getElementById('dm_nin').value.trim();
+    const surname = document.getElementById('dm_surname').value.trim();
+    const fname   = document.getElementById('dm_firstname').value.trim();
+    const phone   = document.getElementById('dm_phone').value.trim();
+    const sex     = document.getElementById('dm_sex').value;
+    const marital = document.getElementById('dm_marital').value;
+    const oldDob  = document.getElementById('dm_old_dob').value;
+    const newDob  = document.getElementById('dm_new_dob').value;
+    const docs    = window._dmDocs || [];
+    const alertEl = document.getElementById('dobModAlert');
+    alertEl.innerHTML = '';
+    let valid = true;
+    const checks = [
+      ['dm_nin_err',     !isValidNIN(nin),             'NIN must be exactly 11 digits'],
+      ['dm_surname_err', !surname,                      'Surname is required'],
+      ['dm_firstname_err',!fname,                       'First name is required'],
+      ['dm_phone_err',   !isValidNigerianPhone(phone),  'Enter a valid Nigerian phone number'],
+      ['dm_sex_err',     !sex,                          'Sex is required'],
+      ['dm_marital_err', !marital,                      'Marital status is required'],
+      ['dm_old_dob_err', !oldDob,                       'Old DOB is required'],
+      ['dm_new_dob_err', !newDob,                       'New DOB is required'],
+    ];
+    checks.forEach(([id, fail, msg]) => {
+      const el = document.getElementById(id);
+      if (fail) { if (el) el.textContent = msg; valid = false; } else { if (el) el.textContent = ''; }
+    });
+    if (!docs.length) { document.getElementById('dm_doc_err').textContent = 'Please upload at least one document'; valid = false; } else document.getElementById('dm_doc_err').textContent = '';
+    if (!valid) return;
+    const fee = _p.dob_mod || 500;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, 'Date of Birth Modification', nin, fee);
+    updateStats();
+    closeModal('dobModModal');
+    toast('Date of Birth Modification request submitted successfully!');
+  }
+
+  // ── NIN Personalization ────────────────────────────
+  function openNinPersonModal() {
+    if (!checkAvailable('NIN Personalization')) return;
+    refreshPricing();
+    document.getElementById('ninPersonPrice').textContent = 'Fee: ' + fmt(_p.ninpers || 1000);
+    document.getElementById('ninPersonAlert').innerHTML = '';
+    document.getElementById('np_tracking').value = '';
+    document.getElementById('np_tracking_err').textContent = '';
+    openModal('ninPersonModal');
+  }
+
+  function submitNinPerson() {
+    const tracking = document.getElementById('np_tracking').value.trim();
+    const alertEl  = document.getElementById('ninPersonAlert');
+    alertEl.innerHTML = '';
+    if (!tracking) { document.getElementById('np_tracking_err').textContent = 'Tracking ID is required'; return; }
+    document.getElementById('np_tracking_err').textContent = '';
+    const fee = _p.ninpers || 1000;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, 'NIN Personalization', tracking, fee);
+    updateStats();
+    closeModal('ninPersonModal');
+    toast('NIN Personalization request submitted successfully!');
+  }
+
+  // ── Shared Tracking ID Modal ───────────────────────
+  let _trackingService = { title: '', fee: 0 };
+
+  function openTrackingModal(title, fee) {
+    if (!checkAvailable(title)) return;
+    refreshPricing();
+    _trackingService = { title, fee };
+    document.getElementById('trackingModalTitle').textContent = title;
+    document.getElementById('trackingModalPrice').textContent = 'Fee: ' + fmt(fee);
+    document.getElementById('trackingModalAlert').innerHTML = '';
+    document.getElementById('tracking_id_input').value = '';
+    document.getElementById('tracking_id_err').textContent = '';
+    openModal('trackingModal');
+  }
+
+  function submitTrackingModal() {
+    const trackingId = document.getElementById('tracking_id_input').value.trim();
+    const alertEl    = document.getElementById('trackingModalAlert');
+    alertEl.innerHTML = '';
+    if (!trackingId) { document.getElementById('tracking_id_err').textContent = 'Tracking ID is required'; return; }
+    document.getElementById('tracking_id_err').textContent = '';
+    const fee = _trackingService.fee;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, _trackingService.title, trackingId, fee);
+    updateStats();
+    closeModal('trackingModal');
+    toast(_trackingService.title + ' request submitted successfully!');
+  }
+
+  // ── Modification Clearance ─────────────────────────
+  function openModClearanceModal() {
+    if (!checkAvailable('Modification Clearance')) return;
+    refreshPricing();
+    document.getElementById('modClearancePrice').textContent = 'Fee: ' + fmt(_p.ipe_mod || 400);
+    document.getElementById('modClearanceAlert').innerHTML = '';
+    document.getElementById('mc_tracking').value = '';
+    document.getElementById('mc_tracking_err').textContent = '';
+    openModal('modClearanceModal');
+  }
+
+  function submitModClearance() {
+    const tracking = document.getElementById('mc_tracking').value.trim();
+    const alertEl  = document.getElementById('modClearanceAlert');
+    alertEl.innerHTML = '';
+    if (!tracking) { document.getElementById('mc_tracking_err').textContent = 'New Tracking ID is required'; return; }
+    document.getElementById('mc_tracking_err').textContent = '';
+    const fee = _p.ipe_mod || 400;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, 'Modification Clearance', tracking, fee);
+    updateStats();
+    closeModal('modClearanceModal');
+    toast('Modification Clearance request submitted successfully!');
+  }
+
+  // ── Other Error ────────────────────────────────────
+  function openOtherErrorModal() {
+    if (!checkAvailable('Other Error')) return;
+    refreshPricing();
+    document.getElementById('otherErrorPrice').textContent = 'Fee: ' + fmt(_p.ipe_other || 400);
+    document.getElementById('otherErrorAlert').innerHTML = '';
+    document.getElementById('oe_error').value = '';
+    document.getElementById('oe_tracking').value = '';
+    document.getElementById('oe_error_err').textContent = '';
+    document.getElementById('oe_tracking_err').textContent = '';
+    openModal('otherErrorModal');
+  }
+
+  function submitOtherError() {
+    const error    = document.getElementById('oe_error').value.trim();
+    const tracking = document.getElementById('oe_tracking').value.trim();
+    const alertEl  = document.getElementById('otherErrorAlert');
+    alertEl.innerHTML = '';
+    let valid = true;
+    if (!error)    { document.getElementById('oe_error_err').textContent = 'Please state the error'; valid = false; } else document.getElementById('oe_error_err').textContent = '';
+    if (!tracking) { document.getElementById('oe_tracking_err').textContent = 'New Tracking ID is required'; valid = false; } else document.getElementById('oe_tracking_err').textContent = '';
+    if (!valid) return;
+    const fee = _p.ipe_other || 400;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, 'Other Error', tracking, fee);
+    updateStats();
+    closeModal('otherErrorModal');
+    toast('Other Error clearance request submitted successfully!');
+  }
+
+  // ── FingerPrint Verification ───────────────────────
+  function openFingerprintModal() {
+    if (!checkAvailable('FingerPrint Verification')) return;
+    refreshPricing();
+    document.getElementById('fingerprintPrice').textContent = 'Fee: ' + fmt(_p.fingerprint || 200);
+    document.getElementById('fingerprintAlert').innerHTML = '';
+    document.getElementById('fp_finger').value = '';
+    document.getElementById('fp_finger_err').textContent = '';
+    document.getElementById('fp_image').value = '';
+    document.getElementById('fp_image_err').textContent = '';
+    document.getElementById('fp_preview').style.display = 'none';
+    openModal('fingerprintModal');
+  }
+
+  document.addEventListener('change', function(e) {
+    if (e.target.id === 'fp_image') {
+      const file = e.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(ev) {
+          document.getElementById('fp_preview_img').src = ev.target.result;
+          document.getElementById('fp_preview').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+  });
+
+  function submitFingerprint() {
+    const finger  = document.getElementById('fp_finger').value;
+    const file    = document.getElementById('fp_image').files[0];
+    const alertEl = document.getElementById('fingerprintAlert');
+    alertEl.innerHTML = '';
+    let valid = true;
+    if (!finger) { document.getElementById('fp_finger_err').textContent = 'Please select a finger'; valid = false; } else document.getElementById('fp_finger_err').textContent = '';
+    if (!file)   { document.getElementById('fp_image_err').textContent = 'Please upload a finger image'; valid = false; } else document.getElementById('fp_image_err').textContent = '';
+    if (!valid) return;
+    const fee = _p.fingerprint || 200;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    addTransaction(user.id, 'FingerPrint Verification', finger, fee);
+    updateStats();
+    closeModal('fingerprintModal');
+    toast('FingerPrint Verification request submitted successfully!');
+  }
+
+  function fundWallet() {
+    const amt = parseInt(document.getElementById("fundAmount").value);
+    if (!amt || amt < 100) { document.getElementById("fundAlert").innerHTML = '<div class="alert alert-error">Minimum fund amount is ₦100.</div>'; return; }
+    walletBalance += amt;
+    addTransaction(user.id, "Wallet Funding", "Via " + document.getElementById("fundMethod").value, amt);
+    closeModal("fundModal");
+    toast("Wallet funded with " + fmt(amt));
+    updateStats();
+  }
+
+  // ── Airtime ────────────────────────────────────────
+  function buyAirtime() {
+    if (!checkAvailable('Buy Airtime')) return;
+    const net = document.getElementById("airtimeNetwork").value;
+    const phone = document.getElementById("airtimePhone").value.trim();
+    const amt = parseInt(document.getElementById("airtimeAmount").value);
+    const alertEl = document.getElementById("airtimeAlert");
+    if (!net || !phone || !amt) { alertEl.innerHTML = '<div class="alert alert-error">Please fill all fields.</div>'; return; }
+    if (walletBalance < amt) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
+    walletBalance -= amt;
+    addTransaction(user.id, "Buy Airtime", net + " – " + phone, amt);
+    alertEl.innerHTML = '<div class="alert alert-success">Airtime sent successfully!</div>';
+    updateStats();
+  }
+
+  // ── Data ───────────────────────────────────────────
+  const DATA_PLANS = {
+    MTN: ["500MB – ₦200","1GB – ₦350","2GB – ₦600","5GB – ₦1,500","10GB – ₦2,500"],
+    Airtel: ["500MB – ₦200","1.5GB – ₦500","3GB – ₦1,000","6GB – ₦1,500"],
+    Glo: ["1GB – ₦300","2GB – ₦500","5GB – ₦1,200","10GB – ₦2,000"],
+    "9mobile": ["500MB – ₦150","1GB – ₦300","2.5GB – ₦700","5GB – ₦1,200"]
+  };
+  const DATA_PRICES = { "500MB":200,"1GB":350,"1.5GB":500,"2GB":600,"2.5GB":700,"3GB":1000,"5GB":1500,"6GB":1500,"10GB":2500 };
+
+  function loadDataPlans() {
+    const net = document.getElementById("dataNetwork").value;
+    const sel = document.getElementById("dataPlan");
+    sel.innerHTML = DATA_PLANS[net] ? DATA_PLANS[net].map(p => `<option>${p}</option>`).join("") : "<option>Select a network first</option>";
+  }
+
+  function buyData() {
+    if (!checkAvailable('Buy Data')) return;
+    const net = document.getElementById("dataNetwork").value;
+    const plan = document.getElementById("dataPlan").value;
+    const phone = document.getElementById("dataPhone").value.trim();
+    const alertEl = document.getElementById("dataAlert");
+    if (!net || !plan || !phone) { alertEl.innerHTML = '<div class="alert alert-error">Please fill all fields.</div>'; return; }
+    const size = plan.split(" – ")[0];
+    const price = DATA_PRICES[size] || 200;
+    if (walletBalance < price) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
+    walletBalance -= price;
+    addTransaction(user.id, "Buy Data", net + " " + plan + " – " + phone, price);
+    alertEl.innerHTML = '<div class="alert alert-success">Data bundle purchased successfully!</div>';
+    updateStats();
+  }
+
+  function toggleSidebar() {
+    document.querySelector('.sidebar').classList.toggle('open');
+    document.getElementById('sidebarOverlay').classList.toggle('open');
+  }
+
+  // Close sidebar on section click (mobile)
+  document.querySelectorAll('.sidebar a').forEach(function(a) {
+    a.addEventListener('click', function() {
+      if (window.innerWidth <= 768) toggleSidebar();
+    });
+  });
+</script>
+</body>
+</html>
