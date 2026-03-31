@@ -249,9 +249,9 @@
             </div>
           </div>
 
-          <!-- Other NIN Services -->
+          <!-- NIN Services - Additional -->
           <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
-            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🪪 Other NIN Services</p>
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🪪 NIN Services</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
               <div class="form-group"><label>NIN Modification (₦)</label><input type="number" id="p_ninmod" value="500"/></div>
               <div class="form-group"><label>NIN Personalization (₦)</label><input type="number" id="p_ninpers" value="1000"/></div>
@@ -1036,10 +1036,9 @@
   }
 
   const SERVICE_GROUPS = [
-    { label: '🔍 NIN Verification', key: 'grp_nin_verify', services: ['Verify with NIN','Phone Number Verification','Bio Data Verification','FingerPrint Verification'] },
+    { label: '🔍 NIN Verification', key: 'grp_nin_verify', services: ['Verify with NIN','Phone Number Verification','Bio Data Verification','FingerPrint Verification','VNIN Slip','NIN Personalization'] },
     { label: '✔️ NIN Validation',   key: 'grp_nin_val',    services: ['No Record Found','Bank Validation','Photograph Error','SIM Validation'] },
     { label: '✏️ NIN Modification', key: 'grp_nin_mod',    services: ['Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification'] },
-    { label: '🪪 Other NIN',        key: 'grp_nin_other',  services: ['NIN Personalization','VNIN Slip'] },
     { label: '✅ IPE Clearance',    key: 'grp_ipe',        services: ['Normal Clearance','Modification Clearance','Other Error'] },
     { label: '🏦 BVN Services',     key: 'grp_bvn',        services: ['BVN Verification','BVN Retrieval','BVN Modification','BVN User'] },
     { label: '📞 Airtime & Data',   key: 'grp_utility',    services: ['Buy Airtime','Buy Data'] }
