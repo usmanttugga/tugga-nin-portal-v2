@@ -364,7 +364,7 @@
     </div>
     <div class="form-group">
       <label>New Tracking ID</label>
-      <input type="text" id="oe_tracking" placeholder="Enter your New Tracking ID"/>
+      <input type="text" id="oe_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
       <span id="oe_tracking_err" style="color:var(--accent);font-size:0.8rem"></span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
@@ -384,7 +384,7 @@
     <div id="modClearanceAlert"></div>
     <div class="form-group">
       <label>New Tracking ID</label>
-      <input type="text" id="mc_tracking" placeholder="Enter your New Tracking ID"/>
+      <input type="text" id="mc_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
       <span id="mc_tracking_err" style="color:var(--accent);font-size:0.8rem"></span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
@@ -404,7 +404,7 @@
     <div id="trackingModalAlert"></div>
     <div class="form-group">
       <label>Tracking ID</label>
-      <input type="text" id="tracking_id_input" placeholder="Enter your Tracking ID"/>
+      <input type="text" id="tracking_id_input" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
       <span id="tracking_id_err" style="color:var(--accent);font-size:0.8rem"></span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
@@ -1965,10 +1965,10 @@
   }
 
   function submitTrackingModal() {
-    const trackingId = document.getElementById('tracking_id_input').value.trim();
+    const trackingId = document.getElementById('tracking_id_input').value.trim().toUpperCase();
     const alertEl    = document.getElementById('trackingModalAlert');
     alertEl.innerHTML = '';
-    if (!trackingId) { document.getElementById('tracking_id_err').textContent = 'Tracking ID is required'; return; }
+    if (!trackingId || !/^[A-Z0-9]{15}$/.test(trackingId)) { document.getElementById('tracking_id_err').textContent = 'Tracking ID must be exactly 15 alphanumeric characters'; return; }
     document.getElementById('tracking_id_err').textContent = '';
     const fee = _trackingService.fee;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
@@ -1993,10 +1993,10 @@
   }
 
   function submitModClearance() {
-    const tracking = document.getElementById('mc_tracking').value.trim();
+    const tracking = document.getElementById('mc_tracking').value.trim().toUpperCase();
     const alertEl  = document.getElementById('modClearanceAlert');
     alertEl.innerHTML = '';
-    if (!tracking) { document.getElementById('mc_tracking_err').textContent = 'New Tracking ID is required'; return; }
+    if (!tracking || !/^[A-Z0-9]{15}$/.test(tracking)) { document.getElementById('mc_tracking_err').textContent = 'Tracking ID must be exactly 15 alphanumeric characters'; return; }
     document.getElementById('mc_tracking_err').textContent = '';
     const fee = _p.ipe_mod || 400;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
@@ -2024,12 +2024,12 @@
 
   function submitOtherError() {
     const error    = document.getElementById('oe_error').value.trim();
-    const tracking = document.getElementById('oe_tracking').value.trim();
+    const tracking = document.getElementById('oe_tracking').value.trim().toUpperCase();
     const alertEl  = document.getElementById('otherErrorAlert');
     alertEl.innerHTML = '';
     let valid = true;
     if (!error)    { document.getElementById('oe_error_err').textContent = 'Please state the error'; valid = false; } else document.getElementById('oe_error_err').textContent = '';
-    if (!tracking) { document.getElementById('oe_tracking_err').textContent = 'New Tracking ID is required'; valid = false; } else document.getElementById('oe_tracking_err').textContent = '';
+    if (!tracking || !/^[A-Z0-9]{15}$/.test(tracking)) { document.getElementById('oe_tracking_err').textContent = 'Tracking ID must be exactly 15 alphanumeric characters'; valid = false; } else document.getElementById('oe_tracking_err').textContent = '';
     if (!valid) return;
     const fee = _p.ipe_other || 400;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
