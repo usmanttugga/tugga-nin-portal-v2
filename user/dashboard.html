@@ -1080,17 +1080,20 @@
     if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
     tbody.innerHTML = txns.map(t => {
       const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
+      const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status;
       return `<tr>
         <td>${t.id}</td><td>${t.service}</td><td>${t.details}</td>
         <td>${fmt(t.amount)}</td>
-        <td><span class="badge badge-${badgeClass}">${t.status}</span></td>
+        <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
         <td>${t.date}</td>
       </tr>`;
     }).join("");
     wbody.innerHTML = txns.map(t => {
       const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
+      const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status;
       return `<tr><td>${t.date}</td><td>${t.service}</td><td style="color:var(--accent)">-${fmt(t.amount)}</td>
-      <td><span class="badge badge-${badgeClass}">${t.status}</span></td></tr>`;
+      return `<tr><td>${t.date}</td><td>${t.service}</td><td style="color:var(--accent)">-${fmt(t.amount)}</td>
+      <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td></tr>`;
     }).join("");
   }
 
@@ -1123,7 +1126,8 @@
             <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
             <tbody>${txns.map(t => {
               const bc = t.status === 'success' || t.status === 'validated' ? 'success' : t.status === 'pending' || t.status === 'submitted' ? 'pending' : 'failed';
-              return `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${t.status}</span></td><td>${t.date}</td></tr>`;
+              const ds = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status;
+              return `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${ds}</span></td><td>${t.date}</td></tr>`;
             }).join('')}</tbody>
           </table>
         </div>

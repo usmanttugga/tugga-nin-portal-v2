@@ -481,6 +481,7 @@
       const needsValidation = validateSvcs.includes(t.service) && t.status === 'submitted';
       const alreadyValidated = t.status === 'validated';
       const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status;
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">👁 View</button>`;
       const validateBtn = needsValidation
         ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;margin-left:4px">✔ Validate</button>`
@@ -491,7 +492,7 @@
         <td><strong>${t.service}</strong></td>
         <td style="font-size:0.85rem">${t.details || '—'}</td>
         <td>${fmt(t.amount)}</td>
-        <td><span class="badge badge-${badgeClass}">${t.status}</span></td>
+        <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
         <td style="font-size:0.78rem">${t.date}</td>
         <td style="white-space:nowrap">${viewBtn}${validateBtn}</td>
       </tr>`;
@@ -513,12 +514,13 @@
     document.getElementById('rdTitle').textContent = t.service;
 
     const badgeClass = t.status === 'validated' ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
+    const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status;
     document.getElementById('rdMeta').innerHTML =
       `<span>Ref: <strong>${t.id}</strong></span>` +
       `<span>User ID: <strong>${t.userId || '—'}</strong></span>` +
       `<span>Date: <strong>${t.date}</strong></span>` +
       `<span>Amount: <strong>${fmt(t.amount)}</strong></span>` +
-      `<span>Status: <span class="badge badge-${badgeClass}">${t.status}</span></span>`;
+      `<span>Status: <span class="badge badge-${badgeClass}">${displayStatus}</span></span>`;
 
     const formData = t.formData || {};
     const keys = Object.keys(formData);
