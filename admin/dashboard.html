@@ -338,6 +338,26 @@
   </div>
 </div>
 
+<!-- IPE CLEAR MODAL -->
+<div class="modal-overlay" id="ipeClearModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>✅ Clear IPE Request</h3>
+      <button class="modal-close" onclick="closeModal('ipeClearModal')">✕</button>
+    </div>
+    <div id="ipeClearAlert"></div>
+    <p style="font-size:0.88rem;color:var(--gray);margin-bottom:1rem">Enter the new tracking ID to complete this clearance.</p>
+    <div class="form-group">
+      <label>New Tracking ID</label>
+      <input type="text" id="ipeClearTrackingId" placeholder="15-CHARACTER TRACKING ID" maxlength="15"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
+      <span id="ipeClearTrackingErr" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <input type="hidden" id="ipeClearTxnId"/>
+    <button class="btn-primary" onclick="confirmIPEClear()">✅ Cleared</button>
+  </div>
+</div>
+
 <script src="../js/app.js?v=4"></script>
 <script type="module" src="../js/firebase.js"></script>
 <script>
@@ -492,13 +512,18 @@
     if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No requests found.</td></tr>'; return; }
     tbody.innerHTML = filtered.map(t => {
       const needsValidation = validateSvcs.includes(t.service) && t.status === 'submitted';
-      const alreadyValidated = t.status === 'validated';
+      const alreadyValidated = t.status === 'validated' || t.status === 'cleared';
+      const isIPE = IPE_SVCS.includes(t.service);
       const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status;
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status;
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap">👁 View</button>`;
-      const validateBtn = needsValidation
-        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>`
-        : alreadyValidated ? '<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">✔ Done</span>' : '';
+      const actionBtn = needsValidation
+        ? isIPE
+          ? `<button onclick="openIPEClearModal('${t.id}')" style="background:#059669;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✅ Cleared</button>`
+          : `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>`
+        : alreadyValidated
+          ? `<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">${isIPE ? '✅ Cleared' : '✔ Done'}</span>`
+          : '';
       return `<tr>
         <td style="font-size:0.75rem;max-width:80px;overflow:hidden;text-overflow:ellipsis">${t.id}</td>
         <td style="font-size:0.75rem">${t.userId || '—'}</td>
@@ -507,7 +532,7 @@
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
         <td style="font-size:0.75rem">${t.date}</td>
-        <td style="min-width:80px"><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${viewBtn}${validateBtn}</div></td>
+        <td style="min-width:80px"><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${viewBtn}${actionBtn}</div></td>
       </tr>`;
     }).join("");
   }
@@ -517,6 +542,39 @@
     window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'validated' })
       .then(function() { toast('Request validated — user has been notified.'); loadNINStats(); closeModal('requestDetailsModal'); })
       .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
+  }
+
+  const IPE_SVCS = ['Normal Clearance', 'Modification Clearance', 'Other Error'];
+
+  function openIPEClearModal(txnId) {
+    document.getElementById('ipeClearTxnId').value = txnId;
+    document.getElementById('ipeClearTrackingId').value = '';
+    document.getElementById('ipeClearTrackingErr').textContent = '';
+    document.getElementById('ipeClearAlert').innerHTML = '';
+    closeModal('requestDetailsModal');
+    openModal('ipeClearModal');
+  }
+
+  function confirmIPEClear() {
+    const txnId = document.getElementById('ipeClearTxnId').value;
+    const newId = document.getElementById('ipeClearTrackingId').value.trim().toUpperCase();
+    const errEl = document.getElementById('ipeClearTrackingErr');
+    if (!/^[A-Z0-9]{15}$/.test(newId)) {
+      errEl.textContent = 'New Tracking ID must be exactly 15 alphanumeric characters';
+      return;
+    }
+    errEl.textContent = '';
+    if (!window.fbReady) { document.getElementById('ipeClearAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), {
+      status: 'cleared',
+      clearedTrackingId: newId
+    }).then(function() {
+      closeModal('ipeClearModal');
+      toast('IPE request cleared — new tracking ID sent to user.');
+      loadNINStats();
+    }).catch(function(e) {
+      document.getElementById('ipeClearAlert').innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>';
+    });
   }
 
   // Ordered field lists matching each user form exactly
@@ -571,12 +629,16 @@
 
     const formData = t.formData || {};
     const orderedKeys = SERVICE_FIELD_ORDER[t.service] || Object.keys(formData);
-    const rows = orderedKeys
-      .filter(k => formData[k] && formData[k] !== '—')
-      .map(k =>
+    const allData = Object.assign({}, formData);
+    if (t.clearedTrackingId) allData['Cleared Tracking ID'] = t.clearedTrackingId;
+    const displayKeys = t.clearedTrackingId
+      ? [...orderedKeys.filter(k => allData[k] && allData[k] !== '—'), 'Cleared Tracking ID']
+      : orderedKeys.filter(k => allData[k] && allData[k] !== '—');
+
+    const rows = displayKeys.map(k =>
         `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.55rem 0;border-bottom:1px solid #f1f5f9;gap:1rem">
           <span style="color:var(--gray);font-size:0.88rem;white-space:nowrap;flex-shrink:0">${k}</span>
-          <span style="font-weight:500;font-size:0.88rem;text-align:right;word-break:break-word">${formData[k]}</span>
+          <span style="font-weight:${k === 'Cleared Tracking ID' ? '700;color:#059669' : '500'};font-size:0.88rem;text-align:right;word-break:break-word">${allData[k]}</span>
         </div>`
       );
 
@@ -584,10 +646,14 @@
       ? rows.join('')
       : `<div style="padding:0.55rem 0;color:var(--gray);font-size:0.88rem">NIN / Details: <strong>${t.details || '—'}</strong></div>`;
 
+    const isIPE = IPE_SVCS.includes(t.service);
     const canValidate = t.status === 'submitted';
     document.getElementById('rdActions').innerHTML = canValidate
-      ? `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="validateNINRequest('${t.id}')">✔ Validate</button>
-         <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
+      ? isIPE
+        ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#059669" onclick="openIPEClearModal('${t.id}')">✅ Cleared</button>
+           <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
+        : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="validateNINRequest('${t.id}')">✔ Validate</button>
+           <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
       : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="closeModal('requestDetailsModal')">Close</button>`;
 
     openModal('requestDetailsModal');
