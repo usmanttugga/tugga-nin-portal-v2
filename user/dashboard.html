@@ -10,7 +10,12 @@
 
 <!-- NAV -->
 <nav>
-  <div class="logo">🛡️ TUGGA <span>IT SOLUTIONS</span></div>
+  <div style="display:flex;align-items:center;gap:12px">
+    <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="logo">🛡️ TUGGA <span>IT SOLUTIONS</span></div>
+  </div>
   <div class="nav-links">
     <a href="#" class="active">Dashboard</a>
     <a href="#" onclick="showSection('sec-history')">History</a>
@@ -21,9 +26,6 @@
     <span id="userName" onclick="openModal('profileModal')" style="cursor:pointer">User</span>
     <button class="btn-logout" onclick="logout()">Logout</button>
   </div>
-  <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
-    <span></span><span></span><span></span>
-  </button>
 </nav>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
 
