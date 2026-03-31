@@ -1652,7 +1652,11 @@
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
     submitWithStatus('Name Modification', nin, fee, 'submitted', {
-      'NIN Number': nin, 'Surname': surname, 'First Name': fname, 'Phone': phone,
+      'NIN Number': nin,
+      'Surname': surname,
+      'First Name': fname,
+      'Middle Name': document.getElementById('nm_middlename')?.value.trim() || '—',
+      'Phone': phone,
       'Documents': (window._nmDocs||[]).map(f=>f.name).join(', ') || '—'
     });
     updateStats();
@@ -1719,7 +1723,11 @@
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
     submitWithStatus('Phone Number Modification', nin, fee, 'submitted', {
-      'NIN Number': nin, 'Surname': surname, 'First Name': fname, 'Phone': phone,
+      'NIN Number': nin,
+      'Surname': surname,
+      'First Name': fname,
+      'Middle Name': document.getElementById('pm_middlename')?.value.trim() || '—',
+      'New Phone': phone,
       'Documents': (window._pmDocs||[]).map(f=>f.name).join(', ') || '—'
     });
     updateStats();
@@ -1886,10 +1894,39 @@
     const fee = _p.dob_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
+    const g = id => document.getElementById(id)?.value.trim() || '—';
     submitWithStatus('Date of Birth Modification', nin, fee, 'submitted', {
-      'NIN Number': nin, 'Surname': surname, 'First Name': fname, 'Phone': phone,
-      'Sex': sex, 'Marital Status': marital,
-      'Old DOB': oldDob, 'New DOB': newDob,
+      'NIN Number': nin,
+      'Surname': surname,
+      'First Name': fname,
+      'Middle Name': g('dm_middlename'),
+      'Phone': phone,
+      'Sex': sex,
+      'Marital Status': marital,
+      'Old DOB': oldDob,
+      'New DOB': newDob,
+      'State of Origin': g('dm_state_origin'),
+      'LGA of Origin': g('dm_lga_origin'),
+      'Town of Origin': g('dm_town_origin'),
+      'Place of Birth': g('dm_place_birth'),
+      'State of Birth': g('dm_state_birth'),
+      'LGA of Birth': g('dm_lga_birth'),
+      'Residential Address': g('dm_res_address'),
+      'Education': g('dm_education'),
+      'Occupation': g('dm_occupation'),
+      'Work Address': g('dm_work_address'),
+      'Requesting Body': g('dm_req_body'),
+      "Father's Surname": g('dm_f_surname'),
+      "Father's First Name": g('dm_f_firstname'),
+      "Father's State": g('dm_f_state'),
+      "Father's LGA": g('dm_f_lga'),
+      "Father's Town": g('dm_f_town'),
+      "Mother's Surname": g('dm_m_surname'),
+      "Mother's First Name": g('dm_m_firstname'),
+      "Mother's Maiden Name": g('dm_m_maiden'),
+      "Mother's State": g('dm_m_state'),
+      "Mother's LGA": g('dm_m_lga'),
+      "Mother's Town": g('dm_m_town'),
       'Documents': docs.map(f=>f.name).join(', ') || '—'
     });
     updateStats();
