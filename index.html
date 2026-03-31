@@ -28,14 +28,26 @@
 
     /* Brand */
     .brand {
-      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+      background: linear-gradient(135deg, #0f2044 0%, #1a3a6e 60%, #1e5c2a 100%);
       text-align: center;
-      padding: 1.5rem 1.5rem 1rem;
+      padding: 1.2rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 90px;
+    }
+    .brand .logo-icon {
+      line-height: 1;
       display: flex;
       align-items: center;
       justify-content: center;
     }
-    .brand .logo-icon { line-height: 1; }
+    .brand .logo-icon img {
+      max-width: 100%;
+      height: auto;
+      max-height: 70px;
+      object-fit: contain;
+    }
 
     /* Tabs */
     .tabs {
@@ -169,7 +181,7 @@
 <div class="card">
   <!-- Brand -->
   <div class="brand">
-    <div class="logo-icon"><img src="img/logo.svg" alt="MAJIA DIGITAL IDENTITY" style="height:110px;width:auto;object-fit:contain"/></div>
+    <div class="logo-icon"><img src="img/logo.svg" alt="MAJIA DIGITAL IDENTITY"/></div>
   </div>
 
   <!-- Tabs -->
