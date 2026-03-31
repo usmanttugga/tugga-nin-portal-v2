@@ -49,6 +49,8 @@
       <a href="#" data-section="sec-nin-validation" onclick="showSection('sec-nin-validation')"><span class="icon">✔️</span> NIN Validation</a>
       <a href="#" data-section="sec-nin-modification" onclick="showSection('sec-nin-modification')"><span class="icon">✏️</span> NIN Modification</a>
       <a href="#" data-section="sec-ipe" onclick="showSection('sec-ipe')"><span class="icon">✅</span> IPE Clearance</a>
+      <a href="#" data-section="sec-vnin" onclick="showSection('sec-vnin')"><span class="icon">📱</span> VNIN Slip</a>
+      <a href="#" data-section="sec-nin-person" onclick="showSection('sec-nin-person')"><span class="icon">🎨</span> NIN Personalization</a>
     </div>
     <div class="menu-section">
       <h4>BVN Services</h4>
@@ -2194,6 +2196,7 @@
     if (!amt || amt < 100) { document.getElementById("fundAlert").innerHTML = '<div class="alert alert-error">Minimum fund amount is ₦100.</div>'; return; }
     walletBalance += amt;
     addTransaction(user.id, "Wallet Funding", "Via " + document.getElementById("fundMethod").value, amt);
+    syncWalletToFirebase();
     closeModal("fundModal");
     toast("Wallet funded with " + fmt(amt));
     updateStats();
