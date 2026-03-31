@@ -88,6 +88,24 @@ function showSection(id) {
   return false; // prevent anchor jump
 }
 
+// ── Toggle Sidebar ────────────────────────────────────
+function toggleSidebar() {
+  var sidebar = document.querySelector('.sidebar');
+  var overlay = document.getElementById('sidebarOverlay');
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+
+// ── Open Admin Profile ────────────────────────────────
+function openAdminProfile() {
+  var admin = getCurrentUser();
+  if (!admin) return;
+  document.getElementById('apName').textContent = admin.name;
+  document.getElementById('apEmail').textContent = admin.email;
+  document.getElementById('apRole').textContent = admin.role;
+  openModal('adminProfileModal');
+}
+
 // ── Format Currency ───────────────────────────────────
 function fmt(n) { return "\u20A6" + Number(n).toLocaleString(); }
 

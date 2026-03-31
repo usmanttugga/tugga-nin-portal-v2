@@ -13,19 +13,18 @@
     <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
-    <div class="logo" style="min-width:0;overflow:hidden">
-      <img src="../img/logo.svg" alt="MAJIA" style="height:40px;width:auto;object-fit:contain;max-width:160px"/>
-      <span style="font-size:0.65rem;background:var(--accent);color:var(--primary);padding:2px 7px;border-radius:4px;margin-left:6px;font-weight:700;white-space:nowrap">ADMIN</span>
+    <div class="logo" style="min-width:0;overflow:hidden;display:flex;align-items:center">
+      <img src="../img/logo.svg" alt="MAJIA" style="height:38px;width:auto;object-fit:contain;max-width:150px"/>
+      <span style="font-size:0.62rem;background:var(--accent);color:var(--primary);padding:2px 7px;border-radius:4px;margin-left:6px;font-weight:700;white-space:nowrap;flex-shrink:0">ADMIN</span>
     </div>
   </div>
   <div class="nav-links" style="flex-shrink:0">
     <a href="#" class="active">Admin Panel</a>
-    <a href="#" onclick="logout()" class="nav-logout-link">Logout</a>
   </div>
   <div class="nav-user" style="flex-shrink:0;gap:8px">
-    <div class="avatar" id="adminAvatar" style="background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--primary);cursor:pointer" onclick="openAdminProfile()">A</div>
+    <div class="avatar" id="adminAvatar" style="background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--primary);cursor:pointer;flex-shrink:0" onclick="openAdminProfile()">A</div>
     <span id="adminName" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px">Admin</span>
-    <button class="btn-logout" onclick="logout()" style="white-space:nowrap">Logout</button>
+    <button class="btn-logout" onclick="logout()">Logout</button>
   </div>
 </nav>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -279,6 +278,19 @@
     </div>
     <div class="form-group"><label>Password</label><input type="password" id="nu_pass" placeholder="Set password"/></div>
     <button class="btn-primary" onclick="addUser()">Create User</button>
+  </div>
+</div>
+
+<!-- ADMIN PROFILE MODAL -->
+<div class="modal-overlay" id="adminProfileModal">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Admin Profile</h3>
+      <button class="modal-close" onclick="closeModal('adminProfileModal')">✕</button>
+    </div>
+    <div class="form-group"><label>Name</label><span id="apName" style="display:block;padding:11px 14px;background:var(--light);border-radius:var(--radius-sm);font-size:0.92rem"></span></div>
+    <div class="form-group"><label>Email</label><span id="apEmail" style="display:block;padding:11px 14px;background:var(--light);border-radius:var(--radius-sm);font-size:0.92rem"></span></div>
+    <div class="form-group"><label>Role</label><span id="apRole" style="display:block;padding:11px 14px;background:var(--light);border-radius:var(--radius-sm);font-size:0.92rem"></span></div>
   </div>
 </div>
 
