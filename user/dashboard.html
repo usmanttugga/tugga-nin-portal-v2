@@ -1081,13 +1081,15 @@
     tbody.innerHTML = txns.map(t => {
       const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' || t.status === 'cleared' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
       const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status;
-      const clearedRow = t.clearedTrackingId ? `<tr><td colspan="5" style="font-size:0.82rem;color:#059669;font-weight:600;padding:4px 0">✅ Cleared Tracking ID: ${t.clearedTrackingId}</td></tr>` : '';
+      const detailsCell = t.clearedTrackingId
+        ? `${t.details}<br><span style="font-size:0.8rem;color:#059669;font-weight:600">✅ Cleared ID: ${t.clearedTrackingId}</span>`
+        : t.details;
       return `<tr>
-        <td>${t.id}</td><td>${t.service}</td><td>${t.details}</td>
+        <td>${t.id}</td><td>${t.service}</td><td>${detailsCell}</td>
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
         <td>${t.date}</td>
-      </tr>${clearedRow}`;
+      </tr>`;
     }).join("");
     wbody.innerHTML = txns.map(t => {
       const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
@@ -1127,8 +1129,8 @@
             <tbody>${txns.map(t => {
               const bc = t.status === 'success' || t.status === 'validated' || t.status === 'cleared' ? 'success' : t.status === 'pending' || t.status === 'submitted' ? 'pending' : 'failed';
               const ds = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status;
-              const clearedRow = t.clearedTrackingId ? `<tr><td colspan="6" style="font-size:0.82rem;color:#059669;font-weight:600;padding:4px 8px">✅ Cleared Tracking ID: ${t.clearedTrackingId}</td></tr>` : '';
-              return `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${ds}</span></td><td>${t.date}</td></tr>${clearedRow}`;
+              const det = t.clearedTrackingId ? `${t.details}<br><span style="font-size:0.78rem;color:#059669;font-weight:600">✅ Cleared ID: ${t.clearedTrackingId}</span>` : t.details;
+              return `<tr><td>${t.id}</td><td>${t.service}</td><td>${det}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${ds}</span></td><td>${t.date}</td></tr>`;
             }).join('')}</tbody>
           </table>
         </div>
