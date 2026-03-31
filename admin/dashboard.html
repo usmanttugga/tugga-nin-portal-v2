@@ -487,25 +487,24 @@
 
   function suspendUser(uid) {
     if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'users', uid), { status: 'Suspended' })
+    window.fbSetDoc(window.fbDoc(window.fbDB, 'users', uid), { status: 'Suspended' }, { merge: true })
       .then(function() { toast('User suspended.'); })
-      .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
+      .catch(function(e) { toast('Suspend failed: ' + e.message, 'error'); console.error('suspendUser error:', e); });
   }
 
   function unsuspendUser(uid) {
     if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'users', uid), { status: 'Active' })
+    window.fbSetDoc(window.fbDoc(window.fbDB, 'users', uid), { status: 'Active' }, { merge: true })
       .then(function() { toast('User unsuspended.'); })
-      .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
+      .catch(function(e) { toast('Unsuspend failed: ' + e.message, 'error'); console.error('unsuspendUser error:', e); });
   }
 
   function deleteUser(uid, name) {
     if (!confirm('Delete user "' + name + '"? This cannot be undone.')) return;
     if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
-    // Delete from Firestore users collection
     window.fbDeleteDoc(window.fbDoc(window.fbDB, 'users', uid))
       .then(function() { toast('User deleted successfully.'); })
-      .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
+      .catch(function(e) { toast('Delete failed: ' + e.message, 'error'); console.error('deleteUser error:', e); });
   }
 
   function loadAllTxns(filter = "") {
