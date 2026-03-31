@@ -160,7 +160,7 @@
         <div class="service-card" data-svc="Bio Data Verification" onclick="openNinVerifyModal('bio-data')">
           <div class="svc-icon">🧬</div><h4>Bio Data</h4><p>Verify bio data match</p>
         </div>
-        <div class="service-card" data-svc="FingerPrint Verification" onclick="openFingerprintModal()">
+        <div class="service-card" data-svc="FingerPrint Verification" onclick="openNinVerifyModal('fingerprint')">
           <div class="svc-icon">👆</div><h4>FingerPrint</h4><p>Verify via fingerprint</p>
         </div>
       </div>
@@ -1460,6 +1460,25 @@
       fields = '<div class="form-group"><label>NIN Number</label><input type="text" id="nv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="nv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
     } else if (currentNinService === 'phone-verify') {
       fields = '<div class="form-group"><label>Phone Number</label><input type="tel" id="nv_phone" placeholder="08XXXXXXXXXX" maxlength="11"/><span id="nv_phone_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
+    } else if (currentNinService === 'fingerprint') {
+      fields = `<div class="form-group"><label>Select Finger</label>
+        <select id="fp_finger">
+          <option value="">-- Select finger --</option>
+          <optgroup label="Right Hand">
+            <option>Right Thumb</option><option>Right Index Finger</option><option>Right Middle Finger</option><option>Right Ring Finger</option><option>Right Little Finger</option>
+          </optgroup>
+          <optgroup label="Left Hand">
+            <option>Left Thumb</option><option>Left Index Finger</option><option>Left Middle Finger</option><option>Left Ring Finger</option><option>Left Little Finger</option>
+          </optgroup>
+        </select>
+        <span id="fp_finger_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>Finger Image</label>
+          <input type="file" id="fp_image" accept="image/*"/>
+          <span id="fp_image_err" style="color:var(--accent);font-size:0.8rem"></span>
+          <div id="fp_preview" style="margin-top:0.5rem;display:none">
+            <img id="fp_preview_img" style="max-width:100%;max-height:180px;border-radius:8px;border:1px solid #e2e8f0" alt="Finger preview"/>
+          </div>
+        </div>`;
     } else {
       fields = '<div class="form-group"><label>First Name</label><input type="text" id="nv_fname" placeholder="First name"/><span id="nv_fname_err" style="color:var(--accent);font-size:0.8rem"></span></div>' +
         '<div class="form-group"><label>Last Name</label><input type="text" id="nv_lname" placeholder="Last name"/><span id="nv_lname_err" style="color:var(--accent);font-size:0.8rem"></span></div>' +
@@ -1467,6 +1486,7 @@
         '<div class="form-group"><label>Gender</label><select id="nv_gender"><option value="">Select gender</option><option>Male</option><option>Female</option></select><span id="nv_gender_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
     }
     document.getElementById('ninVerifyFields').innerHTML = fields;
+    document.getElementById('ninVerifyBtn').textContent = currentNinService === 'fingerprint' ? 'Submit Request' : 'Verify NIN';
     document.getElementById('ninVerifyStep1').style.display = 'none';
     document.getElementById('ninVerifyStep2').style.display = 'block';
   }
@@ -1494,6 +1514,14 @@
       }
       document.getElementById('nv_phone_err').textContent = '';
       inputs = { primary: phone };
+    } else if (currentNinService === 'fingerprint') {
+      const finger = document.getElementById('fp_finger').value;
+      const file   = document.getElementById('fp_image') ? document.getElementById('fp_image').files[0] : null;
+      let valid = true;
+      if (!finger) { document.getElementById('fp_finger_err').textContent = 'Please select a finger'; valid = false; } else document.getElementById('fp_finger_err').textContent = '';
+      if (!file)   { document.getElementById('fp_image_err').textContent = 'Please upload a finger image'; valid = false; } else document.getElementById('fp_image_err').textContent = '';
+      if (!valid) return;
+      inputs = { primary: finger };
     } else {
       const fname  = document.getElementById('nv_fname').value.trim();
       const lname  = document.getElementById('nv_lname').value.trim();
