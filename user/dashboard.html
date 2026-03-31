@@ -1557,7 +1557,6 @@
     }
 
     // Deduct and record
-    const slipFee = getNinVerifyFee(currentNinService, _selectedSlip);
     walletBalance -= slipFee;
     submitWithStatus(svc.title, inputs.primary, slipFee, 'submitted', { 'Input': inputs.primary, 'Slip Type': _selectedSlip });
     updateStats();
