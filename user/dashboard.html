@@ -1084,7 +1084,7 @@
       const detailsCell = t.clearedTrackingId
         ? `${t.details}<br><span style="font-size:0.8rem;color:#059669;font-weight:600">✅ New ID: ${t.clearedTrackingId}</span>`
         : t.ninSlipUrl
-          ? `${t.details}<br><a href="${t.ninSlipUrl}" target="_blank" download style="font-size:0.8rem;color:#7c3aed;font-weight:600;text-decoration:none">📄 Download NIN Slip</a>`
+          ? `${t.details}<br><a href="${t.ninSlipUrl}" target="_blank" download="NIN-Slip.pdf" style="font-size:0.8rem;color:#7c3aed;font-weight:600;text-decoration:none">📄 Download NIN Slip</a>`
           : t.details;
       return `<tr>
         <td>${t.id}</td><td>${t.service}</td><td>${detailsCell}</td>
@@ -1134,7 +1134,7 @@
               const det = t.clearedTrackingId
                 ? `${t.details}<br><span style="font-size:0.78rem;color:#059669;font-weight:600">✅ New ID: ${t.clearedTrackingId}</span>`
                 : t.ninSlipUrl
-                  ? `${t.details}<br><a href="${t.ninSlipUrl}" target="_blank" download style="font-size:0.78rem;color:#7c3aed;font-weight:600;text-decoration:none">📄 Download NIN Slip</a>`
+                  ? `${t.details}<br><a href="${t.ninSlipUrl}" target="_blank" download="NIN-Slip.pdf" style="font-size:0.78rem;color:#7c3aed;font-weight:600;text-decoration:none">📄 Download NIN Slip</a>`
                   : t.details;
               return `<tr><td>${t.id}</td><td>${t.service}</td><td>${det}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${ds}</span></td><td>${t.date}</td></tr>`;
             }).join('')}</tbody>

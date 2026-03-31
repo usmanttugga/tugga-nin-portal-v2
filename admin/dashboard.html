@@ -585,24 +585,30 @@
     const alertEl = document.getElementById('ninModSlipAlert');
     if (!file) { errEl.textContent = 'Please select a PDF file'; return; }
     if (file.type !== 'application/pdf') { errEl.textContent = 'Only PDF files are allowed'; return; }
+    if (file.size > 5 * 1024 * 1024) { errEl.textContent = 'File must be under 5MB'; return; }
     errEl.textContent = '';
-    alertEl.innerHTML = '<div class="alert alert-info">Uploading slip...</div>';
+    alertEl.innerHTML = '<div class="alert alert-info">Processing slip...</div>';
     if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
-    const storageRef = window.fbStorageRef(window.fbStorage, 'nin-slips/' + txnId + '.pdf');
-    window.fbUploadBytes(storageRef, file).then(function(snapshot) {
-      return window.fbGetDownloadURL(snapshot.ref);
-    }).then(function(downloadURL) {
-      return window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), {
+
+    // Read file as base64 data URL and store directly in Firestore
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const dataUrl = e.target.result;
+      window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), {
         status: 'modified',
-        ninSlipUrl: downloadURL
+        ninSlipUrl: dataUrl
+      }).then(function() {
+        closeModal('ninModSlipModal');
+        toast('NIN Modification slip uploaded — user can now download it.');
+        loadNINStats();
+      }).catch(function(err) {
+        alertEl.innerHTML = '<div class="alert alert-error">Failed to save: ' + err.message + '</div>';
       });
-    }).then(function() {
-      closeModal('ninModSlipModal');
-      toast('NIN Modification slip uploaded — user can now download it.');
-      loadNINStats();
-    }).catch(function(e) {
-      alertEl.innerHTML = '<div class="alert alert-error">Upload failed: ' + e.message + '</div>';
-    });
+    };
+    reader.onerror = function() {
+      alertEl.innerHTML = '<div class="alert alert-error">Failed to read file. Please try again.</div>';
+    };
+    reader.readAsDataURL(file);
   }
 
   function openIPEClearModal(txnId) {
