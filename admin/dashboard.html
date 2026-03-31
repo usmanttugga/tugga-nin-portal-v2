@@ -519,6 +519,40 @@
       .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
   }
 
+  // Ordered field lists matching each user form exactly
+  const SERVICE_FIELD_ORDER = {
+    // NIN Validation
+    'No Record Found':            ['NIN Number'],
+    'Bank Validation':            ['NIN Number'],
+    'Photograph Error':           ['NIN Number'],
+    'SIM Validation':             ['NIN Number'],
+    // NIN Verification
+    'Verify with NIN':            ['Input'],
+    'Phone Number Verification':  ['Input'],
+    'Bio Data Verification':      ['Input'],
+    'FingerPrint Verification':   ['Finger', 'Image'],
+    // NIN Modification
+    'Name Modification':          ['NIN Number','Surname','First Name','Middle Name','Phone','Documents'],
+    'Phone Number Modification':  ['NIN Number','Surname','First Name','Middle Name','New Phone','Documents'],
+    'Address Modification':       ['NIN Number','Address','Town/City','LGA of Origin','State of Origin','LGA of Residence','State of Residence','Documents'],
+    'Date of Birth Modification': ['NIN Number','Surname','First Name','Middle Name','Phone','Sex','Marital Status','Old DOB','New DOB','State of Origin','LGA of Origin','Town of Origin','Place of Birth','State of Birth','LGA of Birth','Residential Address','Education','Occupation','Work Address','Requesting Body',"Father's Surname","Father's First Name","Father's State","Father's LGA","Father's Town","Mother's Surname","Mother's First Name","Mother's Maiden Name","Mother's State","Mother's LGA","Mother's Town",'Documents'],
+    // IPE Clearance
+    'Normal Clearance':           ['Tracking ID'],
+    'Modification Clearance':     ['New Tracking ID'],
+    'Other Error':                ['Error Description','New Tracking ID'],
+    // NIN Other
+    'VNIN Slip':                  ['NIN Number'],
+    'NIN Personalization':        ['Tracking ID'],
+    // BVN
+    'BVN Verification':           ['BVN Number','Full Name','Phone Number'],
+    'BVN Retrieval':              ['BVN Number','Full Name','Phone Number'],
+    'BVN Modification':           ['BVN Number','Full Name','Phone Number'],
+    'BVN User':                   ['BVN Number','Full Name','Phone Number'],
+    // Utility
+    'Buy Airtime':                ['Network','Phone','Amount'],
+    'Buy Data':                   ['Network','Plan','Phone']
+  };
+
   function openRequestDetails(txnId) {
     const allTxns = JSON.parse(localStorage.getItem('tugga_txns') || '[]');
     const t = allTxns.find(x => x.id === txnId);
@@ -536,28 +570,21 @@
       `<span>Status: <span class="badge badge-${badgeClass}">${displayStatus}</span></span>`;
 
     const formData = t.formData || {};
-    const keys = Object.keys(formData);
-    if (keys.length) {
-      document.getElementById('rdFields').innerHTML = keys.map(k =>
-        `<div style="display:flex;justify-content:space-between;padding:0.55rem 0;border-bottom:1px solid #f1f5f9">
-          <span style="color:var(--gray);font-size:0.88rem">${k}</span>
-          <span style="font-weight:500;font-size:0.88rem;text-align:right;max-width:60%">${formData[k] || '—'}</span>
+    const orderedKeys = SERVICE_FIELD_ORDER[t.service] || Object.keys(formData);
+    const rows = orderedKeys
+      .filter(k => formData[k] && formData[k] !== '—')
+      .map(k =>
+        `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.55rem 0;border-bottom:1px solid #f1f5f9;gap:1rem">
+          <span style="color:var(--gray);font-size:0.88rem;white-space:nowrap;flex-shrink:0">${k}</span>
+          <span style="font-weight:500;font-size:0.88rem;text-align:right;word-break:break-word">${formData[k]}</span>
         </div>`
-      ).join('');
-    } else {
-      document.getElementById('rdFields').innerHTML =
-        `<div style="padding:0.55rem 0;border-bottom:1px solid #f1f5f9">
-          <span style="color:var(--gray);font-size:0.88rem">NIN / Details</span>
-          <span style="font-weight:500;font-size:0.88rem;margin-left:1rem">${t.details || '—'}</span>
-        </div>`;
-    }
+      );
 
-    const validateSvcs = [
-      'No Record Found','Bank Validation','Photograph Error','SIM Validation',
-      'Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification',
-      'Normal Clearance','Modification Clearance','Other Error'
-    ];
-    const canValidate = validateSvcs.includes(t.service) && t.status === 'submitted';
+    document.getElementById('rdFields').innerHTML = rows.length
+      ? rows.join('')
+      : `<div style="padding:0.55rem 0;color:var(--gray);font-size:0.88rem">NIN / Details: <strong>${t.details || '—'}</strong></div>`;
+
+    const canValidate = t.status === 'submitted';
     document.getElementById('rdActions').innerHTML = canValidate
       ? `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="validateNINRequest('${t.id}')">✔ Validate</button>
          <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
