@@ -431,8 +431,8 @@
     const tbody = document.getElementById("ninTxnTable");
     if (!nin.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999">No NIN transactions</td></tr>'; return; }
     tbody.innerHTML = nin.map(t => {
-      const isPending = ninValSvcs.includes(t.service) && t.status === 'pending';
-      const badgeClass = t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : 'success';
+      const isPending = ninValSvcs.includes(t.service) && t.status === 'submitted';
+      const badgeClass = t.status === 'validated' ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
       const actionBtn = isPending
         ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">✔ Validate</button>`
         : '';

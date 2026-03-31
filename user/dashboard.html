@@ -1079,7 +1079,7 @@
     const wbody = document.getElementById("walletTxnTable");
     if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
     tbody.innerHTML = txns.map(t => {
-      const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : 'failed';
+      const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
       return `<tr>
         <td>${t.id}</td><td>${t.service}</td><td>${t.details}</td>
         <td>${fmt(t.amount)}</td>
@@ -1088,7 +1088,7 @@
       </tr>`;
     }).join("");
     wbody.innerHTML = txns.map(t => {
-      const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : 'failed';
+      const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
       return `<tr><td>${t.date}</td><td>${t.service}</td><td style="color:var(--accent)">-${fmt(t.amount)}</td>
       <td><span class="badge badge-${badgeClass}">${t.status}</span></td></tr>`;
     }).join("");
@@ -1122,7 +1122,7 @@
           <table>
             <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
             <tbody>${txns.map(t => {
-              const bc = t.status === 'success' || t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : 'failed';
+              const bc = t.status === 'success' || t.status === 'validated' ? 'success' : t.status === 'pending' || t.status === 'submitted' ? 'pending' : 'failed';
               return `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${t.status}</span></td><td>${t.date}</td></tr>`;
             }).join('')}</tbody>
           </table>
@@ -1183,7 +1183,7 @@
     // NIN Validation services submit as "pending" — admin must validate
     const NIN_VAL_SVCS = ['No Record Found', 'Bank Validation', 'Photograph Error', 'SIM Validation'];
     const isPending = NIN_VAL_SVCS.includes(currentService.title);
-    const status = isPending ? 'pending' : 'success';
+    const status = isPending ? 'submitted' : 'success';
 
     const txn = {
       id: "TXN" + Date.now(),
