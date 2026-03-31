@@ -1134,6 +1134,26 @@
     Object.keys(SVC_HISTORY_MAP).forEach(renderServiceHistory);
   }
 
+  // ── Shared submit helper (saves to Firestore with known doc ID) ──
+  function submitWithStatus(service, details, fee, status) {
+    const txn = {
+      id: 'TXN' + Date.now(),
+      userId: user.id,
+      service: service,
+      details: details,
+      amount: fee,
+      status: status,
+      date: new Date().toLocaleString()
+    };
+    transactions.unshift(txn);
+    localStorage.setItem('tugga_txns', JSON.stringify(transactions));
+    if (window.fbReady) {
+      window.fbSetDoc(window.fbDoc(window.fbDB, 'transactions', txn.id), txn)
+        .catch(e => console.error('Firebase txn error:', e));
+    }
+    return txn;
+  }
+
   // ── Service Modal ──────────────────────────────────
   const NIN_FIELDS = `
     <div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>
@@ -1595,7 +1615,7 @@
     const fee = _p.name_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, 'Name Modification', nin, fee);
+    submitWithStatus('Name Modification', nin, fee, 'submitted');
     updateStats();
     closeModal('nameModModal');
     toast('Name Modification request submitted successfully!');
@@ -1659,7 +1679,7 @@
     const fee = _p.phone_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, 'Phone Number Modification', nin, fee);
+    submitWithStatus('Phone Number Modification', nin, fee, 'submitted');
     updateStats();
     closeModal('phoneModModal');
     toast('Phone Number Modification request submitted successfully!');
@@ -1735,7 +1755,7 @@
     const fee = _p.address_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, 'Address Modification', nin, fee);
+    submitWithStatus('Address Modification', nin, fee, 'submitted');
     updateStats();
     closeModal('addressModModal');
     toast('Address Modification request submitted successfully!');
@@ -1819,7 +1839,7 @@
     const fee = _p.dob_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, 'Date of Birth Modification', nin, fee);
+    submitWithStatus('Date of Birth Modification', nin, fee, 'submitted');
     updateStats();
     closeModal('dobModModal');
     toast('Date of Birth Modification request submitted successfully!');
@@ -1875,7 +1895,7 @@
     const fee = _trackingService.fee;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, _trackingService.title, trackingId, fee);
+    submitWithStatus(_trackingService.title, trackingId, fee, 'submitted');
     updateStats();
     closeModal('trackingModal');
     toast(_trackingService.title + ' request submitted successfully!');
@@ -1901,7 +1921,7 @@
     const fee = _p.ipe_mod || 400;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, 'Modification Clearance', tracking, fee);
+    submitWithStatus('Modification Clearance', tracking, fee, 'submitted');
     updateStats();
     closeModal('modClearanceModal');
     toast('Modification Clearance request submitted successfully!');
@@ -1932,7 +1952,7 @@
     const fee = _p.ipe_other || 400;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, 'Other Error', tracking, fee);
+    submitWithStatus('Other Error', tracking, fee, 'submitted');
     updateStats();
     closeModal('otherErrorModal');
     toast('Other Error clearance request submitted successfully!');
