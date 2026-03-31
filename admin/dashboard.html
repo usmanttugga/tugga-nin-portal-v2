@@ -416,6 +416,25 @@
   </div>
 </div>
 
+<!-- NIN PERSONALIZATION SLIP UPLOAD MODAL -->
+<div class="modal-overlay" id="ninPersonSlipModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3>🎨 Upload Personalized NIN Slip</h3>
+      <button class="modal-close" onclick="closeModal('ninPersonSlipModal')">✕</button>
+    </div>
+    <div id="ninPersonSlipAlert"></div>
+    <p style="font-size:0.88rem;color:var(--gray);margin-bottom:1rem">Upload the personalized NIN slip PDF for this request.</p>
+    <div class="form-group">
+      <label>Personalized Slip (PDF only)</label>
+      <input type="file" id="ninPersonSlipFile" accept="application/pdf"/>
+      <span id="ninPersonSlipErr" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <input type="hidden" id="ninPersonSlipTxnId"/>
+    <button class="btn-primary" style="background:#7c3aed" onclick="confirmNINPersonSlip()">🎨 Mark as Personalized</button>
+  </div>
+</div>
+
 <script src="../js/app.js?v=4"></script>
 <script type="module" src="../js/firebase.js"></script>
 <script>
@@ -577,26 +596,29 @@
     const filtered = nin.filter(filterMap[_ninFilter] || (() => true));
 
     // Services that require admin validation
-    const validateSvcs = [...ninValSvcs, ...ninModSvcs, ...ninIpeSvcs];
+    const validateSvcs = [...ninValSvcs, ...ninModSvcs, ...ninIpeSvcs, ...ninPersonSvcs];
 
     const tbody = document.getElementById("ninTxnTable");
     if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No requests found.</td></tr>'; return; }
     tbody.innerHTML = filtered.map(t => {
       const needsValidation = validateSvcs.includes(t.service) && t.status === 'submitted';
-      const alreadyValidated = t.status === 'validated' || t.status === 'cleared' || t.status === 'modified';
+      const alreadyValidated = t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized';
       const isIPE = IPE_SVCS.includes(t.service);
       const isMod = MOD_SVCS.includes(t.service);
+      const isPerson = PERSON_SVCS.includes(t.service);
       const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status;
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap">👁 View</button>`;
       const actionBtn = needsValidation
         ? isIPE
           ? `<button onclick="openIPEClearModal('${t.id}')" style="background:#059669;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✅ Cleared</button>`
           : isMod
             ? `<button onclick="openNINModSlipModal('${t.id}')" style="background:#7c3aed;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✏️ Modified</button>`
-            : `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>`
+            : isPerson
+              ? `<button onclick="openNINPersonSlipModal('${t.id}')" style="background:#d97706;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">🎨 Personalized</button>`
+              : `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>`
         : alreadyValidated
-          ? `<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">${isIPE ? '✅ Cleared' : isMod ? '✏️ Modified' : '✔ Done'}</span>`
+          ? `<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">${isIPE ? '✅ Cleared' : isMod ? '✏️ Modified' : isPerson ? '🎨 Personalized' : '✔ Done'}</span>`
           : '';
       return `<tr>
         <td style="font-size:0.75rem;max-width:80px;overflow:hidden;text-overflow:ellipsis">${t.id}</td>
@@ -663,7 +685,46 @@
     reader.readAsDataURL(file);
   }
 
-  function openIPEClearModal(txnId) {
+  const PERSON_SVCS = ['NIN Personalization', 'VNIN Slip'];
+
+  function openNINPersonSlipModal(txnId) {
+    document.getElementById('ninPersonSlipTxnId').value = txnId;
+    document.getElementById('ninPersonSlipFile').value = '';
+    document.getElementById('ninPersonSlipErr').textContent = '';
+    document.getElementById('ninPersonSlipAlert').innerHTML = '';
+    closeModal('requestDetailsModal');
+    openModal('ninPersonSlipModal');
+  }
+
+  function confirmNINPersonSlip() {
+    const txnId   = document.getElementById('ninPersonSlipTxnId').value;
+    const file    = document.getElementById('ninPersonSlipFile').files[0];
+    const errEl   = document.getElementById('ninPersonSlipErr');
+    const alertEl = document.getElementById('ninPersonSlipAlert');
+    if (!file) { errEl.textContent = 'Please select a PDF file'; return; }
+    if (file.type !== 'application/pdf') { errEl.textContent = 'Only PDF files are allowed'; return; }
+    if (file.size > 5 * 1024 * 1024) { errEl.textContent = 'File must be under 5MB'; return; }
+    errEl.textContent = '';
+    alertEl.innerHTML = '<div class="alert alert-info">Processing slip...</div>';
+    if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), {
+        status: 'personalized',
+        personSlipUrl: e.target.result
+      }).then(function() {
+        closeModal('ninPersonSlipModal');
+        toast('Personalized slip uploaded — user can now download it.');
+        loadNINStats();
+      }).catch(function(err) {
+        alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + err.message + '</div>';
+      });
+    };
+    reader.onerror = function() {
+      alertEl.innerHTML = '<div class="alert alert-error">Failed to read file.</div>';
+    };
+    reader.readAsDataURL(file);
+  }
     document.getElementById('ipeClearTxnId').value = txnId;
     document.getElementById('ipeClearTrackingId').value = '';
     document.getElementById('ipeClearTrackingErr').textContent = '';
@@ -765,6 +826,7 @@
 
     const isIPE = IPE_SVCS.includes(t.service);
     const isMod = MOD_SVCS.includes(t.service);
+    const isPerson = PERSON_SVCS.includes(t.service);
     const canAct = t.status === 'submitted';
     document.getElementById('rdActions').innerHTML = canAct
       ? isIPE
@@ -773,8 +835,11 @@
         : isMod
           ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#7c3aed" onclick="openNINModSlipModal('${t.id}')">✏️ Modified</button>
              <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
-          : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="validateNINRequest('${t.id}')">✔ Validate</button>
-             <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
+          : isPerson
+            ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#d97706" onclick="openNINPersonSlipModal('${t.id}')">🎨 Personalized</button>
+               <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
+            : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="validateNINRequest('${t.id}')">✔ Validate</button>
+               <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
       : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="closeModal('requestDetailsModal')">Close</button>`;
 
     openModal('requestDetailsModal');

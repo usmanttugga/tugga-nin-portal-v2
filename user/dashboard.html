@@ -137,10 +137,10 @@
         <div class="service-card" onclick="showSection('sec-ipe')">
           <div class="svc-icon">✅</div><h4>IPE Clearance</h4><p>Identity pre-enrollment</p>
         </div>
-        <div class="service-card" data-svc="VNIN Slip" onclick="openServiceModal('VNIN Slip','Generate virtual NIN slip','nin', String(_p.vnin||250))">
+        <div class="service-card" data-svc="VNIN Slip" onclick="showSection('sec-vnin')">
           <div class="svc-icon">📱</div><h4>VNIN Slip</h4><p>Get virtual NIN slip</p>
         </div>
-        <div class="service-card" data-svc="NIN Personalization" onclick="openNinPersonModal()">
+        <div class="service-card" data-svc="NIN Personalization" onclick="showSection('sec-nin-person')">
           <div class="svc-icon">🎨</div><h4>NIN Personalization</h4><p>Personalize NIN card</p>
         </div>
       </div>
@@ -227,7 +227,29 @@
       <div id="svcHistory-sec-ipe"></div>
     </section>
 
-    <!-- BVN SERVICES -->
+    <!-- VNIN SLIP -->
+    <section id="sec-vnin" class="content-section section-hidden">
+      <p class="page-title">VNIN Slip</p>
+      <p class="page-sub">Generate your virtual NIN slip.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="VNIN Slip" onclick="openServiceModal('VNIN Slip','Generate virtual NIN slip','nin', String(_p.vnin||250))">
+          <div class="svc-icon">📱</div><h4>Generate VNIN Slip</h4><p>Get virtual NIN slip</p><div class="price" id="price-vnin">₦250</div>
+        </div>
+      </div>
+      <div id="svcHistory-sec-vnin"></div>
+    </section>
+
+    <!-- NIN PERSONALIZATION -->
+    <section id="sec-nin-person" class="content-section section-hidden">
+      <p class="page-title">NIN Personalization</p>
+      <p class="page-sub">Personalize your NIN card.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="NIN Personalization" onclick="openNinPersonModal()">
+          <div class="svc-icon">🎨</div><h4>Personalize NIN Card</h4><p>Submit personalization request</p><div class="price" id="price-nin-person">₦1,000</div>
+        </div>
+      </div>
+      <div id="svcHistory-sec-nin-person"></div>
+    </section>
     <section id="sec-bvn" class="content-section section-hidden">
       <p class="page-title">BVN Services</p>
       <p class="page-sub">Bank Verification Number services.</p>
@@ -1089,13 +1111,15 @@
     const wbody = document.getElementById("walletTxnTable");
     if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
     tbody.innerHTML = txns.map(t => {
-      const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
-      const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status;
+      const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
+      const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
       const detailsCell = t.clearedTrackingId
         ? `${t.details}<br><span style="font-size:0.8rem;color:#059669;font-weight:600">✅ New ID: ${t.clearedTrackingId}</span>`
         : t.ninSlipUrl
           ? `${t.details}<br><a href="${t.ninSlipUrl}" target="_blank" download="NIN-Slip.pdf" style="font-size:0.8rem;color:#7c3aed;font-weight:600;text-decoration:none">📄 Download NIN Slip</a>`
-          : t.details;
+          : t.personSlipUrl
+            ? `${t.details}<br><a href="${t.personSlipUrl}" target="_blank" download="Personalized-NIN-Slip.pdf" style="font-size:0.8rem;color:#d97706;font-weight:600;text-decoration:none">🎨 Download Personalized Slip</a>`
+            : t.details;
       return `<tr>
         <td>${t.id}</td><td>${t.service}</td><td>${detailsCell}</td>
         <td>${fmt(t.amount)}</td>
@@ -1117,6 +1141,8 @@
     'sec-nin-validation':   ['No Record Found','Bank Validation','Photograph Error','SIM Validation'],
     'sec-nin-modification': ['Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification'],
     'sec-ipe':              ['Normal Clearance','Modification Clearance','Other Error'],
+    'sec-vnin':             ['VNIN Slip'],
+    'sec-nin-person':       ['NIN Personalization'],
     'sec-bvn':              ['BVN Verification','BVN Retrieval','BVN Modification','BVN User'],
     'sec-airtime':          ['Buy Airtime'],
     'sec-data':             ['Buy Data']
@@ -1139,13 +1165,15 @@
           <table>
             <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
             <tbody>${txns.map(t => {
-              const bc = t.status === 'success' || t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' ? 'success' : t.status === 'pending' || t.status === 'submitted' ? 'pending' : 'failed';
-              const ds = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status;
+              const bc = t.status === 'success' || t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized' ? 'success' : t.status === 'pending' || t.status === 'submitted' ? 'pending' : 'failed';
+              const ds = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
               const det = t.clearedTrackingId
                 ? `${t.details}<br><span style="font-size:0.78rem;color:#059669;font-weight:600">✅ New ID: ${t.clearedTrackingId}</span>`
                 : t.ninSlipUrl
                   ? `${t.details}<br><a href="${t.ninSlipUrl}" target="_blank" download="NIN-Slip.pdf" style="font-size:0.78rem;color:#7c3aed;font-weight:600;text-decoration:none">📄 Download NIN Slip</a>`
-                  : t.details;
+                  : t.personSlipUrl
+                    ? `${t.details}<br><a href="${t.personSlipUrl}" target="_blank" download="Personalized-NIN-Slip.pdf" style="font-size:0.78rem;color:#d97706;font-weight:600;text-decoration:none">🎨 Download Personalized Slip</a>`
+                    : t.details;
               return `<tr><td>${t.id}</td><td>${t.service}</td><td>${det}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${ds}</span></td><td>${t.date}</td></tr>`;
             }).join('')}</tbody>
           </table>
@@ -1303,6 +1331,8 @@
     set('price-ipe-normal',   _p.ipe_normal   || 400);
     set('price-ipe-mod',      _p.ipe_mod      || 400);
     set('price-ipe-other',    _p.ipe_other    || 400);
+    set('price-vnin',         _p.vnin         || 250);
+    set('price-nin-person',   _p.ninpers      || 1000);
   }
 
   // Get fee for a specific method + slip combination
