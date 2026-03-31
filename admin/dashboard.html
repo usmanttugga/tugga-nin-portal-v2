@@ -114,11 +114,12 @@
         <div class="stat-card"><div class="stat-icon bg-blue">🪪</div><div class="stat-info"><h3 id="ninVerCount">0</h3><p>NIN Verifications</p></div></div>
         <div class="stat-card"><div class="stat-icon bg-green">✔️</div><div class="stat-info"><h3 id="ninValCount">0</h3><p>NIN Validations</p></div></div>
         <div class="stat-card"><div class="stat-icon bg-red">✏️</div><div class="stat-info"><h3 id="ninModCount">0</h3><p>Modifications</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-orange">✅</div><div class="stat-info"><h3 id="ninIpeCount">0</h3><p>IPE Clearances</p></div></div>
       </div>
       <div class="table-wrap" style="margin-top:1rem">
         <table>
           <thead><tr><th>Ref</th><th>Service</th><th>NIN/Details</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-          <tbody id="ninTxnTable"><tr><td colspan="6" style="text-align:center;color:#999">No NIN transactions</td></tr></tbody>
+          <tbody id="ninTxnTable"><tr><td colspan="7" style="text-align:center;color:#999">No NIN transactions</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -428,6 +429,8 @@
       t.service === "NIN Validation" || ninValSvcs.includes(t.service)).length;
     document.getElementById("ninModCount").textContent  = nin.filter(t =>
       t.service === "NIN Modification" || ninModSvcs.includes(t.service)).length;
+    document.getElementById("ninIpeCount").textContent  = nin.filter(t =>
+      ninIpeSvcs.includes(t.service)).length;
     const tbody = document.getElementById("ninTxnTable");
     if (!nin.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999">No NIN transactions</td></tr>'; return; }
     tbody.innerHTML = nin.map(t => {
