@@ -325,6 +325,19 @@
   </div>
 </div>
 
+<!-- REQUEST DETAILS MODAL -->
+<div class="modal-overlay" id="requestDetailsModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-header">
+      <h3 id="rdTitle">Request Details</h3>
+      <button class="modal-close" onclick="closeModal('requestDetailsModal')">✕</button>
+    </div>
+    <div id="rdMeta" style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem;font-size:0.82rem;color:var(--gray)"></div>
+    <div id="rdFields" style="display:flex;flex-direction:column;gap:0"></div>
+    <div style="margin-top:1.5rem;display:flex;gap:0.8rem" id="rdActions"></div>
+  </div>
+</div>
+
 <script src="../js/app.js?v=4"></script>
 <script type="module" src="../js/firebase.js"></script>
 <script>
@@ -468,9 +481,10 @@
       const needsValidation = validateSvcs.includes(t.service) && t.status === 'submitted';
       const alreadyValidated = t.status === 'validated';
       const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-      const actionBtn = needsValidation
-        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">✔ Validate</button>`
-        : alreadyValidated ? '<span style="color:#059669;font-size:0.8rem;font-weight:600">✔ Done</span>' : '';
+      const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">👁 View</button>`;
+      const validateBtn = needsValidation
+        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;margin-left:4px">✔ Validate</button>`
+        : alreadyValidated ? '<span style="color:#059669;font-size:0.8rem;font-weight:600;margin-left:4px">✔ Done</span>' : '';
       return `<tr>
         <td style="font-size:0.78rem">${t.id}</td>
         <td style="font-size:0.78rem">${t.userId || '—'}</td>
@@ -479,7 +493,7 @@
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${t.status}</span></td>
         <td style="font-size:0.78rem">${t.date}</td>
-        <td>${actionBtn}</td>
+        <td style="white-space:nowrap">${viewBtn}${validateBtn}</td>
       </tr>`;
     }).join("");
   }
@@ -487,8 +501,54 @@
   function validateNINRequest(txnId) {
     if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
     window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'validated' })
-      .then(function() { toast('Request validated — user has been notified.'); loadNINStats(); })
+      .then(function() { toast('Request validated — user has been notified.'); loadNINStats(); closeModal('requestDetailsModal'); })
       .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
+  }
+
+  function openRequestDetails(txnId) {
+    const allTxns = JSON.parse(localStorage.getItem('tugga_txns') || '[]');
+    const t = allTxns.find(x => x.id === txnId);
+    if (!t) { toast('Request not found', 'error'); return; }
+
+    document.getElementById('rdTitle').textContent = t.service;
+
+    const badgeClass = t.status === 'validated' ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
+    document.getElementById('rdMeta').innerHTML =
+      `<span>Ref: <strong>${t.id}</strong></span>` +
+      `<span>User ID: <strong>${t.userId || '—'}</strong></span>` +
+      `<span>Date: <strong>${t.date}</strong></span>` +
+      `<span>Amount: <strong>${fmt(t.amount)}</strong></span>` +
+      `<span>Status: <span class="badge badge-${badgeClass}">${t.status}</span></span>`;
+
+    const formData = t.formData || {};
+    const keys = Object.keys(formData);
+    if (keys.length) {
+      document.getElementById('rdFields').innerHTML = keys.map(k =>
+        `<div style="display:flex;justify-content:space-between;padding:0.55rem 0;border-bottom:1px solid #f1f5f9">
+          <span style="color:var(--gray);font-size:0.88rem">${k}</span>
+          <span style="font-weight:500;font-size:0.88rem;text-align:right;max-width:60%">${formData[k] || '—'}</span>
+        </div>`
+      ).join('');
+    } else {
+      document.getElementById('rdFields').innerHTML =
+        `<div style="padding:0.55rem 0;border-bottom:1px solid #f1f5f9">
+          <span style="color:var(--gray);font-size:0.88rem">NIN / Details</span>
+          <span style="font-weight:500;font-size:0.88rem;margin-left:1rem">${t.details || '—'}</span>
+        </div>`;
+    }
+
+    const validateSvcs = [
+      'No Record Found','Bank Validation','Photograph Error','SIM Validation',
+      'Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification',
+      'Normal Clearance','Modification Clearance','Other Error'
+    ];
+    const canValidate = validateSvcs.includes(t.service) && t.status === 'submitted';
+    document.getElementById('rdActions').innerHTML = canValidate
+      ? `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="validateNINRequest('${t.id}')">✔ Validate</button>
+         <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
+      : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="closeModal('requestDetailsModal')">Close</button>`;
+
+    openModal('requestDetailsModal');
   }
 
   function loadBVNStats() {

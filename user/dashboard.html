@@ -1135,7 +1135,7 @@
   }
 
   // ── Shared submit helper (saves to Firestore with known doc ID) ──
-  function submitWithStatus(service, details, fee, status) {
+  function submitWithStatus(service, details, fee, status, formData) {
     const txn = {
       id: 'TXN' + Date.now(),
       userId: user.id,
@@ -1143,7 +1143,8 @@
       details: details,
       amount: fee,
       status: status,
-      date: new Date().toLocaleString()
+      date: new Date().toLocaleString(),
+      formData: formData || {}
     };
     transactions.unshift(txn);
     localStorage.setItem('tugga_txns', JSON.stringify(transactions));
@@ -1205,6 +1206,13 @@
     const isPending = NIN_VAL_SVCS.includes(currentService.title);
     const status = isPending ? 'submitted' : 'success';
 
+    const formData = {};
+    if (document.getElementById('f_nin'))  formData['NIN Number'] = document.getElementById('f_nin').value;
+    if (document.getElementById('f_name')) formData['Full Name']  = document.getElementById('f_name').value;
+    if (document.getElementById('f_dob'))  formData['Date of Birth'] = document.getElementById('f_dob').value;
+    if (document.getElementById('f_bvn'))  formData['BVN Number'] = document.getElementById('f_bvn').value;
+    if (document.getElementById('f_phone'))formData['Phone Number'] = document.getElementById('f_phone').value;
+
     const txn = {
       id: "TXN" + Date.now(),
       userId: user.id,
@@ -1212,7 +1220,8 @@
       details: details,
       amount: currentService.price,
       status: status,
-      date: new Date().toLocaleString()
+      date: new Date().toLocaleString(),
+      formData: formData
     };
     // Store locally
     transactions.unshift(txn);
@@ -1615,7 +1624,10 @@
     const fee = _p.name_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    submitWithStatus('Name Modification', nin, fee, 'submitted');
+    submitWithStatus('Name Modification', nin, fee, 'submitted', {
+      'NIN Number': nin, 'Surname': surname, 'First Name': fname, 'Phone': phone,
+      'Documents': (window._nmDocs||[]).map(f=>f.name).join(', ') || '—'
+    });
     updateStats();
     closeModal('nameModModal');
     toast('Name Modification request submitted successfully!');
@@ -1679,7 +1691,10 @@
     const fee = _p.phone_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    submitWithStatus('Phone Number Modification', nin, fee, 'submitted');
+    submitWithStatus('Phone Number Modification', nin, fee, 'submitted', {
+      'NIN Number': nin, 'Surname': surname, 'First Name': fname, 'Phone': phone,
+      'Documents': (window._pmDocs||[]).map(f=>f.name).join(', ') || '—'
+    });
     updateStats();
     closeModal('phoneModModal');
     toast('Phone Number Modification request submitted successfully!');
@@ -1755,7 +1770,12 @@
     const fee = _p.address_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    submitWithStatus('Address Modification', nin, fee, 'submitted');
+    submitWithStatus('Address Modification', nin, fee, 'submitted', {
+      'NIN Number': nin, 'Address': address, 'Town/City': town,
+      'LGA of Origin': lgaOrigin, 'State of Origin': stateOrigin,
+      'LGA of Residence': lgaRes, 'State of Residence': stateRes,
+      'Documents': docs.map(f=>f.name).join(', ') || '—'
+    });
     updateStats();
     closeModal('addressModModal');
     toast('Address Modification request submitted successfully!');
@@ -1839,7 +1859,12 @@
     const fee = _p.dob_mod || 500;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    submitWithStatus('Date of Birth Modification', nin, fee, 'submitted');
+    submitWithStatus('Date of Birth Modification', nin, fee, 'submitted', {
+      'NIN Number': nin, 'Surname': surname, 'First Name': fname, 'Phone': phone,
+      'Sex': sex, 'Marital Status': marital,
+      'Old DOB': oldDob, 'New DOB': newDob,
+      'Documents': docs.map(f=>f.name).join(', ') || '—'
+    });
     updateStats();
     closeModal('dobModModal');
     toast('Date of Birth Modification request submitted successfully!');
@@ -1895,7 +1920,9 @@
     const fee = _trackingService.fee;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    submitWithStatus(_trackingService.title, trackingId, fee, 'submitted');
+    submitWithStatus(_trackingService.title, trackingId, fee, 'submitted', {
+      'Tracking ID': trackingId
+    });
     updateStats();
     closeModal('trackingModal');
     toast(_trackingService.title + ' request submitted successfully!');
@@ -1921,7 +1948,9 @@
     const fee = _p.ipe_mod || 400;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    submitWithStatus('Modification Clearance', tracking, fee, 'submitted');
+    submitWithStatus('Modification Clearance', tracking, fee, 'submitted', {
+      'New Tracking ID': tracking
+    });
     updateStats();
     closeModal('modClearanceModal');
     toast('Modification Clearance request submitted successfully!');
@@ -1952,7 +1981,9 @@
     const fee = _p.ipe_other || 400;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    submitWithStatus('Other Error', tracking, fee, 'submitted');
+    submitWithStatus('Other Error', tracking, fee, 'submitted', {
+      'Error Description': error, 'New Tracking ID': tracking
+    });
     updateStats();
     closeModal('otherErrorModal');
     toast('Other Error clearance request submitted successfully!');
