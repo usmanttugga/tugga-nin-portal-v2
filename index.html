@@ -448,7 +448,11 @@
     setLoading("btn-forgot", true, "Send Link");
     try {
       await waitFB();
-      await window._resetPwd(window._auth, email);
+      const actionCodeSettings = {
+        url: window.location.origin + '/tugga-nin/index.html',
+        handleCodeInApp: false
+      };
+      await window._resetPwd(window._auth, email, actionCodeSettings);
       showMsg("msg-forgot", "Reset link sent! Check your inbox.", "success");
       setLoading("btn-forgot", false, "Send Link");
     } catch (e) {
