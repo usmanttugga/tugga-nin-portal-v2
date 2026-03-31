@@ -123,6 +123,9 @@
         <div class="stat-card" onclick="filterNINTable('ipe')" style="cursor:pointer" title="Show IPE Clearances">
           <div class="stat-icon bg-orange">✅</div><div class="stat-info"><h3 id="ninIpeCount">0</h3><p>IPE Clearances</p></div>
         </div>
+        <div class="stat-card" onclick="filterNINTable('personalization')" style="cursor:pointer" title="Show NIN Personalization">
+          <div class="stat-icon bg-blue">🎨</div><div class="stat-info"><h3 id="ninPersonCount">0</h3><p>NIN Personalization</p></div>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:0.8rem;margin:1rem 0 0.5rem">
         <span id="ninFilterLabel" style="font-size:0.85rem;color:var(--gray)">Showing: All</span>
@@ -538,7 +541,7 @@
 
   function filterNINTable(type) {
     _ninFilter = type;
-    const labels = { all: 'All', verify: 'NIN Verifications', validation: 'NIN Validations', modification: 'Modifications', ipe: 'IPE Clearances' };
+    const labels = { all: 'All', verify: 'NIN Verifications', validation: 'NIN Validations', modification: 'Modifications', ipe: 'IPE Clearances', personalization: 'NIN Personalization' };
     document.getElementById('ninFilterLabel').textContent = 'Showing: ' + (labels[type] || 'All');
     loadNINStats();
   }
@@ -549,15 +552,18 @@
     const ninValSvcs = ["No Record Found", "Bank Validation", "Photograph Error", "SIM Validation"];
     const ninModSvcs = ["Name Modification", "Phone Number Modification", "Address Modification", "Date of Birth Modification"];
     const ninIpeSvcs = ["Normal Clearance", "Modification Clearance", "Other Error"];
+    const ninPersonSvcs = ["NIN Personalization", "VNIN Slip"];
     const nin = allTxns.filter(t =>
       t.service.includes("NIN") || t.service.includes("VNIN") || t.service.includes("IPE") ||
       ninVerSvcs.includes(t.service) || ninValSvcs.includes(t.service) ||
-      ninModSvcs.includes(t.service) || ninIpeSvcs.includes(t.service)
+      ninModSvcs.includes(t.service) || ninIpeSvcs.includes(t.service) ||
+      ninPersonSvcs.includes(t.service)
     );
     document.getElementById("ninVerCount").textContent = nin.filter(t => ninVerSvcs.includes(t.service)).length;
     document.getElementById("ninValCount").textContent = nin.filter(t => ninValSvcs.includes(t.service)).length;
     document.getElementById("ninModCount").textContent = nin.filter(t => ninModSvcs.includes(t.service)).length;
     document.getElementById("ninIpeCount").textContent = nin.filter(t => ninIpeSvcs.includes(t.service)).length;
+    document.getElementById("ninPersonCount").textContent = nin.filter(t => ninPersonSvcs.includes(t.service)).length;
 
     // Apply filter
     const filterMap = {
@@ -565,6 +571,7 @@
       validation: t => ninValSvcs.includes(t.service),
       modification: t => ninModSvcs.includes(t.service),
       ipe:        t => ninIpeSvcs.includes(t.service),
+      personalization: t => ninPersonSvcs.includes(t.service),
       all:        () => true
     };
     const filtered = nin.filter(filterMap[_ninFilter] || (() => true));
