@@ -726,6 +726,8 @@
     };
     reader.readAsDataURL(file);
   }
+
+  function openIPEClearModal(txnId) {
     document.getElementById('ipeClearTxnId').value = txnId;
     document.getElementById('ipeClearTrackingId').value = '';
     document.getElementById('ipeClearTrackingErr').textContent = '';
