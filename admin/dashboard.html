@@ -114,7 +114,7 @@
       </div>
       <div class="table-wrap" style="margin-top:1rem">
         <table>
-          <thead><tr><th>Ref</th><th>Service</th><th>NIN/Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <thead><tr><th>Ref</th><th>Service</th><th>NIN/Details</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
           <tbody id="ninTxnTable"><tr><td colspan="6" style="text-align:center;color:#999">No NIN transactions</td></tr></tbody>
         </table>
       </div>
@@ -426,8 +426,24 @@
     document.getElementById("ninModCount").textContent  = nin.filter(t =>
       t.service === "NIN Modification" || ninModSvcs.includes(t.service)).length;
     const tbody = document.getElementById("ninTxnTable");
-    if (!nin.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No NIN transactions</td></tr>'; return; }
-    tbody.innerHTML = nin.map(t => `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-success">${t.status}</span></td><td>${t.date}</td></tr>`).join("");
+    if (!nin.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999">No NIN transactions</td></tr>'; return; }
+    tbody.innerHTML = nin.map(t => {
+      const isPending = ninValSvcs.includes(t.service) && t.status === 'pending';
+      const badgeClass = t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : 'success';
+      const actionBtn = isPending
+        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">✔ Validate</button>`
+        : '';
+      return `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td>
+        <td><span class="badge badge-${badgeClass}">${t.status}</span></td>
+        <td>${t.date}</td><td>${actionBtn}</td></tr>`;
+    }).join("");
+  }
+
+  function validateNINRequest(txnId) {
+    if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
+    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'validated' })
+      .then(function() { toast('Request validated successfully!'); })
+      .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
   }
 
   function loadBVNStats() {

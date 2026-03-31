@@ -969,7 +969,9 @@
     window.fbOnSnapshot(window.fbCollection(window.fbDB, "transactions"), function(snap) {
       const txns = snap.docs.map(d => d.data()).sort((a,b) => b.id > a.id ? 1 : -1);
       localStorage.setItem('tugga_txns', JSON.stringify(txns));
+      transactions = txns;
       updateStats();
+      renderHistory();
     });
 
     // User wallet real-time
@@ -1058,16 +1060,20 @@
     const tbody = document.getElementById("historyTable");
     const wbody = document.getElementById("walletTxnTable");
     if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
-    tbody.innerHTML = txns.map(t => `
-      <tr>
+    tbody.innerHTML = txns.map(t => {
+      const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : 'failed';
+      return `<tr>
         <td>${t.id}</td><td>${t.service}</td><td>${t.details}</td>
         <td>${fmt(t.amount)}</td>
-        <td><span class="badge badge-${t.status === 'success' ? 'success' : 'failed'}">${t.status}</span></td>
+        <td><span class="badge badge-${badgeClass}">${t.status}</span></td>
         <td>${t.date}</td>
-      </tr>`).join("");
-    wbody.innerHTML = txns.map(t => `
-      <tr><td>${t.date}</td><td>${t.service}</td><td style="color:var(--accent)">-${fmt(t.amount)}</td>
-      <td><span class="badge badge-${t.status === 'success' ? 'success' : 'failed'}">${t.status}</span></td></tr>`).join("");
+      </tr>`;
+    }).join("");
+    wbody.innerHTML = txns.map(t => {
+      const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : 'failed';
+      return `<tr><td>${t.date}</td><td>${t.service}</td><td style="color:var(--accent)">-${fmt(t.amount)}</td>
+      <td><span class="badge badge-${badgeClass}">${t.status}</span></td></tr>`;
+    }).join("");
   }
 
   // ── Service Modal ──────────────────────────────────
@@ -1115,7 +1121,29 @@
     const details = currentService.type === "nin"
       ? (document.getElementById("f_nin")?.value || "N/A")
       : (document.getElementById("f_bvn")?.value || "N/A");
-    addTransaction(user.id, currentService.title, details, currentService.price);
+
+    // NIN Validation services submit as "pending" — admin must validate
+    const NIN_VAL_SVCS = ['No Record Found', 'Bank Validation', 'Photograph Error', 'SIM Validation'];
+    const isPending = NIN_VAL_SVCS.includes(currentService.title);
+    const status = isPending ? 'pending' : 'success';
+
+    const txn = {
+      id: "TXN" + Date.now(),
+      userId: user.id,
+      service: currentService.title,
+      details: details,
+      amount: currentService.price,
+      status: status,
+      date: new Date().toLocaleString()
+    };
+    // Store locally
+    transactions.unshift(txn);
+    localStorage.setItem("tugga_txns", JSON.stringify(transactions));
+    // Save to Firestore with known doc ID so status can be updated later
+    if (window.fbReady) {
+      window.fbSetDoc(window.fbDoc(window.fbDB, 'transactions', txn.id), txn)
+        .catch(e => console.error("Firebase txn error:", e));
+    }
     closeModal("serviceModal");
     toast(currentService.title + " request submitted successfully!");
     updateStats();
