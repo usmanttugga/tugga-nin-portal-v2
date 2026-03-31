@@ -9,20 +9,23 @@
 <body>
 
 <nav>
-  <div style="display:flex;align-items:center;gap:12px">
+  <div style="display:flex;align-items:center;gap:10px;min-width:0;flex:1">
     <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
-    <div class="logo"><img src="../img/logo.svg" alt="MAJIA DIGITAL IDENTITY" style="height:44px;width:auto;object-fit:contain"/> <span style="font-size:0.7rem;background:var(--accent);color:var(--primary);padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:700">ADMIN</span></div>
+    <div class="logo" style="min-width:0;overflow:hidden">
+      <img src="../img/logo.svg" alt="MAJIA" style="height:40px;width:auto;object-fit:contain;max-width:160px"/>
+      <span style="font-size:0.65rem;background:var(--accent);color:var(--primary);padding:2px 7px;border-radius:4px;margin-left:6px;font-weight:700;white-space:nowrap">ADMIN</span>
+    </div>
   </div>
-  <div class="nav-links">
+  <div class="nav-links" style="flex-shrink:0">
     <a href="#" class="active">Admin Panel</a>
     <a href="#" onclick="logout()" class="nav-logout-link">Logout</a>
   </div>
-  <div class="nav-user">
-    <div class="avatar" style="background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--primary)">A</div>
-    <span id="adminName">Admin</span>
-    <button class="btn-logout" onclick="logout()">Logout</button>
+  <div class="nav-user" style="flex-shrink:0;gap:8px">
+    <div class="avatar" id="adminAvatar" style="background:linear-gradient(135deg,var(--accent),var(--accent-2));color:var(--primary);cursor:pointer" onclick="openAdminProfile()">A</div>
+    <span id="adminName" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px">Admin</span>
+    <button class="btn-logout" onclick="logout()" style="white-space:nowrap">Logout</button>
   </div>
 </nav>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -538,6 +541,15 @@
     if (id === "sec-availability") loadAvailabilityFields();
     if (id === "sec-settings") loadSettingsFields();
   };
+
+  function openAdminProfile() {
+    const info = [
+      'Name: ' + (document.getElementById('adminName').textContent || 'Admin'),
+      'Role: Administrator',
+      'Email: ' + (window._adminData ? window._adminData.email : 'admin@majia.com')
+    ].join('\n');
+    toast('Admin Profile\n' + info);
+  }
 
   function toggleSidebar() {
     const sidebar = document.querySelector('.sidebar');
