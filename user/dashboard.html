@@ -263,7 +263,7 @@
         </div>
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" id="airtimePhone" placeholder="08XXXXXXXXX"/>
+        <input type="tel" id="airtimePhone" placeholder="08XXXXXXXXXX" maxlength="11"/>
         </div>
         <div class="form-group">
           <label>Amount (₦)</label>
@@ -295,7 +295,7 @@
         </div>
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" id="dataPhone" placeholder="08XXXXXXXXX"/>
+          <input type="tel" id="dataPhone" placeholder="08XXXXXXXXXX" maxlength="11"/>
         </div>
         <button class="btn-primary" onclick="buyData()">Buy Data</button>
       </div>
@@ -544,7 +544,7 @@
         </div>
         <div class="form-group">
           <label>Phone Number</label>
-          <input type="tel" id="dm_phone" placeholder="e.g. 08012345678"/>
+          <input type="tel" id="dm_phone" placeholder="08XXXXXXXXXX" maxlength="11"/>
           <span id="dm_phone_err" style="color:var(--accent);font-size:0.8rem"></span>
         </div>
       </div>
@@ -760,7 +760,7 @@
       </div>
       <div class="form-group">
         <label>New Phone Number</label>
-        <input type="tel" id="pm_phone" placeholder="e.g. 08012345678"/>
+        <input type="tel" id="pm_phone" placeholder="08XXXXXXXXXX" maxlength="11"/>
         <span id="pm_phone_err" style="color:var(--accent);font-size:0.8rem"></span>
       </div>
     </div>
@@ -817,7 +817,7 @@
       </div>
       <div class="form-group">
         <label>Phone Number</label>
-        <input type="tel" id="nm_phone" placeholder="e.g. 08012345678"/>
+        <input type="tel" id="nm_phone" placeholder="08XXXXXXXXXX" maxlength="11"/>
         <span id="nm_phone_err" style="color:var(--accent);font-size:0.8rem"></span>
       </div>
     </div>
@@ -1170,7 +1170,7 @@
   const BVN_FIELDS = `
     <div class="form-group"><label>BVN Number</label><input type="text" id="f_bvn" placeholder="11-digit BVN" maxlength="11"/></div>
     <div class="form-group"><label>Full Name</label><input type="text" id="f_name" placeholder="As on bank records"/></div>
-    <div class="form-group"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="Linked phone number"/></div>`;
+    <div class="form-group"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="08XXXXXXXXXX" maxlength="11"/></div>`;
 
   const NIN_ONLY_SVCS = ['No Record Found', 'Bank Validation', 'Photograph Error', 'SIM Validation', 'VNIN Slip'];
 
@@ -1437,7 +1437,7 @@
     if (currentNinService === 'verify-nin') {
       fields = '<div class="form-group"><label>NIN Number</label><input type="text" id="nv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="nv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
     } else if (currentNinService === 'phone-verify') {
-      fields = '<div class="form-group"><label>Phone Number</label><input type="tel" id="nv_phone" placeholder="e.g. 08012345678"/><span id="nv_phone_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
+      fields = '<div class="form-group"><label>Phone Number</label><input type="tel" id="nv_phone" placeholder="08XXXXXXXXXX" maxlength="11"/><span id="nv_phone_err" style="color:var(--accent);font-size:0.8rem"></span></div>';
     } else {
       fields = '<div class="form-group"><label>First Name</label><input type="text" id="nv_fname" placeholder="First name"/><span id="nv_fname_err" style="color:var(--accent);font-size:0.8rem"></span></div>' +
         '<div class="form-group"><label>Last Name</label><input type="text" id="nv_lname" placeholder="Last name"/><span id="nv_lname_err" style="color:var(--accent);font-size:0.8rem"></span></div>' +
@@ -2106,6 +2106,7 @@
     const amt = parseInt(document.getElementById("airtimeAmount").value);
     const alertEl = document.getElementById("airtimeAlert");
     if (!net || !phone || !amt) { alertEl.innerHTML = '<div class="alert alert-error">Please fill all fields.</div>'; return; }
+    if (!/^\d{11}$/.test(phone)) { alertEl.innerHTML = '<div class="alert alert-error">Phone number must be exactly 11 digits.</div>'; return; }
     if (walletBalance < amt) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
     walletBalance -= amt;
     submitWithStatus("Buy Airtime", net + " – " + phone, amt, 'submitted', { 'Network': net, 'Phone': phone, 'Amount': '₦' + amt });
@@ -2135,6 +2136,7 @@
     const phone = document.getElementById("dataPhone").value.trim();
     const alertEl = document.getElementById("dataAlert");
     if (!net || !plan || !phone) { alertEl.innerHTML = '<div class="alert alert-error">Please fill all fields.</div>'; return; }
+    if (!/^\d{11}$/.test(phone)) { alertEl.innerHTML = '<div class="alert alert-error">Phone number must be exactly 11 digits.</div>'; return; }
     const size = plan.split(" – ")[0];
     const price = DATA_PRICES[size] || 200;
     if (walletBalance < price) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
