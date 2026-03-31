@@ -427,7 +427,8 @@
     <div id="ninPersonAlert"></div>
     <div class="form-group">
       <label>Tracking ID</label>
-      <input type="text" id="np_tracking" placeholder="Enter your Tracking ID"/>
+      <input type="text" id="np_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15"
+        oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
       <span id="np_tracking_err" style="color:var(--accent);font-size:0.8rem"></span>
     </div>
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
@@ -2002,7 +2003,7 @@
     const tracking = document.getElementById('np_tracking').value.trim();
     const alertEl  = document.getElementById('ninPersonAlert');
     alertEl.innerHTML = '';
-    if (!tracking) { document.getElementById('np_tracking_err').textContent = 'Tracking ID is required'; return; }
+    if (!tracking || !/^[A-Z0-9]{15}$/.test(tracking)) { document.getElementById('np_tracking_err').textContent = 'Tracking ID must be exactly 15 alphanumeric characters'; return; }
     document.getElementById('np_tracking_err').textContent = '';
     const fee = _p.ninpers || 1000;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }

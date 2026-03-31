@@ -5,7 +5,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
 import {
   getFirestore, doc, setDoc, getDoc, onSnapshot,
-  collection, addDoc, getDocs, query, where, updateDoc, increment
+  collection, addDoc, getDocs, query, where, updateDoc, increment, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 import {
   getStorage, ref, uploadBytes, getDownloadURL
@@ -42,6 +42,7 @@ window.fbQuery = query;
 window.fbWhere = where;
 window.fbUpdateDoc = updateDoc;
 window.fbIncrement = increment;
+window.fbDeleteDoc = deleteDoc;
 window.fbCreateUser = createUserWithEmailAndPassword;
 window.fbSignIn = signInWithEmailAndPassword;
 window.fbSignOut = signOut;
