@@ -1175,24 +1175,10 @@
   const NIN_ONLY_SVCS = ['No Record Found', 'Bank Validation', 'Photograph Error', 'SIM Validation', 'VNIN Slip'];
 
   const NIN_VAL_FIELDS = {
-    'No Record Found': `
-      <div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>
-      <div class="form-group"><label>Full Name</label><input type="text" id="f_name" placeholder="Full name as on NIN"/></div>
-      <div class="form-group"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="Linked phone number"/></div>`,
-    'Bank Validation': `
-      <div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>
-      <div class="form-group"><label>Bank Name</label><input type="text" id="f_bank" placeholder="e.g. First Bank"/></div>
-      <div class="form-group"><label>Account Number</label><input type="text" id="f_account" placeholder="10-digit account number" maxlength="10"/></div>`,
-    'Photograph Error': `
-      <div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>
-      <div class="form-group"><label>Full Name</label><input type="text" id="f_name" placeholder="Full name as on NIN"/></div>
-      <div class="form-group"><label>Date of Birth</label><input type="date" id="f_dob"/></div>`,
-    'SIM Validation': `
-      <div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>
-      <div class="form-group"><label>Phone Number</label><input type="tel" id="f_phone" placeholder="SIM phone number"/></div>
-      <div class="form-group"><label>Network</label>
-        <select id="f_network"><option value="">Select Network</option><option>MTN</option><option>Airtel</option><option>Glo</option><option>9mobile</option></select>
-      </div>`
+    'No Record Found':  `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
+    'Bank Validation':  `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
+    'Photograph Error': `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
+    'SIM Validation':   `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`
   };
 
   function openServiceModal(title, desc, type, price) {
@@ -1233,9 +1219,9 @@
 
     const formData = {};
     if (document.getElementById('f_nin'))     formData['NIN Number']     = document.getElementById('f_nin').value;
+    if (document.getElementById('f_bvn'))     formData['BVN Number']     = document.getElementById('f_bvn').value;
     if (document.getElementById('f_name'))    formData['Full Name']      = document.getElementById('f_name').value;
     if (document.getElementById('f_dob'))     formData['Date of Birth']  = document.getElementById('f_dob').value;
-    if (document.getElementById('f_bvn'))     formData['BVN Number']     = document.getElementById('f_bvn').value;
     if (document.getElementById('f_phone'))   formData['Phone Number']   = document.getElementById('f_phone').value;
     if (document.getElementById('f_bank'))    formData['Bank Name']      = document.getElementById('f_bank').value;
     if (document.getElementById('f_account')) formData['Account Number'] = document.getElementById('f_account').value;
