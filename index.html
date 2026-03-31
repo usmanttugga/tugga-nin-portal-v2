@@ -1,224 +1,460 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>TUGGA IT SOLUTIONS - NIN Portal</title>
-  <link rel="stylesheet" href="css/style.css"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MAJIA DIGITAL IDENTITY – NIN Portal</title>
   <style>
-    .register-form{display:none}
-    .pw-wrap{position:relative}
-    .pw-wrap input{padding-right:42px}
-    .pw-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:1rem;color:var(--gray);padding:0 4px}
-    .forgot-link{display:block;text-align:right;font-size:0.82rem;color:var(--primary);cursor:pointer;margin-top:-0.6rem;margin-bottom:1rem;text-decoration:underline}
-    .btn-loader{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:6px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .forgot-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:999;align-items:center;justify-content:center;padding:1rem}
-    .forgot-modal.open{display:flex}
-    .forgot-box{background:#fff;border-radius:16px;padding:2rem;width:100%;max-width:380px;box-shadow:0 20px 60px rgba(0,0,0,0.3)}
-    .forgot-box h3{color:var(--primary);margin-bottom:0.5rem}
-    .forgot-box p{color:var(--gray);font-size:0.85rem;margin-bottom:1.2rem}
-    .demo-hint{text-align:center;color:rgba(255,255,255,0.6);font-size:0.78rem;margin-top:1rem}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      padding: 1rem;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 24px 64px rgba(0,0,0,.35);
+      width: 100%;
+      max-width: 440px;
+      overflow: hidden;
+    }
+
+    /* Brand */
+    .brand {
+      background: linear-gradient(135deg, #1e3a5f, #2563eb);
+      color: #fff;
+      text-align: center;
+      padding: 2rem 1.5rem 1.5rem;
+    }
+    .brand .shield { font-size: 3rem; line-height: 1; }
+    .brand h1 { font-size: 1.25rem; font-weight: 700; margin-top: .5rem; letter-spacing: .5px; }
+    .brand p  { font-size: .8rem; opacity: .8; margin-top: .25rem; }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      border-bottom: 2px solid #e5e7eb;
+    }
+    .tab-btn {
+      flex: 1;
+      padding: .85rem;
+      background: none;
+      border: none;
+      font-size: .95rem;
+      font-weight: 600;
+      color: #6b7280;
+      cursor: pointer;
+      transition: color .2s, border-bottom .2s;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+    }
+    .tab-btn.active { color: #2563eb; border-bottom-color: #2563eb; }
+
+    /* Forms */
+    .form-wrap { padding: 1.75rem 1.75rem 2rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: .82rem; font-weight: 600; color: #374151; margin-bottom: .35rem; }
+    .field input {
+      width: 100%;
+      padding: .65rem .9rem;
+      border: 1.5px solid #d1d5db;
+      border-radius: 8px;
+      font-size: .95rem;
+      outline: none;
+      transition: border-color .2s;
+    }
+    .field input:focus { border-color: #2563eb; }
+
+    .pw-wrap { position: relative; }
+    .pw-wrap input { padding-right: 2.8rem; }
+    .pw-toggle {
+      position: absolute;
+      right: .75rem;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #6b7280;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .forgot-link {
+      display: block;
+      text-align: right;
+      font-size: .8rem;
+      color: #2563eb;
+      text-decoration: none;
+      margin-top: -.5rem;
+      margin-bottom: 1rem;
+      cursor: pointer;
+    }
+    .forgot-link:hover { text-decoration: underline; }
+
+    .btn-primary {
+      width: 100%;
+      padding: .75rem;
+      background: #2563eb;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .2s, opacity .2s;
+    }
+    .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+    .btn-primary:disabled { opacity: .65; cursor: not-allowed; }
+
+    .msg {
+      margin-top: .9rem;
+      padding: .65rem .9rem;
+      border-radius: 8px;
+      font-size: .85rem;
+      display: none;
+    }
+    .msg.error   { background: #fee2e2; color: #b91c1c; display: block; }
+    .msg.success { background: #dcfce7; color: #15803d; display: block; }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.55);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: #fff;
+      border-radius: 14px;
+      padding: 2rem;
+      width: 100%;
+      max-width: 380px;
+      box-shadow: 0 16px 48px rgba(0,0,0,.3);
+    }
+    .modal h2 { font-size: 1.1rem; font-weight: 700; color: #1e3a5f; margin-bottom: .4rem; }
+    .modal p  { font-size: .85rem; color: #6b7280; margin-bottom: 1.2rem; }
+    .modal-actions { display: flex; gap: .75rem; margin-top: 1rem; }
+    .btn-secondary {
+      flex: 1;
+      padding: .65rem;
+      background: #f3f4f6;
+      color: #374151;
+      border: none;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-secondary:hover { background: #e5e7eb; }
   </style>
 </head>
 <body>
-<div class="hero">
-  <div class="login-card">
-    <div class="brand">
-      <div class="logo-icon">&#128737;</div>
-      <h1>TUGGA <span>IT SOLUTIONS</span></h1>
-      <p>National Identity &amp; BVN Services Portal</p>
-    </div>
-    <div class="tabs">
-      <button class="active" onclick="switchTab('login')">Login</button>
-      <button onclick="switchTab('register')">Register</button>
-    </div>
-    <div id="loginForm">
-      <div id="loginAlert"></div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="loginEmail" placeholder="Enter your email"/>
+
+<div class="card">
+  <!-- Brand -->
+  <div class="brand">
+    <div class="logo-icon"><img src="img/logo.png" alt="MAJIA" style="height:80px;width:auto;object-fit:contain"/></div>
+    <h1>MAJIA <span>DIGITAL IDENTITY</span></h1>
+    <p>Securing Your Identity with Trust and Precision</p>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+    <button class="tab-btn"        onclick="switchTab('register')">Register</button>
+  </div>
+
+  <div class="form-wrap">
+
+    <!-- LOGIN -->
+    <div id="panel-login" class="tab-panel active">
+      <div class="field">
+        <label for="l-email">Email Address</label>
+        <input type="email" id="l-email" placeholder="you@example.com" />
       </div>
-      <div class="form-group">
-        <label>Password</label>
+      <div class="field">
+        <label for="l-pw">Password</label>
         <div class="pw-wrap">
-          <input type="password" id="loginPassword" placeholder="Enter your password"/>
-          <button class="pw-toggle" type="button" onclick="togglePw('loginPassword',this)">Show</button>
+          <input type="password" id="l-pw" placeholder="••••••••" />
+          <button class="pw-toggle" onclick="togglePw('l-pw', this)" type="button">👁️</button>
         </div>
       </div>
-      <span class="forgot-link" onclick="openForgot()">Forgot password?</span>
-      <button class="btn-primary" id="loginBtn" onclick="doLogin()">Login to Portal</button>
+      <a class="forgot-link" onclick="openForgot()">Forgot password?</a>
+      <button class="btn-primary" id="btn-login" onclick="doLogin()">Sign In</button>
+      <div class="msg" id="msg-login"></div>
     </div>
-    <div id="registerForm" class="register-form">
-      <div id="regAlert"></div>
-      <div class="form-group">
-        <label>Full Name</label>
-        <input type="text" id="regName" placeholder="Enter full name"/>
+
+    <!-- REGISTER -->
+    <div id="panel-register" class="tab-panel">
+      <div class="field">
+        <label for="r-name">Full Name</label>
+        <input type="text" id="r-name" placeholder="John Doe" />
       </div>
-      <div class="form-group">
-        <label>Email Address</label>
-        <input type="email" id="regEmail" placeholder="Enter email"/>
+      <div class="field">
+        <label for="r-email">Email Address</label>
+        <input type="email" id="r-email" placeholder="you@example.com" />
       </div>
-      <div class="form-group">
-        <label>Phone Number</label>
-        <input type="tel" id="regPhone" placeholder="08XXXXXXXXX"/>
+      <div class="field">
+        <label for="r-phone">Phone Number</label>
+        <input type="tel" id="r-phone" placeholder="+234 800 000 0000" />
       </div>
-      <div class="form-group">
-        <label>Password</label>
+      <div class="field">
+        <label for="r-pw">Password</label>
         <div class="pw-wrap">
-          <input type="password" id="regPassword" placeholder="Create password (min 6 chars)"/>
-          <button class="pw-toggle" type="button" onclick="togglePw('regPassword',this)">Show</button>
+          <input type="password" id="r-pw" placeholder="••••••••" />
+          <button class="pw-toggle" onclick="togglePw('r-pw', this)" type="button">👁️</button>
         </div>
       </div>
-      <div class="form-group">
-        <label>Confirm Password</label>
+      <div class="field">
+        <label for="r-cpw">Confirm Password</label>
         <div class="pw-wrap">
-          <input type="password" id="regConfirm" placeholder="Confirm your password"/>
-          <button class="pw-toggle" type="button" onclick="togglePw('regConfirm',this)">Show</button>
+          <input type="password" id="r-cpw" placeholder="••••••••" />
+          <button class="pw-toggle" onclick="togglePw('r-cpw', this)" type="button">👁️</button>
         </div>
       </div>
-      <button class="btn-primary btn-accent" id="regBtn" onclick="doRegister()">Create Account</button>
+      <button class="btn-primary" id="btn-register" onclick="doRegister()">Create Account</button>
+      <div class="msg" id="msg-register"></div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Forgot Password Modal -->
+<div class="modal-overlay" id="forgot-modal">
+  <div class="modal">
+    <h2>Reset Password</h2>
+    <p>Enter your email and we'll send you a reset link.</p>
+    <div class="field">
+      <label for="f-email">Email Address</label>
+      <input type="email" id="f-email" placeholder="you@example.com" />
+    </div>
+    <div class="msg" id="msg-forgot"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeForgot()">Cancel</button>
+      <button class="btn-primary" id="btn-forgot" onclick="doForgot()" style="flex:1">Send Link</button>
     </div>
   </div>
 </div>
-<div class="forgot-modal" id="forgotModal">
-  <div class="forgot-box">
-    <h3>Reset Password</h3>
-    <p>Enter your email and we will send you a reset link.</p>
-    <div id="forgotAlert"></div>
-    <div class="form-group">
-      <label>Email Address</label>
-      <input type="email" id="forgotEmail" placeholder="Enter your email"/>
-    </div>
-    <button class="btn-primary" id="forgotBtn" onclick="doForgot()">Send Reset Link</button>
-    <button onclick="closeForgot()" style="width:100%;margin-top:0.5rem;padding:10px;background:none;border:1px solid #dfe6e9;border-radius:8px;cursor:pointer;color:var(--gray)">Cancel</button>
-  </div>
-</div>
-<script type="module" src="js/firebase.js"></script>
+
+<!-- Firebase module script -->
+<script type="module">
+  import { initializeApp }                        from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, createUserWithEmailAndPassword,
+           signInWithEmailAndPassword,
+           sendPasswordResetEmail }               from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+  import { getFirestore, doc, setDoc, getDoc }   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey:            "AIzaSyDX31m2k1OOzedDQHAbpvgP15mxLjBRdwc",
+    authDomain:        "tugga-nin.firebaseapp.com",
+    projectId:         "tugga-nin",
+    storageBucket:     "tugga-nin.firebasestorage.app",
+    messagingSenderId: "63922868228",
+    appId:             "1:63922868228:web:45bfadf123e9b493b82551"
+  };
+
+  const app  = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db   = getFirestore(app);
+
+  window._auth        = auth;
+  window._db          = db;
+  window._signIn      = signInWithEmailAndPassword;
+  window._createUser  = createUserWithEmailAndPassword;
+  window._getDoc      = getDoc;
+  window._doc         = doc;
+  window._setDoc      = setDoc;
+  window._resetPwd    = sendPasswordResetEmail;
+  window._fbReady     = true;
+</script>
+
+<!-- Regular script – all onclick handlers live here -->
 <script>
-  var _registering = false;
+  /* ── helpers ─────────────────────────────────────────── */
+  function waitFB() {
+    return new Promise((resolve, reject) => {
+      if (window._fbReady) { resolve(); return; }
+      let tries = 0;
+      const t = setInterval(() => {
+        if (window._fbReady) { clearInterval(t); resolve(); }
+        else if (++tries > 50) { clearInterval(t); reject(new Error("Firebase failed to load.")); }
+      }, 100);
+    });
+  }
 
+  function showMsg(id, text, type) {
+    const el = document.getElementById(id);
+    el.textContent = text;
+    el.className = "msg " + type;
+  }
+
+  function clearMsg(id) {
+    const el = document.getElementById(id);
+    el.textContent = "";
+    el.className = "msg";
+  }
+
+  function setLoading(btnId, loading, label) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.textContent = loading ? "Please wait…" : label;
+  }
+
+  /* ── tab switching ───────────────────────────────────── */
   function switchTab(tab) {
-    document.querySelectorAll(".tabs button").forEach(function(b,i){
-      b.classList.toggle("active",(i===0&&tab==="login")||(i===1&&tab==="register"));
+    document.querySelectorAll(".tab-btn").forEach((b, i) => {
+      b.classList.toggle("active", (tab === "login" ? i === 0 : i === 1));
     });
-    document.getElementById("loginForm").style.display=tab==="login"?"block":"none";
-    document.getElementById("registerForm").style.display=tab==="register"?"block":"none";
+    document.getElementById("panel-login").classList.toggle("active", tab === "login");
+    document.getElementById("panel-register").classList.toggle("active", tab === "register");
+    clearMsg("msg-login");
+    clearMsg("msg-register");
   }
 
-  function togglePw(id,btn){
-    var inp=document.getElementById(id);
-    if(inp.type==="password"){inp.type="text";btn.textContent="Hide";}
-    else{inp.type="password";btn.textContent="Show";}
+  /* ── password toggle ─────────────────────────────────── */
+  function togglePw(inputId, btn) {
+    const inp = document.getElementById(inputId);
+    if (inp.type === "password") {
+      inp.type = "text";
+      btn.textContent = "🙈";
+    } else {
+      inp.type = "password";
+      btn.textContent = "👁️";
+    }
   }
 
-  function setLoading(btnId,loading,defaultText){
-    var btn=document.getElementById(btnId);
-    if(!btn)return;
-    btn.disabled=loading;
-    btn.innerHTML=loading?'<span class="btn-loader"></span> Please wait...':defaultText;
+  /* ── forgot modal ────────────────────────────────────── */
+  function openForgot() {
+    document.getElementById("forgot-modal").classList.add("open");
+    clearMsg("msg-forgot");
+    document.getElementById("f-email").value = document.getElementById("l-email").value || "";
   }
 
-  function waitForFirebase(cb){
-    if(window.fbReady){cb();}else{setTimeout(function(){waitForFirebase(cb);},200);}
+  function closeForgot() {
+    document.getElementById("forgot-modal").classList.remove("open");
   }
 
-  function doLogin(){
-    var email=document.getElementById("loginEmail").value.trim();
-    var pass=document.getElementById("loginPassword").value;
-    var alertEl=document.getElementById("loginAlert");
-    alertEl.innerHTML="";
-    if(!email||!pass){alertEl.innerHTML='<div class="alert alert-error">Please fill all fields.</div>';return;}
-    setLoading("loginBtn",true,"Login to Portal");
-    waitForFirebase(function(){
-      window.fbSignIn(window.fbAuth,email,pass).then(function(cred){
-        return window.fbGetDoc(window.fbDoc(window.fbDB,"users",cred.user.uid)).then(function(snap){
-          if(snap.exists()){
-            var u=snap.data();
-            localStorage.setItem("tugga_user",JSON.stringify(Object.assign({},u,{uid:cred.user.uid})));
-            window.location.href=u.role==="admin"?"admin/dashboard.html":"user/dashboard.html";
-          }else{
-            alertEl.innerHTML='<div class="alert alert-error">User profile not found. Please register.</div>';
-            setLoading("loginBtn",false,"Login to Portal");
-          }
-        });
-      }).catch(function(err){
-        console.error("Login error:",err.code,err.message);
-        var msg="Invalid email or password.";
-        if(err.code==="auth/too-many-requests")msg="Too many attempts. Try again later.";
-        if(err.code==="auth/user-not-found")msg="No account found. Please register.";
-        if(err.code==="auth/network-request-failed")msg="Network error. Check your connection.";
-        alertEl.innerHTML='<div class="alert alert-error">'+msg+'</div>';
-        setLoading("loginBtn",false,"Login to Portal");
+  /* ── doLogin ─────────────────────────────────────────── */
+  async function doLogin() {
+    clearMsg("msg-login");
+    const email = document.getElementById("l-email").value.trim();
+    const pw    = document.getElementById("l-pw").value;
+
+    if (!email || !pw) { showMsg("msg-login", "Please fill in all fields.", "error"); return; }
+
+    setLoading("btn-login", true, "Sign In");
+    try {
+      await waitFB();
+      const c = await window._signIn(window._auth, email, pw);
+      const uid = c.user.uid;
+
+      const snap = await window._getDoc(window._doc(window._db, "users", uid));
+      let role = "user";
+      if (snap.exists()) {
+        role = snap.data().role || "user";
+      }
+
+      window.location.href = role === "admin" ? "admin/dashboard.html" : "user/dashboard.html";
+    } catch (e) {
+      setLoading("btn-login", false, "Sign In");
+      showMsg("msg-login", friendlyError(e.code), "error");
+    }
+  }
+
+  /* ── doRegister ──────────────────────────────────────── */
+  async function doRegister() {
+    clearMsg("msg-register");
+    const name  = document.getElementById("r-name").value.trim();
+    const email = document.getElementById("r-email").value.trim();
+    const phone = document.getElementById("r-phone").value.trim();
+    const pw    = document.getElementById("r-pw").value;
+    const cpw   = document.getElementById("r-cpw").value;
+
+    if (!name || !email || !phone || !pw || !cpw) {
+      showMsg("msg-register", "Please fill in all fields.", "error"); return;
+    }
+    if (pw !== cpw) {
+      showMsg("msg-register", "Passwords do not match.", "error"); return;
+    }
+    if (pw.length < 6) {
+      showMsg("msg-register", "Password must be at least 6 characters.", "error"); return;
+    }
+
+    setLoading("btn-register", true, "Create Account");
+    try {
+      await waitFB();
+      const c   = await window._createUser(window._auth, email, pw);
+      const uid = c.user.uid;
+
+      await window._setDoc(window._doc(window._db, "users", uid), {
+        uid:       uid,
+        id:        uid,
+        name:      name,
+        email:     email,
+        phone:     phone,
+        role:      "user",
+        createdAt: new Date().toISOString()
       });
-    });
+
+      showMsg("msg-register", "Account created! Redirecting…", "success");
+      setTimeout(() => { window.location.href = "user/dashboard.html"; }, 1200);
+    } catch (e) {
+      setLoading("btn-register", false, "Create Account");
+      showMsg("msg-register", friendlyError(e.code), "error");
+    }
   }
 
-  function doRegister(){
-    var name=document.getElementById("regName").value.trim();
-    var email=document.getElementById("regEmail").value.trim();
-    var phone=document.getElementById("regPhone").value.trim();
-    var pass=document.getElementById("regPassword").value;
-    var confirm=document.getElementById("regConfirm").value;
-    var alertEl=document.getElementById("regAlert");
-    alertEl.innerHTML="";
-    if(!name||!email||!phone||!pass||!confirm){alertEl.innerHTML='<div class="alert alert-error">Please fill all fields.</div>';return;}
-    if(pass.length<6){alertEl.innerHTML='<div class="alert alert-error">Password must be at least 6 characters.</div>';return;}
-    if(pass!==confirm){alertEl.innerHTML='<div class="alert alert-error">Passwords do not match.</div>';return;}
-    setLoading("regBtn",true,"Create Account");
-    _registering=true;
-    waitForFirebase(function(){
-      window.fbCreateUser(window.fbAuth,email,pass).then(function(cred){
-        var userData={
-          id:cred.user.uid,name:name,email:email,phone:phone,
-          role:"user",wallet:0,nin:"",
-          registeredAt:new Date().toLocaleDateString("en-GB")
-        };
-        return window.fbSetDoc(window.fbDoc(window.fbDB,"users",cred.user.uid),userData).then(function(){
-          localStorage.setItem("tugga_user",JSON.stringify(Object.assign({},userData,{uid:cred.user.uid})));
-          _registering=false;
-          alertEl.innerHTML='<div class="alert alert-success">Account created! Redirecting...</div>';
-          setTimeout(function(){window.location.href="user/dashboard.html";},1200);
-        });
-      }).catch(function(err){
-        _registering=false;
-        console.error("Register error:",err.code,err.message);
-        var msg="Registration failed: "+err.message;
-        if(err.code==="auth/email-already-in-use")msg="Email already registered. Please login.";
-        if(err.code==="auth/invalid-email")msg="Invalid email address.";
-        if(err.code==="auth/weak-password")msg="Password too weak. Use at least 6 characters.";
-        if(err.code==="auth/network-request-failed")msg="Network error. Check your connection.";
-        alertEl.innerHTML='<div class="alert alert-error">'+msg+'</div>';
-        setLoading("regBtn",false,"Create Account");
-      });
-    });
+  /* ── doForgot ────────────────────────────────────────── */
+  async function doForgot() {
+    clearMsg("msg-forgot");
+    const email = document.getElementById("f-email").value.trim();
+    if (!email) { showMsg("msg-forgot", "Please enter your email.", "error"); return; }
+
+    setLoading("btn-forgot", true, "Send Link");
+    try {
+      await waitFB();
+      await window._resetPwd(window._auth, email);
+      showMsg("msg-forgot", "Reset link sent! Check your inbox.", "success");
+      setLoading("btn-forgot", false, "Send Link");
+    } catch (e) {
+      setLoading("btn-forgot", false, "Send Link");
+      showMsg("msg-forgot", friendlyError(e.code), "error");
+    }
   }
 
-  function openForgot(){
-    document.getElementById("forgotModal").classList.add("open");
-    document.getElementById("forgotAlert").innerHTML="";
-    document.getElementById("forgotEmail").value=document.getElementById("loginEmail").value||"";
-  }
-  function closeForgot(){document.getElementById("forgotModal").classList.remove("open");}
-
-  function doForgot(){
-    var email=document.getElementById("forgotEmail").value.trim();
-    var alertEl=document.getElementById("forgotAlert");
-    alertEl.innerHTML="";
-    if(!email){alertEl.innerHTML='<div class="alert alert-error">Please enter your email.</div>';return;}
-    setLoading("forgotBtn",true,"Send Reset Link");
-    waitForFirebase(function(){
-      window.fbResetPassword(window.fbAuth,email).then(function(){
-        alertEl.innerHTML='<div class="alert alert-success">Reset link sent! Check your email.</div>';
-        setLoading("forgotBtn",false,"Send Reset Link");
-      }).catch(function(err){
-        var msg="Failed to send reset email.";
-        if(err.code==="auth/user-not-found")msg="No account found with this email.";
-        alertEl.innerHTML='<div class="alert alert-error">'+msg+'</div>';
-        setLoading("forgotBtn",false,"Send Reset Link");
-      });
-    });
+  /* ── error messages ──────────────────────────────────── */
+  function friendlyError(code) {
+    const map = {
+      "auth/user-not-found":       "No account found with this email.",
+      "auth/wrong-password":       "Incorrect password.",
+      "auth/invalid-credential":   "Invalid email or password.",
+      "auth/email-already-in-use": "This email is already registered.",
+      "auth/weak-password":        "Password is too weak.",
+      "auth/invalid-email":        "Please enter a valid email address.",
+      "auth/too-many-requests":    "Too many attempts. Please try again later.",
+      "auth/network-request-failed": "Network error. Check your connection."
+    };
+    return map[code] || "Something went wrong. Please try again.";
   }
 </script>
+
 </body>
 </html>
+
+<!-- deploy trigger v2 -->

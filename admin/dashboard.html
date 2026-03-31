@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Dashboard – TUGGA IT SOLUTIONS</title>
+  <title>Admin Dashboard – MAJIA DIGITAL IDENTITY</title>
   <link rel="stylesheet" href="../css/style.css"/>
 </head>
 <body>
@@ -13,7 +13,7 @@
     <button class="hamburger" onclick="toggleSidebar()" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
-    <div class="logo">🛡️ TUGGA <span>IT SOLUTIONS</span> <span style="font-size:0.7rem;background:var(--accent);color:var(--primary);padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:700">ADMIN</span></div>
+    <div class="logo"><img src="../img/logo.png" alt="MAJIA" style="height:40px;width:auto;object-fit:contain"/> <span>MAJIA</span> DIGITAL IDENTITY <span style="font-size:0.7rem;background:var(--accent);color:var(--primary);padding:2px 8px;border-radius:4px;margin-left:8px;font-weight:700">ADMIN</span></div>
   </div>
   <div class="nav-links">
     <a href="#" class="active">Admin Panel</a>
@@ -247,7 +247,7 @@
       <p class="page-sub">Configure platform details.</p>
       <div style="background:var(--white);border-radius:12px;padding:2rem;max-width:560px;box-shadow:var(--card-shadow)">
         <div id="settingsAlert"></div>
-        <div class="form-group"><label>Company Name</label><input type="text" id="s_company" value="TUGGA IT SOLUTIONS"/></div>
+        <div class="form-group"><label>Company Name</label><input type="text" id="s_company" value="MAJIA DIGITAL IDENTITY"/></div>
         <div class="form-group"><label>Support Email</label><input type="email" id="s_email" placeholder="support@tugga.com"/></div>
         <div class="form-group"><label>Support Phone</label><input type="tel" id="s_phone" placeholder="+234XXXXXXXXXX"/></div>
         <div class="form-group"><label>Platform Status</label>
@@ -484,7 +484,7 @@
 
   function saveSettings() {
     const settings = {
-      companyName:    document.getElementById("s_company").value.trim() || "TUGGA IT SOLUTIONS",
+      companyName:    document.getElementById("s_company").value.trim() || "MAJIA DIGITAL IDENTITY",
       supportEmail:   document.getElementById("s_email").value.trim(),
       supportPhone:   document.getElementById("s_phone").value.trim(),
       platformStatus: document.getElementById("s_status").value
