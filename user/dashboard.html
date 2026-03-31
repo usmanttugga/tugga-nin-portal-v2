@@ -83,8 +83,8 @@
         <div class="service-card" onclick="showSection('sec-nin-verify')"><div class="svc-icon">🪪</div><h4>NIN Verification</h4><p>Verify NIN instantly</p></div>
         <div class="service-card" onclick="showSection('sec-nin-validation')"><div class="svc-icon">✔️</div><h4>NIN Validation</h4><p>Validate NIN details</p></div>
         <div class="service-card" onclick="showSection('sec-nin-modification')"><div class="svc-icon">✏️</div><h4>NIN Modification</h4><p>Update NIN data</p></div>
-        <div class="service-card" data-svc="NIN Personalization" onclick="openNinPersonModal()"><div class="svc-icon">🎨</div><h4>NIN Personalization</h4><p>Personalize NIN card</p></div>
-        <div class="service-card" data-svc="VNIN Slip" onclick="openServiceModal('VNIN Slip','Generate virtual NIN slip','nin', String(_p.vnin||250))"><div class="svc-icon">📱</div><h4>VNIN Slip</h4><p>Get virtual NIN slip</p></div>
+        <div class="service-card" data-svc="NIN Personalization" onclick="showSection('sec-nin-person')"><div class="svc-icon">🎨</div><h4>NIN Personalization</h4><p>Personalize NIN card</p></div>
+        <div class="service-card" data-svc="VNIN Slip" onclick="showSection('sec-vnin')"><div class="svc-icon">📱</div><h4>VNIN Slip</h4><p>Get virtual NIN slip</p></div>
         <div class="service-card" onclick="showSection('sec-ipe')"><div class="svc-icon">✅</div><h4>IPE Clearance</h4><p>Identity pre-enrollment</p></div>
         <div class="service-card" data-svc="BVN Verification" onclick="showSection('sec-bvn')"><div class="svc-icon">🏦</div><h4>BVN Verification</h4><p>Verify BVN details</p><div class="price">₦200</div></div>
         <div class="service-card" data-svc="BVN Retrieval" onclick="showSection('sec-bvn')"><div class="svc-icon">🔍</div><h4>BVN Retrieval</h4><p>Retrieve your BVN</p><div class="price">₦150</div></div>
@@ -1105,7 +1105,7 @@
     document.getElementById("statWallet").textContent = fmt(walletBalance);
     document.getElementById("walletBal").textContent = fmt(walletBalance) + ".00";
     renderHistory();
-    renderAllServiceHistories();
+    if (typeof SVC_HISTORY_MAP !== 'undefined') renderAllServiceHistories();
   }
 
   function renderHistory() {
