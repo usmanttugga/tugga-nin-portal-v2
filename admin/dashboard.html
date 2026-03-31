@@ -181,12 +181,49 @@
 
           <!-- NIN Verification group -->
           <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
-            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🔍 NIN Verification</p>
-            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
-              <div class="form-group"><label>Verify with NIN (₦)</label><input type="number" id="p_verify_nin" value="200"/></div>
-              <div class="form-group"><label>Phone Number Verification (₦)</label><input type="number" id="p_phone_verify" value="150"/></div>
-              <div class="form-group"><label>Bio Data Verification (₦)</label><input type="number" id="p_bio_data" value="300"/></div>
-              <div class="form-group"><label>FingerPrint Verification (₦)</label><input type="number" id="p_fingerprint" value="200"/></div>
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🔍 NIN Verification — Slip Pricing</p>
+            <div style="display:flex;flex-direction:column;gap:1rem">
+
+              <div>
+                <p style="font-size:0.85rem;font-weight:600;color:var(--gray);margin-bottom:0.5rem">🪪 Verify with NIN</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem">
+                  <div class="form-group"><label>Normal Slip (₦)</label><input type="number" id="p_nin_normal" value="200"/></div>
+                  <div class="form-group"><label>Verification Info Slip (₦)</label><input type="number" id="p_nin_info" value="250"/></div>
+                  <div class="form-group"><label>Premium Slip (₦)</label><input type="number" id="p_nin_premium" value="350"/></div>
+                  <div class="form-group"><label>Standard Slip (₦)</label><input type="number" id="p_nin_standard" value="200"/></div>
+                </div>
+              </div>
+
+              <div>
+                <p style="font-size:0.85rem;font-weight:600;color:var(--gray);margin-bottom:0.5rem">📞 Phone Number Verification</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem">
+                  <div class="form-group"><label>Normal Slip (₦)</label><input type="number" id="p_phone_normal" value="150"/></div>
+                  <div class="form-group"><label>Verification Info Slip (₦)</label><input type="number" id="p_phone_info" value="200"/></div>
+                  <div class="form-group"><label>Premium Slip (₦)</label><input type="number" id="p_phone_premium" value="300"/></div>
+                  <div class="form-group"><label>Standard Slip (₦)</label><input type="number" id="p_phone_standard" value="150"/></div>
+                </div>
+              </div>
+
+              <div>
+                <p style="font-size:0.85rem;font-weight:600;color:var(--gray);margin-bottom:0.5rem">🧬 Bio Data Verification</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem">
+                  <div class="form-group"><label>Normal Slip (₦)</label><input type="number" id="p_bio_normal" value="300"/></div>
+                  <div class="form-group"><label>Verification Info Slip (₦)</label><input type="number" id="p_bio_info" value="350"/></div>
+                  <div class="form-group"><label>Premium Slip (₦)</label><input type="number" id="p_bio_premium" value="450"/></div>
+                  <div class="form-group"><label>Standard Slip (₦)</label><input type="number" id="p_bio_standard" value="300"/></div>
+                </div>
+              </div>
+
+              <div>
+                <p style="font-size:0.85rem;font-weight:600;color:var(--gray);margin-bottom:0.5rem">👆 FingerPrint Verification</p>
+                <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.8rem">
+                  <div class="form-group"><label>Normal Slip (₦)</label><input type="number" id="p_fp_normal" value="200"/></div>
+                  <div class="form-group"><label>Verification Info Slip (₦)</label><input type="number" id="p_fp_info" value="250"/></div>
+                  <div class="form-group"><label>Premium Slip (₦)</label><input type="number" id="p_fp_premium" value="350"/></div>
+                  <div class="form-group"><label>Standard Slip (₦)</label><input type="number" id="p_fp_standard" value="200"/></div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -795,10 +832,22 @@
       bvnret:       parseInt(document.getElementById("p_bvnret").value) || 150,
       bvnmod:       parseInt(document.getElementById("p_bvnmod").value) || 500,
       bvnuser:      parseInt(document.getElementById("p_bvnuser").value) || 200,
-      verify_nin:   parseInt(document.getElementById("p_verify_nin").value) || 200,
-      phone_verify: parseInt(document.getElementById("p_phone_verify").value) || 150,
-      bio_data:     parseInt(document.getElementById("p_bio_data").value) || 300,
-      fingerprint:  parseInt(document.getElementById("p_fingerprint").value) || 200,
+      nin_normal:   parseInt(document.getElementById("p_nin_normal").value) || 200,
+      nin_info:     parseInt(document.getElementById("p_nin_info").value) || 250,
+      nin_premium:  parseInt(document.getElementById("p_nin_premium").value) || 350,
+      nin_standard: parseInt(document.getElementById("p_nin_standard").value) || 200,
+      phone_normal:   parseInt(document.getElementById("p_phone_normal").value) || 150,
+      phone_info:     parseInt(document.getElementById("p_phone_info").value) || 200,
+      phone_premium:  parseInt(document.getElementById("p_phone_premium").value) || 300,
+      phone_standard: parseInt(document.getElementById("p_phone_standard").value) || 150,
+      bio_normal:   parseInt(document.getElementById("p_bio_normal").value) || 300,
+      bio_info:     parseInt(document.getElementById("p_bio_info").value) || 350,
+      bio_premium:  parseInt(document.getElementById("p_bio_premium").value) || 450,
+      bio_standard: parseInt(document.getElementById("p_bio_standard").value) || 300,
+      fp_normal:    parseInt(document.getElementById("p_fp_normal").value) || 200,
+      fp_info:      parseInt(document.getElementById("p_fp_info").value) || 250,
+      fp_premium:   parseInt(document.getElementById("p_fp_premium").value) || 350,
+      fp_standard:  parseInt(document.getElementById("p_fp_standard").value) || 200,
       no_record:    parseInt(document.getElementById("p_no_record").value) || 150,
       bank_val:     parseInt(document.getElementById("p_bank_val").value) || 150,
       photo_err:    parseInt(document.getElementById("p_photo_err").value) || 150,
@@ -821,7 +870,7 @@
 
   function loadPricingFields() {
     function applyPricing(saved) {
-      const defaults = { ninmod:500, ninpers:1000, vnin:250, ipe_normal:400, ipe_mod:400, ipe_other:400, bvnver:200, bvnret:150, bvnmod:500, bvnuser:200, verify_nin:200, phone_verify:150, bio_data:300, fingerprint:200, no_record:150, bank_val:150, photo_err:150, sim_val:150, name_mod:500, phone_mod:500, address_mod:500, dob_mod:500 };
+      const defaults = { ninmod:500, ninpers:1000, vnin:250, ipe_normal:400, ipe_mod:400, ipe_other:400, bvnver:200, bvnret:150, bvnmod:500, bvnuser:200, nin_normal:200, nin_info:250, nin_premium:350, nin_standard:200, phone_normal:150, phone_info:200, phone_premium:300, phone_standard:150, bio_normal:300, bio_info:350, bio_premium:450, bio_standard:300, fp_normal:200, fp_info:250, fp_premium:350, fp_standard:200, no_record:150, bank_val:150, photo_err:150, sim_val:150, name_mod:500, phone_mod:500, address_mod:500, dob_mod:500 };
       const p = Object.assign({}, defaults, saved);
       document.getElementById("p_ninmod").value       = p.ninmod;
       document.getElementById("p_ninpers").value      = p.ninpers;
@@ -833,10 +882,22 @@
       document.getElementById("p_bvnret").value       = p.bvnret;
       document.getElementById("p_bvnmod").value       = p.bvnmod;
       document.getElementById("p_bvnuser").value      = p.bvnuser;
-      document.getElementById("p_verify_nin").value   = p.verify_nin;
-      document.getElementById("p_phone_verify").value = p.phone_verify;
-      document.getElementById("p_bio_data").value     = p.bio_data;
-      document.getElementById("p_fingerprint").value  = p.fingerprint;
+      document.getElementById("p_nin_normal").value   = p.nin_normal;
+      document.getElementById("p_nin_info").value     = p.nin_info;
+      document.getElementById("p_nin_premium").value  = p.nin_premium;
+      document.getElementById("p_nin_standard").value = p.nin_standard;
+      document.getElementById("p_phone_normal").value   = p.phone_normal;
+      document.getElementById("p_phone_info").value     = p.phone_info;
+      document.getElementById("p_phone_premium").value  = p.phone_premium;
+      document.getElementById("p_phone_standard").value = p.phone_standard;
+      document.getElementById("p_bio_normal").value   = p.bio_normal;
+      document.getElementById("p_bio_info").value     = p.bio_info;
+      document.getElementById("p_bio_premium").value  = p.bio_premium;
+      document.getElementById("p_bio_standard").value = p.bio_standard;
+      document.getElementById("p_fp_normal").value    = p.fp_normal;
+      document.getElementById("p_fp_info").value      = p.fp_info;
+      document.getElementById("p_fp_premium").value   = p.fp_premium;
+      document.getElementById("p_fp_standard").value  = p.fp_standard;
       document.getElementById("p_no_record").value    = p.no_record;
       document.getElementById("p_bank_val").value     = p.bank_val;
       document.getElementById("p_photo_err").value    = p.photo_err;

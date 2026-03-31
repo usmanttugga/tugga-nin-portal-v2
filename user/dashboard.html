@@ -1279,10 +1279,27 @@
 
   function refreshPricing() {
     _p = JSON.parse(localStorage.getItem("tugga_pricing") || "{}");
-    NIN_VERIFY_SERVICES['verify-nin'].fee   = _p.verify_nin   || 200;
-    NIN_VERIFY_SERVICES['phone-verify'].fee = _p.phone_verify || 150;
-    NIN_VERIFY_SERVICES['bio-data'].fee     = _p.bio_data     || 300;
-    NIN_VERIFY_SERVICES['fingerprint'].fee  = _p.fingerprint  || 200;
+    // NIN Verify fees are now per slip type — base fee is the Normal Slip price
+    NIN_VERIFY_SERVICES['verify-nin'].fee   = _p.nin_normal   || 200;
+    NIN_VERIFY_SERVICES['phone-verify'].fee = _p.phone_normal || 150;
+    NIN_VERIFY_SERVICES['bio-data'].fee     = _p.bio_normal   || 300;
+    NIN_VERIFY_SERVICES['fingerprint'].fee  = _p.fp_normal    || 200;
+  }
+
+  // Get fee for a specific method + slip combination
+  function getNinVerifyFee(serviceKey, slipName) {
+    const slipKey = slipName === 'Normal Slip' ? 'normal'
+      : slipName === 'Verification Information Slip' ? 'info'
+      : slipName === 'Premium Slip' ? 'premium'
+      : slipName === 'Standard Slip' ? 'standard' : 'normal';
+    const methodKey = serviceKey === 'verify-nin' ? 'nin'
+      : serviceKey === 'phone-verify' ? 'phone'
+      : serviceKey === 'bio-data' ? 'bio'
+      : serviceKey === 'fingerprint' ? 'fp' : 'nin';
+    const key = methodKey + '_' + slipKey;
+    const defaults = { nin_normal:200, nin_info:250, nin_premium:350, nin_standard:200, phone_normal:150, phone_info:200, phone_premium:300, phone_standard:150, bio_normal:300, bio_info:350, bio_premium:450, bio_standard:300, fp_normal:200, fp_info:250, fp_premium:350, fp_standard:200 };
+    return _p[key] || defaults[key] || 200;
+  }
     const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = fmt(val); };
     set('price-verify-nin',   _p.verify_nin   || 200);
     set('price-phone-verify', _p.phone_verify || 150);
@@ -1422,10 +1439,10 @@
     });
     _selectedSlip = '';
     document.getElementById('slipChoiceErr').textContent = '';
-    // Show price on each slip card
+    // Show price on each slip card based on method + slip type
     ['Normal Slip','Verification Information Slip','Premium Slip','Standard Slip'].forEach(function(slip) {
       var el = document.getElementById('slipPrice-' + slip);
-      if (el) el.textContent = fmt(svc.fee);
+      if (el) el.textContent = fmt(getNinVerifyFee(serviceKey, slip));
     });
     openModal('ninVerifyModal');
   }
@@ -1451,7 +1468,8 @@
     const svc = NIN_VERIFY_SERVICES[currentNinService];
     document.getElementById('ninVerifySlipBadge').textContent = '🖨️ Selected: ' + _selectedSlip;
     document.getElementById('ninVerifyDesc').textContent = svc.desc;
-    document.getElementById('ninVerifyPrice').textContent = 'Fee: ' + fmt(svc.fee);
+    const slipFee = getNinVerifyFee(currentNinService, _selectedSlip);
+    document.getElementById('ninVerifyPrice').textContent = 'Fee: ' + fmt(slipFee);
     document.getElementById('ninVerifyAlert').innerHTML = '';
     document.getElementById('ninVerifyResult').style.display = 'none';
 
@@ -1537,14 +1555,16 @@
     }
 
     // Check balance
-    if (walletBalance < svc.fee) {
+    const slipFee = getNinVerifyFee(currentNinService, _selectedSlip);
+    if (walletBalance < slipFee) {
       alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>';
       return;
     }
 
     // Deduct and record
-    walletBalance -= svc.fee;
-    submitWithStatus(svc.title, inputs.primary, svc.fee, 'submitted', { 'Input': inputs.primary });
+    const slipFee = getNinVerifyFee(currentNinService, _selectedSlip);
+    walletBalance -= slipFee;
+    submitWithStatus(svc.title, inputs.primary, slipFee, 'submitted', { 'Input': inputs.primary, 'Slip Type': _selectedSlip });
     updateStats();
     syncWalletToFirebase();
     window._lastNinInputs = inputs;
