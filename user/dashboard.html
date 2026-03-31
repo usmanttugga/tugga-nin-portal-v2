@@ -876,29 +876,32 @@
         <div class="slip-choice" onclick="chooseSlip(this,'Normal Slip')" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.6rem;cursor:pointer;transition:all 0.2s">
           <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">📄 Normal Slip</div>
           <img src="../img/normal-slip.png" style="width:100%;border-radius:6px;display:block" alt="Normal Slip"/>
+          <div id="slipPrice-Normal Slip" style="font-weight:700;color:var(--accent);font-size:0.85rem;margin-top:0.4rem;text-align:center"></div>
         </div>
 
         <!-- Verification Info Slip -->
         <div class="slip-choice" onclick="chooseSlip(this,'Verification Information Slip')" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.6rem;cursor:pointer;transition:all 0.2s">
           <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">🔍 Verification Info Slip</div>
           <img src="../img/verification-slip.png" style="width:100%;border-radius:6px;display:block" alt="Verification Info Slip"/>
+          <div id="slipPrice-Verification Information Slip" style="font-weight:700;color:var(--accent);font-size:0.85rem;margin-top:0.4rem;text-align:center"></div>
         </div>
 
         <!-- Premium Slip -->
         <div class="slip-choice" onclick="chooseSlip(this,'Premium Slip')" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.6rem;cursor:pointer;transition:all 0.2s">
           <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">💎 Premium Slip</div>
           <img src="../img/premium-slip.png" style="width:100%;border-radius:6px;display:block" alt="Premium Slip"/>
+          <div id="slipPrice-Premium Slip" style="font-weight:700;color:var(--accent);font-size:0.85rem;margin-top:0.4rem;text-align:center"></div>
         </div>
 
         <!-- Standard Slip -->
         <div class="slip-choice" onclick="chooseSlip(this,'Standard Slip')" style="border:2px solid #e2e8f0;border-radius:10px;padding:0.6rem;cursor:pointer;transition:all 0.2s">
           <div style="font-weight:600;font-size:0.85rem;margin-bottom:0.4rem">🪪 Standard Slip</div>
           <img src="../img/standard-slip.PNG.jpg" style="width:100%;border-radius:6px;display:block" alt="Standard Slip"/>
+          <div id="slipPrice-Standard Slip" style="font-weight:700;color:var(--accent);font-size:0.85rem;margin-top:0.4rem;text-align:center"></div>
         </div>
 
       </div>
       <div id="slipChoiceErr" style="color:var(--accent);font-size:0.8rem;margin-bottom:0.5rem"></div>
-      <button class="btn-primary" onclick="proceedToVerifyForm()" style="width:100%;padding:10px">Continue to Verification →</button>
     </div>
 
     <!-- STEP 2: Verification Form -->
@@ -1419,16 +1422,25 @@
     });
     _selectedSlip = '';
     document.getElementById('slipChoiceErr').textContent = '';
+    // Show price on each slip card
+    ['Normal Slip','Verification Information Slip','Premium Slip','Standard Slip'].forEach(function(slip) {
+      var el = document.getElementById('slipPrice-' + slip);
+      if (el) el.textContent = fmt(svc.fee);
+    });
     openModal('ninVerifyModal');
   }
 
   function chooseSlip(el, slipName) {
     document.querySelectorAll('.slip-choice').forEach(function(c) {
       c.style.border = '2px solid #e2e8f0';
+      c.style.background = '';
     });
     el.style.border = '2px solid var(--primary)';
+    el.style.background = '#f0fdf4';
     _selectedSlip = slipName;
     document.getElementById('slipChoiceErr').textContent = '';
+    // Auto-advance to form
+    proceedToVerifyForm();
   }
 
   function proceedToVerifyForm() {
