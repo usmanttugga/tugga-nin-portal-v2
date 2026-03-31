@@ -380,6 +380,12 @@
       if (snap.exists()) {
         userData = Object.assign({}, snap.data(), { uid });
         role = userData.role || "user";
+        // Block suspended users from logging in
+        if (userData.status === 'Suspended') {
+          setLoading("btn-login", false, "Sign In");
+          showMsg("msg-login", "Your account has been suspended. Please contact support.", "error");
+          return;
+        }
       }
       // Save to localStorage so requireAuth works
       localStorage.setItem("tugga_user", JSON.stringify(userData));

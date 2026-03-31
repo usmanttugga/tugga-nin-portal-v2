@@ -989,11 +989,17 @@
       renderAllServiceHistories();
     });
 
-    // User wallet real-time
+    // User wallet real-time + suspension check
     if (user && user.uid) {
       window.fbOnSnapshot(window.fbDoc(window.fbDB, "users", user.uid), function(snap) {
         if (snap.exists()) {
           const data = snap.data();
+          // If admin suspended this user, log them out immediately
+          if (data.status === 'Suspended') {
+            alert('Your account has been suspended. Please contact support.');
+            logout();
+            return;
+          }
           walletBalance = data.wallet || 0;
           updateStats();
         }
