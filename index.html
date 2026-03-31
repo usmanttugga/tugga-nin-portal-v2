@@ -366,10 +366,13 @@
 
       const snap = await window._getDoc(window._doc(window._db, "users", uid));
       let role = "user";
+      let userData = { uid, id: uid, role: "user", name: "", email, wallet: 0 };
       if (snap.exists()) {
-        role = snap.data().role || "user";
+        userData = Object.assign({}, snap.data(), { uid });
+        role = userData.role || "user";
       }
-
+      // Save to localStorage so requireAuth works
+      localStorage.setItem("tugga_user", JSON.stringify(userData));
       window.location.href = role === "admin" ? "admin/dashboard.html" : "user/dashboard.html";
     } catch (e) {
       setLoading("btn-login", false, "Sign In");
