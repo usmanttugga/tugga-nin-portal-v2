@@ -294,7 +294,7 @@
   </div>
 </div>
 
-<script src="../js/app.js?v=2"></script>
+<script src="../js/app.js?v=3"></script>
 <script type="module" src="../js/firebase.js"></script>
 <script>
   const admin = requireAuth("admin");
@@ -494,7 +494,6 @@
     } else {
       applyPricing(JSON.parse(localStorage.getItem("tugga_pricing") || "{}"));
     }
-  }ob_mod;
   }
 
   function saveSettings() {
@@ -554,37 +553,6 @@
     if (id === "sec-settings") loadSettingsFields();
   };
 
-  function openAdminProfile() {
-    const info = [
-      'Name: ' + (document.getElementById('adminName').textContent || 'Admin'),
-      'Role: Administrator',
-      'Email: ' + (window._adminData ? window._adminData.email : 'admin@majia.com')
-    ].join('\n');
-    toast('Admin Profile\n' + info);
-  }
-
-  function toggleSidebar() {
-    const sidebar = document.querySelector('.sidebar');
-    const overlay = document.getElementById('sidebarOverlay');
-    const isOpen = sidebar.classList.contains('open');
-    if (!isOpen) {
-      sidebar.classList.add('open');
-      overlay.classList.add('open');
-      history.pushState({ sidebarOpen: true }, '');
-    } else {
-      sidebar.classList.remove('open');
-      overlay.classList.remove('open');
-    }
-  }
-
-  window.addEventListener('popstate', function(e) {
-    const sidebar = document.querySelector('.sidebar');
-    if (sidebar && sidebar.classList.contains('open')) {
-      sidebar.classList.remove('open');
-      document.getElementById('sidebarOverlay').classList.remove('open');
-    }
-  });
-
   // Close sidebar on section click (mobile)
   document.querySelectorAll('.sidebar a').forEach(function(a) {
     a.addEventListener('click', function() {
@@ -613,10 +581,10 @@
 
     // Real-time users
     window.fbOnSnapshot(window.fbCollection(window.fbDB, "users"), function(snap) {
-      const users = snap.docs.map(d => ({ ...d.data(), uid: d.id })).filter(u => u.role === 'user');
+      const users = snap.docs.map(d => ({ ...d.data(), uid: d.id }));
       window._fbUsers = users;
-      document.getElementById("statUsers").textContent = users.length;
-      if (document.getElementById('usersTable').innerHTML !== '') loadUsers();
+      document.getElementById("statUsers").textContent = users.filter(u => u.role !== 'admin').length;
+      loadUsers();
     });
 
     // Real-time platform settings
@@ -654,33 +622,45 @@
   ];
 
   function loadAvailabilityFields() {
-    const av = getAvailability();
-    const container = document.getElementById('availabilityGroups');
-    let html = '';
-    SERVICE_GROUPS.forEach(function(g) {
-      const grpOn = av[g.key] !== false;
-      let svcsHtml = '';
-      g.services.forEach(function(svc) {
-        const svcKey = svc.replace(/\s+/g,'_');
-        const svcOn = grpOn && av[svc] !== false;
-        svcsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid #f8fafc">' +
-          '<span style="font-size:0.88rem;color:var(--gray)">' + svc + '</span>' +
-          '<label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer">' +
-          '<input type="checkbox" id="av_' + svcKey + '" ' + (svcOn ? 'checked' : '') + ' ' + (!grpOn ? 'disabled' : '') + ' style="width:15px;height:15px;cursor:pointer" onchange="updateSvcLabel(\'' + svcKey + '\')" />' +
-          '<span id="av_' + svcKey + '_lbl" style="font-size:0.78rem;color:' + (svcOn ? 'var(--primary)' : 'var(--accent)') + '">' + (svcOn ? 'On' : 'Off') + '</span>' +
-          '</label></div>';
+    function renderAvailability(av) {
+      const container = document.getElementById('availabilityGroups');
+      let html = '';
+      SERVICE_GROUPS.forEach(function(g) {
+        const grpOn = av[g.key] !== false;
+        let svcsHtml = '';
+        g.services.forEach(function(svc) {
+          const svcKey = svc.replace(/\s+/g,'_');
+          const svcOn = grpOn && av[svc] !== false;
+          svcsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:0.4rem 0;border-bottom:1px solid #f8fafc">' +
+            '<span style="font-size:0.88rem;color:var(--gray)">' + svc + '</span>' +
+            '<label style="display:flex;align-items:center;gap:0.4rem;cursor:pointer">' +
+            '<input type="checkbox" id="av_' + svcKey + '" ' + (svcOn ? 'checked' : '') + ' ' + (!grpOn ? 'disabled' : '') + ' style="width:15px;height:15px;cursor:pointer" onchange="updateSvcLabel(\'' + svcKey + '\')" />' +
+            '<span id="av_' + svcKey + '_lbl" style="font-size:0.78rem;color:' + (svcOn ? 'var(--primary)' : 'var(--accent)') + '">' + (svcOn ? 'On' : 'Off') + '</span>' +
+            '</label></div>';
+        });
+        html += '<div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem">' +
+          '<p style="font-weight:700;color:var(--dark);margin:0">' + g.label + '</p>' +
+          '<label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">' +
+          '<input type="checkbox" id="av_' + g.key + '" ' + (grpOn ? 'checked' : '') + ' style="width:18px;height:18px;cursor:pointer" onchange="toggleGroup(\'' + g.key + '\')" />' +
+          '<span id="av_' + g.key + '_lbl" style="font-size:0.85rem;font-weight:600;color:' + (grpOn ? 'var(--primary)' : 'var(--accent)') + '">' + (grpOn ? 'Available' : 'Unavailable') + '</span>' +
+          '</label></div>' +
+          '<div style="display:flex;flex-direction:column;gap:0.5rem;padding-left:0.5rem" id="grp_children_' + g.key + '">' +
+          svcsHtml + '</div></div>';
       });
-      html += '<div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">' +
-        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem">' +
-        '<p style="font-weight:700;color:var(--dark);margin:0">' + g.label + '</p>' +
-        '<label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer">' +
-        '<input type="checkbox" id="av_' + g.key + '" ' + (grpOn ? 'checked' : '') + ' style="width:18px;height:18px;cursor:pointer" onchange="toggleGroup(\'' + g.key + '\')" />' +
-        '<span id="av_' + g.key + '_lbl" style="font-size:0.85rem;font-weight:600;color:' + (grpOn ? 'var(--primary)' : 'var(--accent)') + '">' + (grpOn ? 'Available' : 'Unavailable') + '</span>' +
-        '</label></div>' +
-        '<div style="display:flex;flex-direction:column;gap:0.5rem;padding-left:0.5rem" id="grp_children_' + g.key + '">' +
-        svcsHtml + '</div></div>';
-    });
-    container.innerHTML = html;
+      container.innerHTML = html;
+    }
+    if (window.fbReady) {
+      window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "availability")).then(function(snap) {
+        const data = snap.exists() ? snap.data() : {};
+        localStorage.setItem('tugga_availability', JSON.stringify(data));
+        renderAvailability(data);
+      }).catch(function() {
+        renderAvailability(JSON.parse(localStorage.getItem('tugga_availability') || '{}'));
+      });
+    } else {
+      renderAvailability(JSON.parse(localStorage.getItem('tugga_availability') || '{}'));
+    }
   }
 
   function toggleGroup(grpKey) {
