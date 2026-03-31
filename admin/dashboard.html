@@ -522,7 +522,8 @@
   }
 
   function deleteUser(uid, name) {
-    if (!confirm('Delete user "' + name + '"? This cannot be undone.')) return;
+    const confirmed = prompt('Type DELETE to confirm removing user "' + name + '". This cannot be undone.');
+    if (confirmed !== 'DELETE') { toast('Deletion cancelled.'); return; }
     if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
     window.fbDeleteDoc(window.fbDoc(window.fbDB, 'users', uid))
       .then(function() { toast('User deleted successfully.'); })
