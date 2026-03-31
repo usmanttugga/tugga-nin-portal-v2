@@ -20,12 +20,12 @@
     <a href="#" class="active">Dashboard</a>
     <a href="#" onclick="showSection('sec-history')">History</a>
     <a href="#" onclick="showSection('sec-wallet')">Wallet</a>
-    <a href="#" onclick="logout()" style="color:rgba(255,255,255,0.75);border:1px solid rgba(255,255,255,0.2);padding:5px 14px;border-radius:6px;margin-left:0.5rem;font-weight:600;transition:all 0.2s" onmouseover="this.style.background='rgba(239,68,68,0.8)';this.style.borderColor='transparent'" onmouseout="this.style.background='transparent';this.style.borderColor='rgba(255,255,255,0.2)'">Logout</a>
+    <a href="#" onclick="logout()" class="nav-logout-link">Logout</a>
   </div>
   <div class="nav-user">
     <div class="avatar" id="userAvatar" onclick="openModal('profileModal')" style="cursor:pointer">U</div>
     <span id="userName" onclick="openModal('profileModal')" style="cursor:pointer">User</span>
-    <button class="nav-logout-mobile" style="display:none" onclick="logout()">Logout</button>
+    <button class="btn-logout" onclick="logout()">Logout</button>
   </div>
 </nav>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
@@ -1955,9 +1955,27 @@
   }
 
   function toggleSidebar() {
-    document.querySelector('.sidebar').classList.toggle('open');
-    document.getElementById('sidebarOverlay').classList.toggle('open');
+    const sidebar = document.querySelector('.sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const isOpen = sidebar.classList.contains('open');
+    if (!isOpen) {
+      sidebar.classList.add('open');
+      overlay.classList.add('open');
+      history.pushState({ sidebarOpen: true }, '');
+    } else {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    }
   }
+
+  // Back button closes sidebar instead of navigating away
+  window.addEventListener('popstate', function(e) {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar && sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+  });
 
   // Close sidebar on section click (mobile)
   document.querySelectorAll('.sidebar a').forEach(function(a) {

@@ -135,6 +135,22 @@ nav .btn-logout:hover {
   border-color: var(--danger);
 }
 
+/* Logout link in nav-links (desktop) */
+.nav-logout-link {
+  color: rgba(255,255,255,0.75) !important;
+  border: 1px solid rgba(255,255,255,0.2) !important;
+  padding: 5px 14px !important;
+  border-radius: 6px !important;
+  margin-left: 0.5rem !important;
+  font-weight: 600 !important;
+  transition: all 0.2s !important;
+}
+.nav-logout-link:hover {
+  background: rgba(239,68,68,0.85) !important;
+  border-color: transparent !important;
+  color: white !important;
+}
+
 /* ── HERO / LOGIN ──────────────────────────────────── */
 .hero {
   min-height: 100vh;
@@ -694,23 +710,19 @@ nav .btn-logout:hover {
   nav .nav-links { display: none; }
   nav .logo { font-size: 0.95rem; }
   nav .nav-user span { display: none; }
+  nav .btn-logout { display: flex; }
 
-  /* Show logout button separately on mobile */
-  .nav-logout-mobile {
-    display: flex !important;
-    align-items: center;
-    color: rgba(255,255,255,0.8);
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-    padding: 6px 12px;
-    border: 1px solid rgba(255,255,255,0.2);
-    border-radius: 6px;
-    background: none;
-    font-family: inherit;
-    transition: all 0.2s;
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    top: var(--nav-h);
+    background: rgba(0,0,0,0.55);
+    z-index: 998;
+    backdrop-filter: blur(2px);
+    pointer-events: all;
   }
-  .nav-logout-mobile:hover { background: rgba(239,68,68,0.8); border-color: transparent; }
+  .sidebar-overlay.open { display: block; }
 
   .hamburger {
     display: flex;
