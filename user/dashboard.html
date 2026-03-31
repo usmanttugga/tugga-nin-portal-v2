@@ -1212,10 +1212,10 @@
       ? (document.getElementById("f_nin")?.value || "N/A")
       : (document.getElementById("f_bvn")?.value || "N/A");
 
-    // NIN Validation services submit as "pending" — admin must validate
+    // All services submit as "submitted" — admin must validate
     const NIN_VAL_SVCS = ['No Record Found', 'Bank Validation', 'Photograph Error', 'SIM Validation'];
     const isPending = NIN_VAL_SVCS.includes(currentService.title);
-    const status = isPending ? 'submitted' : 'success';
+    const status = 'submitted';
 
     const formData = {};
     if (document.getElementById('f_nin'))     formData['NIN Number']     = document.getElementById('f_nin').value;
@@ -1494,7 +1494,7 @@
 
     // Deduct and record
     walletBalance -= svc.fee;
-    addTransaction(user.id, svc.title, inputs.primary, svc.fee);
+    submitWithStatus(svc.title, inputs.primary, svc.fee, 'submitted', { 'Input': inputs.primary });
     updateStats();
     syncWalletToFirebase();
     window._lastNinInputs = inputs;
@@ -1943,7 +1943,7 @@
     const fee = _p.ninpers || 1000;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, 'NIN Personalization', tracking, fee);
+    submitWithStatus('NIN Personalization', tracking, fee, 'submitted', { 'Tracking ID': tracking });
     updateStats();
     closeModal('ninPersonModal');
     toast('NIN Personalization request submitted successfully!');
@@ -2082,7 +2082,7 @@
     const fee = _p.fingerprint || 200;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
     walletBalance -= fee;
-    addTransaction(user.id, 'FingerPrint Verification', finger, fee);
+    submitWithStatus('FingerPrint Verification', finger, fee, 'submitted', { 'Finger': finger, 'Image': file ? file.name : '—' });
     updateStats();
     closeModal('fingerprintModal');
     toast('FingerPrint Verification request submitted successfully!');
@@ -2108,8 +2108,8 @@
     if (!net || !phone || !amt) { alertEl.innerHTML = '<div class="alert alert-error">Please fill all fields.</div>'; return; }
     if (walletBalance < amt) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
     walletBalance -= amt;
-    addTransaction(user.id, "Buy Airtime", net + " – " + phone, amt);
-    alertEl.innerHTML = '<div class="alert alert-success">Airtime sent successfully!</div>';
+    submitWithStatus("Buy Airtime", net + " – " + phone, amt, 'submitted', { 'Network': net, 'Phone': phone, 'Amount': '₦' + amt });
+    alertEl.innerHTML = '<div class="alert alert-success">Airtime request submitted!</div>';
     updateStats();
   }
 
@@ -2139,8 +2139,8 @@
     const price = DATA_PRICES[size] || 200;
     if (walletBalance < price) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
     walletBalance -= price;
-    addTransaction(user.id, "Buy Data", net + " " + plan + " – " + phone, price);
-    alertEl.innerHTML = '<div class="alert alert-success">Data bundle purchased successfully!</div>';
+    submitWithStatus("Buy Data", net + " " + plan + " – " + phone, price, 'submitted', { 'Network': net, 'Plan': plan, 'Phone': phone });
+    alertEl.innerHTML = '<div class="alert alert-success">Data request submitted!</div>';
     updateStats();
   }
 

@@ -100,8 +100,8 @@
       </div>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Ref</th><th>User ID</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody id="allTxnTable"><tr><td colspan="7" style="text-align:center;color:#999">No transactions</td></tr></tbody>
+          <thead><tr><th>Ref</th><th>User ID</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="allTxnTable"><tr><td colspan="8" style="text-align:center;color:#999">No transactions</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -427,12 +427,25 @@
     const txns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
     const filtered = filter ? txns.filter(t => t.id.includes(filter) || t.service.toLowerCase().includes(filter.toLowerCase())) : txns;
     const tbody = document.getElementById("allTxnTable");
-    if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999">No transactions</td></tr>'; return; }
-    tbody.innerHTML = filtered.map(t => `
-      <tr><td>${t.id}</td><td>#${t.userId}</td><td>${t.service}</td><td>${t.details}</td>
-      <td>${fmt(t.amount)}</td>
-      <td><span class="badge badge-${t.status === 'success' ? 'success' : 'failed'}">${t.status}</span></td>
-      <td>${t.date}</td></tr>`).join("");
+    if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No transactions</td></tr>'; return; }
+    tbody.innerHTML = filtered.map(t => {
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status;
+      const badgeClass = t.status === 'submitted' ? 'pending' : t.status === 'validated' ? 'success' : t.status === 'success' ? 'success' : 'failed';
+      const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600">👁 View</button>`;
+      const validateBtn = t.status === 'submitted'
+        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;margin-top:4px">✔ Validate</button>`
+        : t.status === 'validated' ? '<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">✔ Done</span>' : '';
+      return `<tr>
+        <td style="font-size:0.75rem">${t.id}</td>
+        <td style="font-size:0.75rem">#${t.userId}</td>
+        <td style="font-size:0.82rem">${t.service}</td>
+        <td style="font-size:0.82rem">${t.details}</td>
+        <td>${fmt(t.amount)}</td>
+        <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
+        <td style="font-size:0.75rem">${t.date}</td>
+        <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${viewBtn}${validateBtn}</div></td>
+      </tr>`;
+    }).join("");
   }
 
   function filterTxns() { loadAllTxns(document.getElementById("txnSearch").value); }
