@@ -1092,7 +1092,6 @@
       const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
       const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status;
       return `<tr><td>${t.date}</td><td>${t.service}</td><td style="color:var(--accent)">-${fmt(t.amount)}</td>
-      return `<tr><td>${t.date}</td><td>${t.service}</td><td style="color:var(--accent)">-${fmt(t.amount)}</td>
       <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td></tr>`;
     }).join("");
   }

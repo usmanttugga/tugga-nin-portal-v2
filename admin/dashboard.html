@@ -482,19 +482,19 @@
       const alreadyValidated = t.status === 'validated';
       const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
       const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status;
-      const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">👁 View</button>`;
+      const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap">👁 View</button>`;
       const validateBtn = needsValidation
-        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:5px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600;margin-left:4px">✔ Validate</button>`
-        : alreadyValidated ? '<span style="color:#059669;font-size:0.8rem;font-weight:600;margin-left:4px">✔ Done</span>' : '';
+        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>`
+        : alreadyValidated ? '<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">✔ Done</span>' : '';
       return `<tr>
-        <td style="font-size:0.78rem">${t.id}</td>
-        <td style="font-size:0.78rem">${t.userId || '—'}</td>
-        <td><strong>${t.service}</strong></td>
-        <td style="font-size:0.85rem">${t.details || '—'}</td>
+        <td style="font-size:0.75rem;max-width:80px;overflow:hidden;text-overflow:ellipsis">${t.id}</td>
+        <td style="font-size:0.75rem">${t.userId || '—'}</td>
+        <td><strong style="font-size:0.82rem">${t.service}</strong></td>
+        <td style="font-size:0.82rem;max-width:120px;overflow:hidden;text-overflow:ellipsis">${t.details || '—'}</td>
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
-        <td style="font-size:0.78rem">${t.date}</td>
-        <td style="white-space:nowrap">${viewBtn}${validateBtn}</td>
+        <td style="font-size:0.75rem">${t.date}</td>
+        <td style="min-width:80px"><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${viewBtn}${validateBtn}</div></td>
       </tr>`;
     }).join("");
   }
