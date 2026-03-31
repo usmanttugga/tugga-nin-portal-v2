@@ -253,7 +253,6 @@
           <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
             <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🪪 NIN Services</p>
             <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
-              <div class="form-group"><label>NIN Modification (₦)</label><input type="number" id="p_ninmod" value="500"/></div>
               <div class="form-group"><label>NIN Personalization (₦)</label><input type="number" id="p_ninpers" value="1000"/></div>
               <div class="form-group"><label>VNIN Slip (₦)</label><input type="number" id="p_vnin" value="250"/></div>
             </div>
@@ -822,7 +821,6 @@
 
   function savePricing() {
     const pricing = {
-      ninmod:       parseInt(document.getElementById("p_ninmod").value) || 500,
       ninpers:      parseInt(document.getElementById("p_ninpers").value) || 1000,
       vnin:         parseInt(document.getElementById("p_vnin").value) || 250,
       ipe_normal:   parseInt(document.getElementById("p_ipe_normal").value) || 400,
@@ -872,7 +870,6 @@
     function applyPricing(saved) {
       const defaults = { ninmod:500, ninpers:1000, vnin:250, ipe_normal:400, ipe_mod:400, ipe_other:400, bvnver:200, bvnret:150, bvnmod:500, bvnuser:200, nin_normal:200, nin_info:250, nin_premium:350, nin_standard:200, phone_normal:150, phone_info:200, phone_premium:300, phone_standard:150, bio_normal:300, bio_info:350, bio_premium:450, bio_standard:300, fp_normal:200, fp_info:250, fp_premium:350, fp_standard:200, no_record:150, bank_val:150, photo_err:150, sim_val:150, name_mod:500, phone_mod:500, address_mod:500, dob_mod:500 };
       const p = Object.assign({}, defaults, saved);
-      document.getElementById("p_ninmod").value       = p.ninmod;
       document.getElementById("p_ninpers").value      = p.ninpers;
       document.getElementById("p_vnin").value         = p.vnin;
       document.getElementById("p_ipe_normal").value   = p.ipe_normal;
