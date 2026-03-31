@@ -109,17 +109,29 @@
     <!-- NIN ADMIN -->
     <section id="sec-nin-admin" class="content-section section-hidden">
       <p class="page-title">NIN Services Management</p>
-      <p class="page-sub">Monitor and process NIN service requests.</p>
+      <p class="page-sub">Click a category to filter requests. All submitted requests can be validated below.</p>
       <div class="stats-grid">
-        <div class="stat-card"><div class="stat-icon bg-blue">🪪</div><div class="stat-info"><h3 id="ninVerCount">0</h3><p>NIN Verifications</p></div></div>
-        <div class="stat-card"><div class="stat-icon bg-green">✔️</div><div class="stat-info"><h3 id="ninValCount">0</h3><p>NIN Validations</p></div></div>
-        <div class="stat-card"><div class="stat-icon bg-red">✏️</div><div class="stat-info"><h3 id="ninModCount">0</h3><p>Modifications</p></div></div>
-        <div class="stat-card"><div class="stat-icon bg-orange">✅</div><div class="stat-info"><h3 id="ninIpeCount">0</h3><p>IPE Clearances</p></div></div>
+        <div class="stat-card" onclick="filterNINTable('verify')" style="cursor:pointer" title="Show NIN Verifications">
+          <div class="stat-icon bg-blue">🪪</div><div class="stat-info"><h3 id="ninVerCount">0</h3><p>NIN Verifications</p></div>
+        </div>
+        <div class="stat-card" onclick="filterNINTable('validation')" style="cursor:pointer;outline:none" title="Show NIN Validations" id="ninValCard">
+          <div class="stat-icon bg-green">✔️</div><div class="stat-info"><h3 id="ninValCount">0</h3><p>NIN Validations</p></div>
+        </div>
+        <div class="stat-card" onclick="filterNINTable('modification')" style="cursor:pointer" title="Show Modifications">
+          <div class="stat-icon bg-red">✏️</div><div class="stat-info"><h3 id="ninModCount">0</h3><p>Modifications</p></div>
+        </div>
+        <div class="stat-card" onclick="filterNINTable('ipe')" style="cursor:pointer" title="Show IPE Clearances">
+          <div class="stat-icon bg-orange">✅</div><div class="stat-info"><h3 id="ninIpeCount">0</h3><p>IPE Clearances</p></div>
+        </div>
       </div>
-      <div class="table-wrap" style="margin-top:1rem">
+      <div style="display:flex;align-items:center;gap:0.8rem;margin:1rem 0 0.5rem">
+        <span id="ninFilterLabel" style="font-size:0.85rem;color:var(--gray)">Showing: All</span>
+        <button onclick="filterNINTable('all')" style="background:none;border:1px solid #e2e8f0;padding:3px 10px;border-radius:6px;font-size:0.8rem;cursor:pointer;color:var(--gray)">Clear filter</button>
+      </div>
+      <div class="table-wrap" style="margin-top:0.5rem">
         <table>
-          <thead><tr><th>Ref</th><th>Service</th><th>NIN/Details</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-          <tbody id="ninTxnTable"><tr><td colspan="7" style="text-align:center;color:#999">No NIN transactions</td></tr></tbody>
+          <thead><tr><th>Ref</th><th>User ID</th><th>Service</th><th>Details / Input</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="ninTxnTable"><tr><td colspan="8" style="text-align:center;color:#999">No NIN transactions</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -412,6 +424,15 @@
 
   function filterTxns() { loadAllTxns(document.getElementById("txnSearch").value); }
 
+  var _ninFilter = 'all';
+
+  function filterNINTable(type) {
+    _ninFilter = type;
+    const labels = { all: 'All', verify: 'NIN Verifications', validation: 'NIN Validations', modification: 'Modifications', ipe: 'IPE Clearances' };
+    document.getElementById('ninFilterLabel').textContent = 'Showing: ' + (labels[type] || 'All');
+    loadNINStats();
+  }
+
   function loadNINStats() {
     const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
     const ninVerSvcs = ["Verify with NIN", "Phone Number Verification", "Bio Data Verification", "FingerPrint Verification"];
@@ -423,32 +444,50 @@
       ninVerSvcs.includes(t.service) || ninValSvcs.includes(t.service) ||
       ninModSvcs.includes(t.service) || ninIpeSvcs.includes(t.service)
     );
-    document.getElementById("ninVerCount").textContent  = nin.filter(t =>
-      t.service === "NIN Verification" || ninVerSvcs.includes(t.service)).length;
-    document.getElementById("ninValCount").textContent  = nin.filter(t =>
-      t.service === "NIN Validation" || ninValSvcs.includes(t.service)).length;
-    document.getElementById("ninModCount").textContent  = nin.filter(t =>
-      t.service === "NIN Modification" || ninModSvcs.includes(t.service)).length;
-    document.getElementById("ninIpeCount").textContent  = nin.filter(t =>
-      ninIpeSvcs.includes(t.service)).length;
+    document.getElementById("ninVerCount").textContent = nin.filter(t => ninVerSvcs.includes(t.service)).length;
+    document.getElementById("ninValCount").textContent = nin.filter(t => ninValSvcs.includes(t.service)).length;
+    document.getElementById("ninModCount").textContent = nin.filter(t => ninModSvcs.includes(t.service)).length;
+    document.getElementById("ninIpeCount").textContent = nin.filter(t => ninIpeSvcs.includes(t.service)).length;
+
+    // Apply filter
+    const filterMap = {
+      verify:     t => ninVerSvcs.includes(t.service),
+      validation: t => ninValSvcs.includes(t.service),
+      modification: t => ninModSvcs.includes(t.service),
+      ipe:        t => ninIpeSvcs.includes(t.service),
+      all:        () => true
+    };
+    const filtered = nin.filter(filterMap[_ninFilter] || (() => true));
+
+    // Services that require admin validation
+    const validateSvcs = [...ninValSvcs, ...ninModSvcs, ...ninIpeSvcs];
+
     const tbody = document.getElementById("ninTxnTable");
-    if (!nin.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999">No NIN transactions</td></tr>'; return; }
-    tbody.innerHTML = nin.map(t => {
-      const isPending = ninValSvcs.includes(t.service) && t.status === 'submitted';
-      const badgeClass = t.status === 'validated' ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-      const actionBtn = isPending
-        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 12px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">✔ Validate</button>`
-        : '';
-      return `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td>
+    if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No requests found.</td></tr>'; return; }
+    tbody.innerHTML = filtered.map(t => {
+      const needsValidation = validateSvcs.includes(t.service) && t.status === 'submitted';
+      const alreadyValidated = t.status === 'validated';
+      const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
+      const actionBtn = needsValidation
+        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">✔ Validate</button>`
+        : alreadyValidated ? '<span style="color:#059669;font-size:0.8rem;font-weight:600">✔ Done</span>' : '';
+      return `<tr>
+        <td style="font-size:0.78rem">${t.id}</td>
+        <td style="font-size:0.78rem">${t.userId || '—'}</td>
+        <td><strong>${t.service}</strong></td>
+        <td style="font-size:0.85rem">${t.details || '—'}</td>
+        <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${t.status}</span></td>
-        <td>${t.date}</td><td>${actionBtn}</td></tr>`;
+        <td style="font-size:0.78rem">${t.date}</td>
+        <td>${actionBtn}</td>
+      </tr>`;
     }).join("");
   }
 
   function validateNINRequest(txnId) {
     if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
     window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'validated' })
-      .then(function() { toast('Request validated successfully!'); })
+      .then(function() { toast('Request validated — user has been notified.'); loadNINStats(); })
       .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
   }
 
