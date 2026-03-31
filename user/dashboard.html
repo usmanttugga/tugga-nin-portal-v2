@@ -1284,6 +1284,18 @@
     NIN_VERIFY_SERVICES['phone-verify'].fee = _p.phone_normal || 150;
     NIN_VERIFY_SERVICES['bio-data'].fee     = _p.bio_normal   || 300;
     NIN_VERIFY_SERVICES['fingerprint'].fee  = _p.fp_normal    || 200;
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = fmt(val); };
+    set('price-no-record',    _p.no_record    || 150);
+    set('price-bank-val',     _p.bank_val     || 150);
+    set('price-photo-err',    _p.photo_err    || 150);
+    set('price-sim-val',      _p.sim_val      || 150);
+    set('price-name-mod',     _p.name_mod     || 500);
+    set('price-phone-mod',    _p.phone_mod    || 500);
+    set('price-address-mod',  _p.address_mod  || 500);
+    set('price-dob-mod',      _p.dob_mod      || 500);
+    set('price-ipe-normal',   _p.ipe_normal   || 400);
+    set('price-ipe-mod',      _p.ipe_mod      || 400);
+    set('price-ipe-other',    _p.ipe_other    || 400);
   }
 
   // Get fee for a specific method + slip combination
@@ -1299,23 +1311,6 @@
     const key = methodKey + '_' + slipKey;
     const defaults = { nin_normal:200, nin_info:250, nin_premium:350, nin_standard:200, phone_normal:150, phone_info:200, phone_premium:300, phone_standard:150, bio_normal:300, bio_info:350, bio_premium:450, bio_standard:300, fp_normal:200, fp_info:250, fp_premium:350, fp_standard:200 };
     return _p[key] || defaults[key] || 200;
-  }
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = fmt(val); };
-    set('price-verify-nin',   _p.verify_nin   || 200);
-    set('price-phone-verify', _p.phone_verify || 150);
-    set('price-bio-data',     _p.bio_data     || 300);
-    set('price-fingerprint',  _p.fingerprint  || 200);
-    set('price-no-record',    _p.no_record    || 150);
-    set('price-bank-val',     _p.bank_val     || 150);
-    set('price-photo-err',    _p.photo_err    || 150);
-    set('price-sim-val',      _p.sim_val      || 150);
-    set('price-name-mod',     _p.name_mod     || 500);
-    set('price-phone-mod',    _p.phone_mod    || 500);
-    set('price-address-mod',  _p.address_mod  || 500);
-    set('price-dob-mod',      _p.dob_mod      || 500);
-    set('price-ipe-normal',   _p.ipe_normal   || 400);
-    set('price-ipe-mod',      _p.ipe_mod      || 400);
-    set('price-ipe-other',    _p.ipe_other    || 400);
   }
 
   refreshPricing();
