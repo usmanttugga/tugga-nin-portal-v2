@@ -2454,10 +2454,13 @@
     if (sidebar && sidebar.classList.contains('open')) {
       sidebar.classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('open');
-    } else {
+      history.pushState({ page: 'dashboard' }, '', window.location.href);
+    } else if (_prevSection && _prevSection !== _currentSection) {
       _goBack();
+      history.pushState({ page: 'dashboard' }, '', window.location.href);
+    } else {
+      history.pushState({ page: 'dashboard' }, '', window.location.href);
     }
-    history.pushState({ page: 'dashboard' }, '', window.location.href);
   });
 
   // Close sidebar on section click (mobile)
