@@ -1122,14 +1122,16 @@
 
   function _goBack() {
     if (_prevSection) {
+      const target = _prevSection;
+      _prevSection = null; // clear so double-back doesn't loop
       _isGoingBack = true;
-      window.showSection(_prevSection);
+      window.showSection(target);
     }
   }
 
   window.showSection = function(id) {
     if (!_isGoingBack) {
-      _prevSection = _currentSection;
+      _prevSection = _currentSection !== id ? _currentSection : _prevSection;
     }
     _isGoingBack = false;
     _currentSection = id;
