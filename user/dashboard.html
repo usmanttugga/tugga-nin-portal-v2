@@ -102,6 +102,18 @@
         <div><h4>Available Balance</h4><div class="balance" id="walletBal">₦0.00</div></div>
         <button class="btn-fund" onclick="openModal('fundModal')">+ Fund Wallet</button>
       </div>
+
+      <!-- Virtual Account Card -->
+      <div id="walletVACard" style="display:none;background:var(--white);border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow);border:1px solid #d1fae5">
+        <p style="font-weight:700;color:var(--primary);margin-bottom:0.8rem;font-size:0.95rem">🏦 Your Dedicated Bank Account</p>
+        <p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.8rem">Transfer money to this account to fund your wallet automatically.</p>
+        <div style="display:flex;flex-direction:column;gap:0.4rem">
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--gray);font-size:0.85rem">Bank</span><strong id="walletVABank" style="font-size:0.85rem"></strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--gray);font-size:0.85rem">Account Number</span><strong id="walletVANumber" style="font-size:0.9rem;letter-spacing:2px;color:var(--primary)"></strong></div>
+          <div style="display:flex;justify-content:space-between"><span style="color:var(--gray);font-size:0.85rem">Account Name</span><strong id="walletVAName" style="font-size:0.85rem"></strong></div>
+        </div>
+      </div>
+
       <div class="table-wrap">
         <table>
           <thead><tr><th>Date</th><th>Description</th><th>Amount</th><th>Status</th></tr></thead>
@@ -955,28 +967,50 @@
 
 <!-- FUND MODAL -->
 <div class="modal-overlay" id="fundModal">
-  <div class="modal">
+  <div class="modal" style="max-width:480px">
     <div class="modal-header">
-      <h3>Fund Wallet</h3>
+      <h3>💰 Fund Wallet</h3>
       <button class="modal-close" onclick="closeModal('fundModal')">✕</button>
     </div>
     <div id="fundAlert"></div>
+
+    <!-- Amount input -->
     <div class="form-group">
       <label>Amount (₦)</label>
-      <input type="number" id="fundAmount" placeholder="Enter amount" min="100"/>
+      <input type="number" id="fundAmount" placeholder="Minimum ₦100" min="100"/>
     </div>
-    <div class="form-group">
-      <label>Payment Method</label>
-      <select id="fundMethod">
-        <option>Bank Transfer</option>
-        <option>Card Payment</option>
-        <option>USSD</option>
-      </select>
+
+    <!-- Payment method tabs -->
+    <div style="display:flex;gap:0.5rem;margin-bottom:1.2rem">
+      <button id="tabCard" onclick="switchFundTab('card')" style="flex:1;padding:9px;border:2px solid var(--primary);background:var(--primary);color:#fff;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.85rem">💳 Card / USSD</button>
+      <button id="tabBank" onclick="switchFundTab('bank')" style="flex:1;padding:9px;border:2px solid #e2e8f0;background:#fff;color:var(--gray);border-radius:8px;cursor:pointer;font-weight:600;font-size:0.85rem">🏦 Bank Transfer</button>
     </div>
-    <button class="btn-primary" onclick="fundWallet()">Proceed to Pay</button>
+
+    <!-- Card payment panel -->
+    <div id="fundPanelCard">
+      <p style="font-size:0.85rem;color:var(--gray);margin-bottom:1rem">Pay securely via card, USSD, or bank transfer through Paystack.</p>
+      <button class="btn-primary" onclick="payWithPaystack()">Pay with Paystack</button>
+    </div>
+
+    <!-- Bank transfer panel -->
+    <div id="fundPanelBank" style="display:none">
+      <div id="virtualAccountBox" style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+        <p style="font-weight:700;color:var(--primary);margin-bottom:0.6rem;font-size:0.9rem">Your Dedicated Virtual Account</p>
+        <div id="vaLoading" style="color:var(--gray);font-size:0.85rem">Loading account details...</div>
+        <div id="vaDetails" style="display:none">
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #d1fae5"><span style="color:var(--gray);font-size:0.85rem">Bank</span><strong id="vaBank" style="font-size:0.85rem"></strong></div>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #d1fae5"><span style="color:var(--gray);font-size:0.85rem">Account Number</span><strong id="vaNumber" style="font-size:0.85rem;letter-spacing:1px"></strong></div>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0"><span style="color:var(--gray);font-size:0.85rem">Account Name</span><strong id="vaName" style="font-size:0.85rem"></strong></div>
+        </div>
+        <div id="vaError" style="display:none;color:var(--accent);font-size:0.82rem"></div>
+      </div>
+      <p style="font-size:0.78rem;color:var(--gray);margin-bottom:0.8rem">Transfer the exact amount to the account above. Your wallet will be credited automatically once payment is confirmed.</p>
+      <button class="btn-primary" style="background:#059669" onclick="confirmBankTransfer()">I've Made the Transfer</button>
+    </div>
   </div>
 </div>
 
+<script src="https://js.paystack.co/v1/inline.js"></script>
 <script src="../js/app.js?v=7"></script>
 <script type="module" src="../js/firebase.js"></script>
 <script>
@@ -1033,6 +1067,14 @@
             return;
           }
           walletBalance = data.wallet || 0;
+          // Show virtual account if assigned
+          if (data.virtualAccount) {
+            const va = data.virtualAccount;
+            document.getElementById('walletVACard').style.display = 'block';
+            document.getElementById('walletVABank').textContent   = va.bank || '';
+            document.getElementById('walletVANumber').textContent = va.account_number || '';
+            document.getElementById('walletVAName').textContent   = va.account_name || user.name;
+          }
           updateStats();
         }
       });
@@ -2389,15 +2431,88 @@
     toast('FingerPrint Verification request submitted successfully!');
   }
 
-  function fundWallet() {
-    const amt = parseInt(document.getElementById("fundAmount").value);
-    if (!amt || amt < 100) { document.getElementById("fundAlert").innerHTML = '<div class="alert alert-error">Minimum fund amount is ₦100.</div>'; return; }
-    walletBalance += amt;
-    addTransaction(user.id, "Wallet Funding", "Via " + document.getElementById("fundMethod").value, amt);
-    syncWalletToFirebase();
-    closeModal("fundModal");
-    toast("Wallet funded with " + fmt(amt));
+  function switchFundTab(tab) {
+    document.getElementById('fundPanelCard').style.display = tab === 'card' ? 'block' : 'none';
+    document.getElementById('fundPanelBank').style.display = tab === 'bank' ? 'block' : 'none';
+    document.getElementById('tabCard').style.background = tab === 'card' ? 'var(--primary)' : '#fff';
+    document.getElementById('tabCard').style.color = tab === 'card' ? '#fff' : 'var(--gray)';
+    document.getElementById('tabCard').style.borderColor = tab === 'card' ? 'var(--primary)' : '#e2e8f0';
+    document.getElementById('tabBank').style.background = tab === 'bank' ? 'var(--primary)' : '#fff';
+    document.getElementById('tabBank').style.color = tab === 'bank' ? '#fff' : 'var(--gray)';
+    document.getElementById('tabBank').style.borderColor = tab === 'bank' ? 'var(--primary)' : '#e2e8f0';
+    if (tab === 'bank') loadVirtualAccount();
+  }
+
+  function loadVirtualAccount() {
+    const vaDetails = document.getElementById('vaDetails');
+    const vaLoading = document.getElementById('vaLoading');
+    const vaError   = document.getElementById('vaError');
+    // Check if user already has a virtual account in Firestore
+    if (!window.fbReady) { vaLoading.textContent = 'Loading...'; return; }
+    window.fbGetDoc(window.fbDoc(window.fbDB, 'users', user.uid)).then(function(snap) {
+      if (snap.exists() && snap.data().virtualAccount) {
+        const va = snap.data().virtualAccount;
+        document.getElementById('vaBank').textContent   = va.bank || 'Wema Bank';
+        document.getElementById('vaNumber').textContent = va.account_number || '—';
+        document.getElementById('vaName').textContent   = va.account_name || user.name;
+        vaLoading.style.display = 'none';
+        vaDetails.style.display = 'block';
+      } else {
+        // No virtual account yet — show instructions to contact admin or use card
+        vaLoading.style.display = 'none';
+        vaError.style.display = 'block';
+        vaError.textContent = 'No virtual account assigned yet. Please use Card payment or contact support to get your dedicated account.';
+      }
+    }).catch(function() {
+      vaLoading.textContent = 'Could not load account details.';
+    });
+  }
+
+  function payWithPaystack() {
+    const amt = parseInt(document.getElementById('fundAmount').value);
+    if (!amt || amt < 100) { document.getElementById('fundAlert').innerHTML = '<div class="alert alert-error">Minimum amount is ₦100.</div>'; return; }
+    document.getElementById('fundAlert').innerHTML = '';
+    // Check if Paystack SDK is loaded
+    if (typeof PaystackPop === 'undefined') {
+      document.getElementById('fundAlert').innerHTML = '<div class="alert alert-error">Payment SDK not loaded. Please check your internet connection.</div>';
+      return;
+    }
+    const handler = PaystackPop.setup({
+      key: 'pk_test_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx', // Replace with your Paystack public key
+      email: user.email,
+      amount: amt * 100, // Paystack uses kobo
+      currency: 'NGN',
+      ref: 'TXN' + Date.now(),
+      metadata: { userId: user.id || user.uid, name: user.name },
+      callback: function(response) {
+        // Payment successful — credit wallet
+        walletBalance += amt;
+        addTransaction(user.id, 'Wallet Funding', 'Paystack Ref: ' + response.reference, amt);
+        syncWalletToFirebase();
+        closeModal('fundModal');
+        toast('Wallet funded with ' + fmt(amt) + ' via Paystack!');
+        updateStats();
+      },
+      onClose: function() {
+        toast('Payment cancelled.', 'error');
+      }
+    });
+    handler.openIframe();
+  }
+
+  function confirmBankTransfer() {
+    const amt = parseInt(document.getElementById('fundAmount').value);
+    if (!amt || amt < 100) { document.getElementById('fundAlert').innerHTML = '<div class="alert alert-error">Please enter the amount you transferred.</div>'; return; }
+    // In production, this would be verified via webhook. For now, show pending message.
+    document.getElementById('fundAlert').innerHTML = '<div class="alert alert-info">Transfer recorded. Your wallet will be credited once payment is confirmed (usually within minutes).</div>';
+    // Record a pending funding transaction
+    addTransaction(user.id, 'Wallet Funding', 'Bank Transfer – Pending Confirmation', amt);
     updateStats();
+  }
+
+  function fundWallet() {
+    // Legacy fallback — kept for compatibility
+    payWithPaystack();
   }
 
   // ── Airtime ────────────────────────────────────────

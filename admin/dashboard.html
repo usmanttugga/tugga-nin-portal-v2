@@ -355,6 +355,23 @@
   </div>
 </div>
 
+<!-- ASSIGN VIRTUAL ACCOUNT MODAL -->
+<div class="modal-overlay" id="assignVAModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>🏦 Assign Virtual Account</h3>
+      <button class="modal-close" onclick="closeModal('assignVAModal')">✕</button>
+    </div>
+    <div id="assignVAAlert"></div>
+    <p style="font-size:0.88rem;color:var(--gray);margin-bottom:1rem">Assign a dedicated bank account for: <strong id="assignVAUserName"></strong></p>
+    <div class="form-group"><label>Bank Name</label><input type="text" id="va_bank" placeholder="e.g. Wema Bank"/></div>
+    <div class="form-group"><label>Account Number</label><input type="text" id="va_number" placeholder="10-digit account number" maxlength="10" oninput="this.value=this.value.replace(/\D/g,'')"/></div>
+    <div class="form-group"><label>Account Name</label><input type="text" id="va_name" placeholder="Account holder name"/></div>
+    <input type="hidden" id="assignVAUserId"/>
+    <button class="btn-primary" onclick="confirmAssignVA()">Assign Account</button>
+  </div>
+</div>
+
 <!-- FUND WALLET MODAL -->
 <div class="modal-overlay" id="fundWalletModal">
   <div class="modal">
@@ -490,9 +507,39 @@
         <td style="display:flex;gap:6px;flex-wrap:wrap">
           <button onclick="openFundWallet('${uid}','${u.name}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">Fund</button>
           ${suspendBtn}
+          <button onclick="openAssignVA('${uid}','${u.name}')" style="background:#059669;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem">VA</button>
           <button onclick="deleteUser('${uid}','${u.name}')" style="background:#1a1a2e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.8rem">Delete</button>
         </td></tr>`;
     }).join("");
+  }
+
+  function openAssignVA(uid, name) {
+    document.getElementById('assignVAUserId').value = uid;
+    document.getElementById('assignVAUserName').textContent = name;
+    document.getElementById('va_bank').value = '';
+    document.getElementById('va_number').value = '';
+    document.getElementById('va_name').value = name;
+    document.getElementById('assignVAAlert').innerHTML = '';
+    openModal('assignVAModal');
+  }
+
+  function confirmAssignVA() {
+    const uid    = document.getElementById('assignVAUserId').value;
+    const bank   = document.getElementById('va_bank').value.trim();
+    const number = document.getElementById('va_number').value.trim();
+    const name   = document.getElementById('va_name').value.trim();
+    const alertEl = document.getElementById('assignVAAlert');
+    if (!bank || !number || !name) { alertEl.innerHTML = '<div class="alert alert-error">All fields are required.</div>'; return; }
+    if (!/^\d{10}$/.test(number)) { alertEl.innerHTML = '<div class="alert alert-error">Account number must be 10 digits.</div>'; return; }
+    if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    window.fbSetDoc(window.fbDoc(window.fbDB, 'users', uid), {
+      virtualAccount: { bank, account_number: number, account_name: name }
+    }, { merge: true }).then(function() {
+      closeModal('assignVAModal');
+      toast('Virtual account assigned to user.');
+    }).catch(function(e) {
+      alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>';
+    });
   }
 
   function openFundWallet(uid, name) {
