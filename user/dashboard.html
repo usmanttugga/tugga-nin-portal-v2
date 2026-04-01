@@ -2387,20 +2387,24 @@
     if (!isOpen) {
       sidebar.classList.add('open');
       overlay.classList.add('open');
-      history.pushState({ sidebarOpen: true }, '');
     } else {
       sidebar.classList.remove('open');
       overlay.classList.remove('open');
     }
   }
 
-  // Back button closes sidebar instead of navigating away
+  // Push a history entry on load so back button stays on this page
+  history.pushState({ page: 'dashboard' }, '', window.location.href);
+
+  // Intercept back button — close sidebar if open, otherwise stay on page
   window.addEventListener('popstate', function(e) {
     const sidebar = document.querySelector('.sidebar');
     if (sidebar && sidebar.classList.contains('open')) {
       sidebar.classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('open');
     }
+    // Re-push so back button always stays on dashboard
+    history.pushState({ page: 'dashboard' }, '', window.location.href);
   });
 
   // Close sidebar on section click (mobile)

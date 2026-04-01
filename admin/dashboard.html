@@ -1129,6 +1129,19 @@
   }
   initAdminFirebaseSync();
 
+  // Push a history entry on load so back button stays on this page
+  history.pushState({ page: 'admin-dashboard' }, '', window.location.href);
+
+  // Intercept back button — close sidebar if open, otherwise stay on page
+  window.addEventListener('popstate', function(e) {
+    const sidebar = document.querySelector('.sidebar');
+    if (sidebar && sidebar.classList.contains('open')) {
+      sidebar.classList.remove('open');
+      document.getElementById('sidebarOverlay').classList.remove('open');
+    }
+    history.pushState({ page: 'admin-dashboard' }, '', window.location.href);
+  });
+
   // Initial load
   loadOverview();
   loadUsers();
