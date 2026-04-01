@@ -116,8 +116,8 @@
       <p class="page-sub">All your service requests.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
-          <tbody id="historyTable"><tr><td colspan="7" style="text-align:center;color:#999">No transactions yet</td></tr></tbody>
+          <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="historyTable"><tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -1204,7 +1204,7 @@
     const txns = getUserTransactions(user.id);
     const tbody = document.getElementById("historyTable");
     const wbody = document.getElementById("walletTxnTable");
-    if (!txns.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
+    if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
     tbody.innerHTML = txns.map(t => {
       const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
       const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
@@ -1215,15 +1215,11 @@
           : t.personSlipUrl
             ? `${t.details}<br><a href="${t.personSlipUrl}" target="_blank" download="Personalized-NIN-Slip.pdf" style="font-size:0.8rem;color:#d97706;font-weight:600;text-decoration:none">🎨 Download Personalized Slip</a>`
             : t.details;
-      const downloadBtn = t.slipUrl
-        ? `<a href="${t.slipUrl}" download="NIN-Verification-Slip.txt" style="font-size:0.78rem;background:var(--primary);color:#fff;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600">⬇ Download Slip</a>`
-        : '';
       return `<tr>
         <td>${t.id}</td><td>${t.service}</td><td>${detailsCell}</td>
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
         <td>${t.date}</td>
-        <td>${downloadBtn}</td>
       </tr>`;
     }).join("");
     wbody.innerHTML = txns.map(t => {
@@ -1253,16 +1249,18 @@
     const services = SVC_HISTORY_MAP[sectionId];
     if (!services) return;
     const txns = getUserTransactions(user.id).filter(t => services.includes(t.service));
+    const isNinVerify = sectionId === 'sec-nin-verify';
     if (!txns.length) {
       container.innerHTML = '<p style="margin-top:1.5rem;color:var(--gray);font-size:0.9rem;text-align:center">No history for this service yet.</p>';
       return;
     }
+    const hasDownload = isNinVerify && txns.some(t => t.slipUrl);
     container.innerHTML = `
       <div style="margin-top:1.5rem">
         <p style="font-weight:700;color:var(--dark);margin-bottom:0.8rem">Recent Requests</p>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
+            <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th>${hasDownload ? '<th>Action</th>' : ''}</tr></thead>
             <tbody>${txns.map(t => {
               const bc = t.status === 'success' || t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized' ? 'success' : t.status === 'pending' || t.status === 'submitted' ? 'pending' : 'failed';
               const ds = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
@@ -1273,7 +1271,10 @@
                   : t.personSlipUrl
                     ? `${t.details}<br><a href="${t.personSlipUrl}" target="_blank" download="Personalized-NIN-Slip.pdf" style="font-size:0.78rem;color:#d97706;font-weight:600;text-decoration:none">🎨 Download Personalized Slip</a>`
                     : t.details;
-              return `<tr><td>${t.id}</td><td>${t.service}</td><td>${det}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${ds}</span></td><td>${t.date}</td></tr>`;
+              const downloadCell = isNinVerify && t.slipUrl
+                ? `<td><a onclick="downloadNINSlipFromHistory('${t.id}')" style="font-size:0.78rem;background:var(--primary);color:#fff;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;cursor:pointer">⬇ Download</a></td>`
+                : (hasDownload ? '<td></td>' : '');
+              return `<tr><td>${t.id}</td><td>${t.service}</td><td>${det}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-${bc}">${ds}</span></td><td>${t.date}</td>${downloadCell}</tr>`;
             }).join('')}</tbody>
           </table>
         </div>
@@ -1785,6 +1786,17 @@
     el.style.color = '#fff';
     _selectedSlip = slipName;
     document.getElementById('printSlipBtn').style.display = 'block';
+  }
+
+  function downloadNINSlipFromHistory(txnId) {
+    const txns = JSON.parse(localStorage.getItem('tugga_txns') || '[]');
+    const t = txns.find(x => x.id === txnId);
+    if (!t || !t.slipUrl) return;
+    const win = window.open('', '_blank', 'width=900,height=700');
+    win.document.write(t.slipUrl.startsWith('data:text') ? '<pre>' + atob(t.slipUrl.split(',')[1]) + '</pre>' : '<p>Slip not available</p>');
+    win.document.close();
+    win.focus();
+    setTimeout(function() { win.print(); }, 400);
   }
 
   function downloadNINSlip(slipType) {
