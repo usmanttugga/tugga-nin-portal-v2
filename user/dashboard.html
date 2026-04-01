@@ -1667,6 +1667,7 @@
     const slipDataUrl = 'data:text/plain;base64,' + btoa(unescape(encodeURIComponent(slipContent)));
     submitWithStatus(svc.title, inputs.primary, slipFee, 'success', { 'Input': inputs.primary, 'Slip Type': _selectedSlip, 'slipUrl': slipDataUrl });
     updateStats();
+  }
 
   let _selectedSlip = '';
   let _lastVerifiedResult = null;
