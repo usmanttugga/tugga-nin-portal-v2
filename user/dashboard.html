@@ -1121,11 +1121,10 @@
   }
 
   function _goBack() {
-    if (_prevSection) {
-      const target = _prevSection;
-      _prevSection = null; // clear so double-back doesn't loop
+    const parent = _sectionParent[_currentSection];
+    if (parent) {
       _isGoingBack = true;
-      window.showSection(target);
+      window.showSection(parent);
     }
   }
 
