@@ -1037,7 +1037,7 @@
         }
       });
     }
-    // Real-time platform settings (apply company name)
+    // Real-time platform settings (apply company name + support contact)
     window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "platform"), function(snap) {
       if (snap.exists()) {
         const s = snap.data();
@@ -1045,6 +1045,27 @@
         if (s.companyName) {
           const logoEl = document.querySelector('nav .logo');
           if (logoEl) logoEl.innerHTML = '🛡️ ' + s.companyName.split(' ')[0] + ' <span>' + (s.companyName.split(' ').slice(1).join(' ') || 'IT SOLUTIONS') + '</span>';
+        }
+        // Show support bar
+        const bar = document.getElementById('supportBar');
+        const emailLink = document.getElementById('supportEmailLink');
+        const emailText = document.getElementById('supportEmailText');
+        const waLink = document.getElementById('supportWhatsappLink');
+        if (s.supportEmail || s.supportPhone) {
+          bar.style.display = 'flex';
+          document.querySelector('.main').style.paddingBottom = '3rem';
+        }
+        if (s.supportEmail) {
+          emailLink.href = 'mailto:' + s.supportEmail;
+          emailText.textContent = s.supportEmail;
+          emailLink.style.display = 'inline';
+        }
+        if (s.supportPhone) {
+          // Strip non-digits, convert to international format for WhatsApp
+          const digits = s.supportPhone.replace(/\D/g, '');
+          const intl = digits.startsWith('0') ? '234' + digits.slice(1) : digits;
+          waLink.href = 'https://wa.me/' + intl;
+          waLink.style.display = 'inline';
         }
       }
     });
@@ -2322,5 +2343,13 @@
     });
   });
 </script>
+
+<!-- Support Contact Bar -->
+<div id="supportBar" style="display:none;position:fixed;bottom:0;left:0;right:0;background:var(--primary);color:#fff;z-index:500;padding:8px 1.5rem;align-items:center;justify-content:center;gap:1.5rem;font-size:0.82rem;border-top:1px solid rgba(201,168,76,0.3);flex-wrap:wrap">
+  <span style="opacity:0.7;font-weight:600">Need help?</span>
+  <a id="supportEmailLink" href="#" style="color:var(--accent);text-decoration:none;font-weight:600;display:none">✉️ <span id="supportEmailText"></span></a>
+  <a id="supportWhatsappLink" href="#" target="_blank" style="color:#25d366;text-decoration:none;font-weight:600;display:none">💬 WhatsApp Support</a>
+</div>
+
 </body>
 </html>
