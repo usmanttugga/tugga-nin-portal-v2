@@ -202,6 +202,12 @@
         <div class="service-card" data-svc="SIM Validation" onclick="openServiceModal('SIM Validation','Validate NIN against SIM registration','nin', String(_p.sim_val||150))">
           <div class="svc-icon">📲</div><h4>SIM Validation</h4><p>Validate NIN via SIM</p><div class="price" id="price-sim-val">₦150</div>
         </div>
+        <div class="service-card" data-svc="Modification Validation" onclick="openServiceModal('Modification Validation','Validate NIN modification request','nin', String(_p.mod_val||150))">
+          <div class="svc-icon">✏️</div><h4>Modification Validation</h4><p>Validate NIN modification</p><div class="price" id="price-mod-val">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Immigration Validation" onclick="openServiceModal('Immigration Validation','Validate NIN for immigration purposes','nin', String(_p.imm_val||150))">
+          <div class="svc-icon">✈️</div><h4>Immigration Validation</h4><p>Validate NIN for immigration</p><div class="price" id="price-imm-val">₦150</div>
+        </div>
       </div>
       <div id="svcHistory-sec-nin-validation"></div>
     </section>
@@ -1281,7 +1287,7 @@
   // ── Service section history maps ───────────────────
   const SVC_HISTORY_MAP = {
     'sec-nin-verify':       ['Verify with NIN','Phone Number Verification','Bio Data Verification','FingerPrint Verification'],
-    'sec-nin-validation':   ['No Record Found','Bank Validation','Photograph Error','SIM Validation'],
+    'sec-nin-validation':   ['No Record Found','Bank Validation','Photograph Error','SIM Validation','Modification Validation','Immigration Validation'],
     'sec-nin-modification': ['Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification'],
     'sec-ipe':              ['Normal Clearance','Modification Clearance','Other Error'],
     'sec-vnin':             ['VNIN Slip'],
@@ -1374,10 +1380,12 @@
   const NIN_ONLY_SVCS = ['No Record Found', 'Bank Validation', 'Photograph Error', 'SIM Validation', 'VNIN Slip'];
 
   const NIN_VAL_FIELDS = {
-    'No Record Found':  `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
-    'Bank Validation':  `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
-    'Photograph Error': `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
-    'SIM Validation':   `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`
+    'No Record Found':        `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
+    'Bank Validation':        `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
+    'Photograph Error':       `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
+    'SIM Validation':         `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
+    'Modification Validation':`<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
+    'Immigration Validation': `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`
   };
 
   function openServiceModal(title, desc, type, price) {
@@ -1478,6 +1486,8 @@
     set('price-bank-val',     _p.bank_val     || 150);
     set('price-photo-err',    _p.photo_err    || 150);
     set('price-sim-val',      _p.sim_val      || 150);
+    set('price-mod-val',      _p.mod_val      || 150);
+    set('price-imm-val',      _p.imm_val      || 150);
     set('price-name-mod',     _p.name_mod     || 500);
     set('price-phone-mod',    _p.phone_mod    || 500);
     set('price-address-mod',  _p.address_mod  || 500);
@@ -1523,6 +1533,7 @@
       'Bio Data Verification':'grp_nin_verify','FingerPrint Verification':'grp_nin_verify',
       'No Record Found':'grp_nin_val','Bank Validation':'grp_nin_val',
       'Photograph Error':'grp_nin_val','SIM Validation':'grp_nin_val',
+      'Modification Validation':'grp_nin_val','Immigration Validation':'grp_nin_val',
       'Name Modification':'grp_nin_mod','Phone Number Modification':'grp_nin_mod',
       'Address Modification':'grp_nin_mod','Date of Birth Modification':'grp_nin_mod',
       'NIN Personalization':'grp_nin_verify','VNIN Slip':'grp_nin_verify',
@@ -1553,6 +1564,7 @@
       'Bio Data Verification':'grp_nin_verify','FingerPrint Verification':'grp_nin_verify',
       'No Record Found':'grp_nin_val','Bank Validation':'grp_nin_val',
       'Photograph Error':'grp_nin_val','SIM Validation':'grp_nin_val',
+      'Modification Validation':'grp_nin_val','Immigration Validation':'grp_nin_val',
       'Name Modification':'grp_nin_mod','Phone Number Modification':'grp_nin_mod',
       'Address Modification':'grp_nin_mod','Date of Birth Modification':'grp_nin_mod',
       'NIN Personalization':'grp_nin_verify','VNIN Slip':'grp_nin_verify',
