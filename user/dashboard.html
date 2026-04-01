@@ -1490,15 +1490,20 @@
 
   function ninMockLookup(serviceKey, inputs) {
     const hash = (s) => s.split('').reduce((a, c) => a + c.charCodeAt(0), 0);
-    const names = ['Aminu Bello', 'Fatima Yusuf', 'Chukwuemeka Obi', 'Aisha Musa', 'Tunde Adeyemi'];
-    const dobs  = ['1990-04-12', '1985-07-23', '1992-11-05', '1988-03-17', '1995-09-30'];
-    const genders = ['Male', 'Female', 'Male', 'Female', 'Male'];
-    const idx = hash(inputs.primary || '') % names.length;
+    const records = [
+      { firstname:'AMINU', middlename:'', surname:'BELLO', birthdate:'15-03-1988', telephoneno:'08034567890', gender:'M', residence_address:'12 MURTALA STREET, KANO', residence_town:'KANO', residence_lga:'KANO MUNICIPAL', residence_state:'Kano' },
+      { firstname:'FATIMA', middlename:'AISHA', surname:'YUSUF', birthdate:'23-07-1992', telephoneno:'07012345678', gender:'F', residence_address:'5 IBRAHIM ROAD, KADUNA', residence_town:'KADUNA', residence_lga:'KADUNA NORTH', residence_state:'Kaduna' },
+      { firstname:'CHUKWUEMEKA', middlename:'JOHN', surname:'OBI', birthdate:'05-11-1985', telephoneno:'09087654321', gender:'M', residence_address:'22 ADEOLA STREET, LAGOS', residence_town:'LAGOS', residence_lga:'LAGOS ISLAND', residence_state:'Lagos' },
+      { firstname:'AISHA', middlename:'', surname:'MUSA', birthdate:'17-03-1995', telephoneno:'08123456789', gender:'F', residence_address:'8 SULTAN ROAD, SOKOTO', residence_town:'SOKOTO', residence_lga:'SOKOTO NORTH', residence_state:'Sokoto' },
+      { firstname:'TUNDE', middlename:'SEGUN', surname:'ADEYEMI', birthdate:'30-09-1990', telephoneno:'07098765432', gender:'M', residence_address:'15 AWOLOWO AVENUE, IBADAN', residence_town:'IBADAN', residence_lga:'IBADAN NORTH', residence_state:'Oyo' }
+    ];
+    const idx = hash(inputs.primary || '') % records.length;
     if (serviceKey === 'bio-data') {
       const match = inputs.fname && inputs.lname && inputs.dob && inputs.gender;
       return { match: !!(match && (inputs.fname.charCodeAt(0) + inputs.lname.charCodeAt(0)) % 2 === 0) };
     }
-    return { name: names[idx], dob: dobs[idx], gender: genders[idx], photo: '📷' };
+    const r = records[idx];
+    return { ...r, nin: inputs.primary || '', name: r.firstname + ' ' + r.surname, dob: r.birthdate, gender: r.gender, photo: '👤' };
   }
 
   function openNinVerifyModal(serviceKey) {
@@ -1666,16 +1671,36 @@
       resultEl.innerHTML = '<span class="badge badge-success">✅ Match</span> Bio data matches the NIN record.';
     } else {
       resultEl.innerHTML =
-        '<span class="badge badge-success">✅ Verified</span>' +
-        '<div style="margin-top:0.5rem;line-height:1.8">' +
-          '<div><strong>Name:</strong> ' + result.name + '</div>' +
-          '<div><strong>DOB:</strong> ' + result.dob + '</div>' +
-          '<div><strong>Gender:</strong> ' + result.gender + '</div>' +
-          '<div><strong>Photo:</strong> ' + result.photo + '</div>' +
-        '</div>' +
-        '<div style="margin-top:1rem;border-top:1px solid #bbf7d0;padding-top:1rem">' +
-          '<p style="font-weight:600;margin-bottom:0.6rem;font-size:0.9rem">Selected: ' + _selectedSlip + '</p>' +
-          '<button onclick="printSelectedSlip()" style="width:100%;padding:10px;background:var(--primary);color:#fff;border:none;border-radius:8px;cursor:pointer;font-weight:600">🖨️ Print ' + _selectedSlip + '</button>' +
+        '<div style="background:#1a2a3a;border-radius:12px;overflow:hidden;max-width:420px;margin:0 auto">' +
+          '<div style="background:#1a2a3a;padding:1rem;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1)">' +
+            '<p style="color:#fff;font-weight:700;font-size:1rem;margin-bottom:0.8rem">Search Details</p>' +
+            '<div style="width:140px;height:160px;background:#2a3a4a;border-radius:8px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:5rem;border:2px solid rgba(255,255,255,0.2)">' +
+              result.photo +
+            '</div>' +
+          '</div>' +
+          '<table style="width:100%;border-collapse:collapse">' +
+            [
+              ['NIN', result.nin || inputs.primary],
+              ['FIRSTNAME', result.firstname],
+              ['MIDDLENAME', result.middlename || ''],
+              ['SURNAME', result.surname],
+              ['BIRTHDATE', result.birthdate],
+              ['TELEPHONENO', result.telephoneno],
+              ['GENDER', result.gender],
+              ['RESIDENCE_ADDRESS', result.residence_address],
+              ['RESIDENCE_TOWN', result.residence_town],
+              ['RESIDENCE_LGA', result.residence_lga],
+              ['RESIDENCE_STATE', result.residence_state]
+            ].map(([label, value]) =>
+              `<tr style="border-bottom:1px solid rgba(255,255,255,0.08)">
+                <td style="padding:10px 14px;color:rgba(255,255,255,0.6);font-size:0.78rem;font-weight:700;background:#1e2d3d;width:45%">${label}</td>
+                <td style="padding:10px 14px;color:#fff;font-size:0.82rem;background:#1a2535">${value || ''}</td>
+              </tr>`
+            ).join('') +
+          '</table>' +
+          '<div style="padding:1rem;background:#1a2a3a">' +
+            `<button onclick="downloadNINSlip('${_selectedSlip}')" style="width:100%;padding:11px;background:linear-gradient(135deg,#c9a84c,#e8c96a);color:#0f2044;border:none;border-radius:8px;cursor:pointer;font-weight:700;font-size:0.9rem">⬇ Download ${_selectedSlip}</button>` +
+          '</div>' +
         '</div>';
     }
     resultEl.style.display = 'block';
@@ -1706,6 +1731,17 @@
     document.getElementById('printSlipBtn').style.display = 'block';
   }
 
+  function downloadNINSlip(slipType) {
+    const result = ninMockLookup(currentNinService, window._lastNinInputs || {primary:'N/A'});
+    const nin = (window._lastNinInputs && window._lastNinInputs.primary) || 'N/A';
+    const slipHTML = generateSlipHTML(slipType, result, nin);
+    const win = window.open('', '_blank', 'width=900,height=700');
+    win.document.write(slipHTML);
+    win.document.close();
+    win.focus();
+    setTimeout(function() { win.print(); }, 600);
+  }
+
   function printSelectedSlip() {
     if (!_selectedSlip) return;
     const result = ninMockLookup(currentNinService, window._lastNinInputs || {primary:'N/A'});
@@ -1719,32 +1755,63 @@
   function buildSlipHTML(slipType, result) {
     const now = new Date().toLocaleDateString('en-GB');
     const nin = (window._lastNinInputs && window._lastNinInputs.primary) || '***********';
-    if (slipType === 'Normal Slip') {
-      return '<!DOCTYPE html><html><head><title>NIN Slip</title><style>body{font-family:Arial,sans-serif;margin:20px}table{width:100%;border-collapse:collapse}td,th{border:1px solid #333;padding:6px 10px;font-size:13px}.header{text-align:center;margin-bottom:10px}.footer{display:flex;justify-content:space-around;border-top:1px solid #333;padding-top:8px;font-size:11px;margin-top:10px}</style></head><body>' +
-        '<div class="header"><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7a/Coat_of_arms_of_Nigeria.svg/60px-Coat_of_arms_of_Nigeria.svg.png" height="50"/><h3 style="margin:4px 0">National Identity Management System</h3><p style="margin:2px 0">Federal Republic of Nigeria</p><p style="margin:2px 0"><strong>National Identification Number Slip (NINS)</strong></p></div>' +
-        '<table><tr><td><strong>Tracking ID:</strong> NIN-INVALIDATED</td><td><strong>Surname:</strong> ' + (result.name ? result.name.split(' ')[1]||'****' : '****') + '</td><td><strong>Address:</strong> ****</td></tr>' +
-        '<tr><td><strong>NIN:</strong> ' + nin + '</td><td><strong>First Name:</strong> ' + (result.name ? result.name.split(' ')[0] : '****') + '</td><td></td></tr>' +
-        '<tr><td></td><td><strong>Middle Name:</strong> ****</td><td></td></tr>' +
-        '<tr><td></td><td><strong>Gender:</strong> ' + (result.gender||'*') + '</td><td></td></tr></table>' +
-        '<p style="font-size:11px;margin-top:8px"><em>Note: The National Identification Number (NIN) is your identity. It is confidential and may only be released to authorised bodies.</em></p>' +
-        '<div class="footer"><span>helpdesk@nimc.gov.ng</span><span>www.nimc.gov.ng</span><span>0700-CALL-NIMC</span><span>National Identity Management Commission</span></div></body></html>';
-    } else if (slipType === 'Verification Information Slip') {
-      return '<!DOCTYPE html><html><head><title>Verified NIN Details</title><style>body{font-family:Arial,sans-serif;margin:30px;color:#222}.header{display:flex;align-items:center;gap:16px;margin-bottom:20px}.verified{color:green;font-size:2rem;font-weight:bold;text-align:right}.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px 20px;font-size:13px}.label{color:#555}.value{font-weight:600}.notes{font-size:11px;margin-top:16px;color:#444}</style></head><body>' +
-        '<div class="header"><div><h2 style="margin:0">Federal Republic of Nigeria</h2><h3 style="margin:4px 0;color:#1a5c1a">Verified NIN Details</h3></div></div>' +
-        '<div style="display:flex;gap:20px"><div class="grid" style="flex:1"><div class="label">First Name:</div><div class="value">' + (result.name?result.name.split(' ')[0]:'****') + '</div><div class="label">Middle Name:</div><div class="value">****</div><div class="label">Last Name:</div><div class="value">' + (result.name?result.name.split(' ')[1]||'****':'****') + '</div><div class="label">Date of Birth:</div><div class="value">' + (result.dob||'****') + '</div><div class="label">Gender:</div><div class="value">' + (result.gender||'*') + '</div><div class="label">NIN Number:</div><div class="value">' + nin + '</div><div class="label">Tracking ID:</div><div class="value">****</div><div class="label">Phone Number:</div><div class="value">****</div></div>' +
-        '<div style="text-align:center;min-width:80px"><div style="width:70px;height:80px;background:#ddd;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:2rem">👤</div></div>' +
-        '<div style="max-width:260px;font-size:11px;color:#333"><p style="color:green;font-size:1.4rem;font-weight:bold;margin:0">Verified</p><p>This is a property of National Identity Management Commission (NIMC), Nigeria.</p><ol><li>This NIN slip remains the property of the Federal Republic of Nigeria.</li><li>This NIN slip does not imply nor confer citizenship.</li><li>This NIN slip is valid for the lifetime of the holder and <span style="color:red">DOES NOT EXPIRE</span>.</li></ol></div></div>' +
-        '</body></html>';
-    } else if (slipType === 'Premium Slip') {
-      return '<!DOCTYPE html><html><head><title>Digital NIN Slip</title><style>body{margin:0;font-family:Arial,sans-serif}.card{width:340px;height:210px;background:linear-gradient(135deg,#1a5c1a,#2d8a2d,#a8d5a2);border-radius:12px;padding:14px;color:#fff;position:relative;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,0.3)}.card-title{font-size:9px;letter-spacing:1px;text-transform:uppercase;opacity:0.9}.card-main{font-size:11px;margin-top:6px}.photo{width:50px;height:60px;background:rgba(255,255,255,0.3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;float:left;margin-right:10px}.qr{width:60px;height:60px;background:#fff;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.6rem;color:#333;float:right}.nin-num{font-size:18px;letter-spacing:4px;text-align:center;margin-top:8px;font-weight:bold}</style></head><body>' +
-        '<div class="card"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><div class="card-title">Federal Republic of Nigeria</div><div style="font-size:8px;opacity:0.8">Digital NIN Slip</div></div><div style="font-size:8px;text-align:right;opacity:0.9">NGA</div></div>' +
-        '<div style="display:flex;margin-top:8px"><div class="photo">👤</div><div class="card-main"><div><strong>SURNAME/NOM</strong><br/>' + (result.name?result.name.split(' ')[1]||'RESIDENT':'RESIDENT') + '</div><div style="margin-top:4px"><strong>GIVEN NAMES</strong><br/>' + (result.name||'PROUD, NIGERIAN') + '</div><div style="margin-top:4px"><strong>DATE OF BIRTH</strong> ' + (result.dob||'01 JAN 1990') + ' &nbsp; <strong>SEX</strong> ' + (result.gender?result.gender[0]:'*') + '</div><div style="margin-top:4px;font-size:9px">ISSUE DATE: ' + now + '</div></div><div class="qr">QR</div></div>' +
-        '<div class="nin-num">' + nin.replace(/(\d{4})(\d{3})(\d{4})/,'$1 $2 $3') + '</div></div></body></html>';
+    const fn = result.firstname || (result.name ? result.name.split(' ')[0] : '****');
+    const mn = result.middlename || '';
+    const sn = result.surname || (result.name ? result.name.split(' ')[1] || '****' : '****');
+    const dob = result.birthdate || result.dob || '****';
+    const tel = result.telephoneno || '****';
+    const gen = result.gender || '*';
+    const addr = result.residence_address || '****';
+    const town = result.residence_town || '****';
+    const lga  = result.residence_lga || '****';
+    const state = result.residence_state || '****';
+
+    const searchDetailsTable =
+      `<table style="width:100%;border-collapse:collapse;font-size:13px">` +
+      [['NIN',nin],['FIRSTNAME',fn],['MIDDLENAME',mn],['SURNAME',sn],['BIRTHDATE',dob],
+       ['TELEPHONENO',tel],['GENDER',gen],['RESIDENCE_ADDRESS',addr],
+       ['RESIDENCE_TOWN',town],['RESIDENCE_LGA',lga],['RESIDENCE_STATE',state]]
+      .map(([l,v]) => `<tr><td style="padding:8px 12px;background:#2a3a4a;color:rgba(255,255,255,0.7);font-weight:700;width:45%;border-bottom:1px solid rgba(255,255,255,0.08)">${l}</td><td style="padding:8px 12px;background:#1e2d3d;color:#fff;border-bottom:1px solid rgba(255,255,255,0.08)">${v}</td></tr>`)
+      .join('') + `</table>`;
+
+    const photoBox = `<div style="width:140px;height:160px;background:#2a3a4a;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:5rem;margin:0 auto 1rem;border:2px solid rgba(255,255,255,0.2)">👤</div>`;
+
+    if (slipType === 'Normal Slip' || slipType === 'Verification Information Slip' || slipType === 'Standard Slip') {
+      return `<!DOCTYPE html><html><head><title>Search Details – ${slipType}</title>
+      <style>body{margin:0;background:#1a2535;font-family:Arial,sans-serif;display:flex;justify-content:center;padding:20px}
+      .container{background:#1a2535;border-radius:12px;overflow:hidden;width:420px}
+      .header{background:#1a2535;padding:1rem;text-align:center;border-bottom:1px solid rgba(255,255,255,0.1)}
+      .title{color:#fff;font-weight:700;font-size:1rem;margin-bottom:0.8rem}
+      @media print{body{background:#fff}.container{width:100%}}</style></head><body>
+      <div class="container">
+        <div class="header"><p class="title">Search Details</p>${photoBox}</div>
+        ${searchDetailsTable}
+        <div style="padding:1rem;text-align:center;background:#1a2535;font-size:11px;color:rgba(255,255,255,0.5)">
+          ${slipType} &nbsp;|&nbsp; ${now} &nbsp;|&nbsp; NIMC Nigeria
+        </div>
+      </div></body></html>`;
     } else {
-      return '<!DOCTYPE html><html><head><title>Standard NIN Slip</title><style>body{margin:20px;font-family:Arial,sans-serif}.card{width:340px;border:2px solid #333;border-radius:8px;padding:14px;background:#fff;position:relative}.header{display:flex;justify-content:space-between;align-items:center}.photo{width:50px;height:60px;background:#ccc;border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:1.5rem}.qr{width:55px;height:55px;background:#eee;border:1px solid #999;display:flex;align-items:center;justify-content:center;font-size:0.6rem}.nin-num{font-size:20px;letter-spacing:4px;text-align:center;font-weight:bold;margin-top:8px;border-top:1px solid #333;padding-top:6px}</style></head><body>' +
-        '<div class="card"><div class="header"><div class="photo">👤</div><div style="text-align:center;flex:1"><div style="font-size:9px;font-weight:bold">Surname/Nom</div><div>' + (result.name?result.name.split(' ')[1]||'RESIDENT':'RESIDENT') + '</div><div style="font-size:9px;font-weight:bold;margin-top:4px">Given Names/Prénoms</div><div>' + (result.name||'PROUD, NIGERIAN') + '</div><div style="font-size:9px;margin-top:4px">Date of Birth: ' + (result.dob||'01 OCT 1960') + '</div><div style="font-size:9px">Issue Date: ' + now + '</div></div><div class="qr">QR</div></div>' +
-        '<div style="text-align:center;font-size:9px;margin-top:6px;font-weight:bold">National Identification Number (NIN)</div>' +
-        '<div class="nin-num">' + nin.replace(/(\d{4})(\d{3})(\d{4})/,'$1 $2 $3') + '</div></div></body></html>';
+      // Premium Slip — card style
+      return `<!DOCTYPE html><html><head><title>Digital NIN Slip</title>
+      <style>body{margin:20px;font-family:Arial,sans-serif;background:#1a2535;display:flex;justify-content:center}
+      .card{width:380px;background:linear-gradient(135deg,#1a5c1a,#2d8a2d,#a8d5a2);border-radius:12px;padding:16px;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,0.3)}
+      .nin-num{font-size:18px;letter-spacing:4px;text-align:center;margin-top:10px;font-weight:bold;border-top:1px solid rgba(255,255,255,0.4);padding-top:8px}
+      @media print{body{background:#fff}}</style></head><body>
+      <div class="card">
+        <div style="font-size:9px;letter-spacing:1px;text-transform:uppercase;opacity:0.9">Federal Republic of Nigeria — Digital NIN Slip</div>
+        <div style="display:flex;gap:12px;margin-top:10px">
+          <div style="width:60px;height:70px;background:rgba(255,255,255,0.3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:2rem;flex-shrink:0">👤</div>
+          <div style="font-size:11px">
+            <div><strong>SURNAME:</strong> ${sn}</div>
+            <div><strong>GIVEN NAMES:</strong> ${fn} ${mn}</div>
+            <div><strong>DATE OF BIRTH:</strong> ${dob}</div>
+            <div><strong>SEX:</strong> ${gen}</div>
+            <div><strong>PHONE:</strong> ${tel}</div>
+            <div style="font-size:9px;margin-top:4px">ISSUE DATE: ${now}</div>
+          </div>
+        </div>
+        <div class="nin-num">${nin.replace(/(\d{4})(\d{3})(\d{4})/,'$1 $2 $3')}</div>
+      </div></body></html>`;
     }
   }
 
