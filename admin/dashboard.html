@@ -398,6 +398,11 @@
         oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/>
       <span id="ipeClearTrackingErr" style="color:var(--accent);font-size:0.8rem"></span>
     </div>
+    <div class="form-group">
+      <label>NIN (optional)</label>
+      <input type="text" id="ipeClearNin" placeholder="11-digit NIN (optional)" maxlength="11"
+        oninput="this.value=this.value.replace(/\D/g,'')"/>
+    </div>
     <input type="hidden" id="ipeClearTxnId"/>
     <button class="btn-primary" onclick="confirmIPEClear()">✅ Cleared</button>
   </div>
@@ -752,6 +757,7 @@
   function openIPEClearModal(txnId) {
     document.getElementById('ipeClearTxnId').value = txnId;
     document.getElementById('ipeClearTrackingId').value = '';
+    document.getElementById('ipeClearNin').value = '';
     document.getElementById('ipeClearTrackingErr').textContent = '';
     document.getElementById('ipeClearAlert').innerHTML = '';
     closeModal('requestDetailsModal');
@@ -761,6 +767,7 @@
   function confirmIPEClear() {
     const txnId = document.getElementById('ipeClearTxnId').value;
     const newId = document.getElementById('ipeClearTrackingId').value.trim().toUpperCase();
+    const nin   = document.getElementById('ipeClearNin').value.trim();
     const errEl = document.getElementById('ipeClearTrackingErr');
     if (!/^[A-Z0-9]{15}$/.test(newId)) {
       errEl.textContent = 'New Tracking ID must be exactly 15 alphanumeric characters';
@@ -768,10 +775,9 @@
     }
     errEl.textContent = '';
     if (!window.fbReady) { document.getElementById('ipeClearAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), {
-      status: 'cleared',
-      clearedTrackingId: newId
-    }).then(function() {
+    const update = { status: 'cleared', clearedTrackingId: newId };
+    if (nin) update.clearedNin = nin;
+    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), update).then(function() {
       closeModal('ipeClearModal');
       toast('IPE request cleared — new tracking ID sent to user.');
       loadNINStats();
@@ -833,15 +839,16 @@
     const formData = t.formData || {};
     const orderedKeys = SERVICE_FIELD_ORDER[t.service] || Object.keys(formData);
     const allData = Object.assign({}, formData);
-    if (t.clearedTrackingId) allData['Cleared Tracking ID'] = t.clearedTrackingId;
+    if (t.clearedTrackingId) allData['Old Tracking ID'] = t.clearedTrackingId;
+    if (t.clearedNin) allData['NIN'] = t.clearedNin;
     const displayKeys = t.clearedTrackingId
-      ? [...orderedKeys.filter(k => allData[k] && allData[k] !== '—'), 'Cleared Tracking ID']
+      ? [...orderedKeys.filter(k => allData[k] && allData[k] !== '—'), 'Old Tracking ID', ...(t.clearedNin ? ['NIN'] : [])]
       : orderedKeys.filter(k => allData[k] && allData[k] !== '—');
 
     const rows = displayKeys.map(k =>
         `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.55rem 0;border-bottom:1px solid #f1f5f9;gap:1rem">
           <span style="color:var(--gray);font-size:0.88rem;white-space:nowrap;flex-shrink:0">${k}</span>
-          <span style="font-weight:${k === 'Cleared Tracking ID' ? '700;color:#059669' : '500'};font-size:0.88rem;text-align:right;word-break:break-word">${allData[k]}</span>
+          <span style="font-weight:${k === 'Old Tracking ID' || k === 'NIN' ? '700;color:#059669' : '500'};font-size:0.88rem;text-align:right;word-break:break-word">${allData[k]}</span>
         </div>`
       );
 
