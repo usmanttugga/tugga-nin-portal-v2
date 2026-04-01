@@ -1043,8 +1043,8 @@
         const s = snap.data();
         localStorage.setItem("tugga_settings", JSON.stringify(s));
         if (s.companyName) {
-          const logoEl = document.querySelector('nav .logo');
-          if (logoEl) logoEl.innerHTML = '🛡️ ' + s.companyName.split(' ')[0] + ' <span>' + (s.companyName.split(' ').slice(1).join(' ') || 'IT SOLUTIONS') + '</span>';
+          // Update page title only — don't overwrite the logo image
+          document.title = s.companyName + ' – NIN Portal';
         }
         // Show support bar
         const bar = document.getElementById('supportBar');
