@@ -104,13 +104,18 @@
       </div>
 
       <!-- Virtual Account Card -->
-      <div id="walletVACard" style="display:none;background:var(--white);border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow);border:1px solid #d1fae5">
+      <div id="walletVACard" style="background:var(--white);border-radius:14px;padding:1.2rem 1.5rem;margin-bottom:1.5rem;box-shadow:var(--card-shadow);border:1px solid #d1fae5">
         <p style="font-weight:700;color:var(--primary);margin-bottom:0.8rem;font-size:0.95rem">🏦 Your Dedicated Bank Account</p>
-        <p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.8rem">Transfer money to this account to fund your wallet automatically.</p>
-        <div style="display:flex;flex-direction:column;gap:0.4rem">
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--gray);font-size:0.85rem">Bank</span><strong id="walletVABank" style="font-size:0.85rem"></strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--gray);font-size:0.85rem">Account Number</span><strong id="walletVANumber" style="font-size:0.9rem;letter-spacing:2px;color:var(--primary)"></strong></div>
-          <div style="display:flex;justify-content:space-between"><span style="color:var(--gray);font-size:0.85rem">Account Name</span><strong id="walletVAName" style="font-size:0.85rem"></strong></div>
+        <div id="walletVAContent">
+          <p style="font-size:0.85rem;color:var(--gray);margin-bottom:1rem">Get a dedicated bank account to fund your wallet via bank transfer.</p>
+          <button onclick="generateVirtualAccount()" id="btnGenerateVA" style="background:linear-gradient(135deg,var(--primary),var(--primary-2));color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600;font-size:0.88rem;width:100%">🏦 Generate My Virtual Account</button>
+          <div id="vaGenAlert" style="margin-top:0.8rem"></div>
+        </div>
+        <div id="walletVADetails" style="display:none;flex-direction:column;gap:0.4rem">
+          <p style="font-size:0.8rem;color:var(--gray);margin-bottom:0.6rem">Transfer money to this account to fund your wallet automatically.</p>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #d1fae5"><span style="color:var(--gray);font-size:0.85rem">Bank</span><strong id="walletVABank" style="font-size:0.85rem"></strong></div>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0;border-bottom:1px solid #d1fae5"><span style="color:var(--gray);font-size:0.85rem">Account Number</span><strong id="walletVANumber" style="font-size:0.9rem;letter-spacing:2px;color:var(--primary)"></strong></div>
+          <div style="display:flex;justify-content:space-between;padding:0.4rem 0"><span style="color:var(--gray);font-size:0.85rem">Account Name</span><strong id="walletVAName" style="font-size:0.85rem"></strong></div>
         </div>
       </div>
 
@@ -1070,7 +1075,9 @@
           // Show virtual account if assigned
           if (data.virtualAccount) {
             const va = data.virtualAccount;
-            document.getElementById('walletVACard').style.display = 'block';
+            document.getElementById('walletVAContent').style.display = 'none';
+            const det = document.getElementById('walletVADetails');
+            det.style.display = 'flex';
             document.getElementById('walletVABank').textContent   = va.bank || '';
             document.getElementById('walletVANumber').textContent = va.account_number || '';
             document.getElementById('walletVAName').textContent   = va.account_name || user.name;
@@ -2441,6 +2448,68 @@
     document.getElementById('tabBank').style.color = tab === 'bank' ? '#fff' : 'var(--gray)';
     document.getElementById('tabBank').style.borderColor = tab === 'bank' ? 'var(--primary)' : '#e2e8f0';
     if (tab === 'bank') loadVirtualAccount();
+  }
+
+  function generateVirtualAccount() {
+    const btn = document.getElementById('btnGenerateVA');
+    const alertEl = document.getElementById('vaGenAlert');
+    btn.disabled = true;
+    btn.textContent = 'Generating...';
+    alertEl.innerHTML = '';
+
+    // Paystack Dedicated Virtual Account API
+    // Replace PAYSTACK_PUBLIC_KEY with your actual key when ready
+    const PAYSTACK_SECRET_KEY = 'sk_test_YOUR_SECRET_KEY_HERE'; // ⚠️ Move to backend in production
+
+    // In production this MUST be called from your backend (not frontend) to protect your secret key
+    // For now, this is a frontend stub — replace with a Firebase Cloud Function call
+    fetch('https://api.paystack.co/dedicated_account', {
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer ' + PAYSTACK_SECRET_KEY,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        customer: user.email,
+        preferred_bank: 'wema-bank',
+        first_name: user.name.split(' ')[0] || user.name,
+        last_name: user.name.split(' ')[1] || '',
+        email: user.email,
+        phone: user.phone || ''
+      })
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.status && data.data && data.data.account_number) {
+        const va = {
+          bank: data.data.bank.name,
+          account_number: data.data.account_number,
+          account_name: data.data.account_name || user.name
+        };
+        // Save to Firestore
+        if (window.fbReady) {
+          window.fbSetDoc(window.fbDoc(window.fbDB, 'users', user.uid), { virtualAccount: va }, { merge: true });
+        }
+        // Show details
+        document.getElementById('walletVAContent').style.display = 'none';
+        const det = document.getElementById('walletVADetails');
+        det.style.display = 'flex';
+        document.getElementById('walletVABank').textContent   = va.bank;
+        document.getElementById('walletVANumber').textContent = va.account_number;
+        document.getElementById('walletVAName').textContent   = va.account_name;
+        toast('Virtual account generated successfully!');
+      } else {
+        // API not configured yet — show placeholder message
+        alertEl.innerHTML = '<div class="alert alert-info">Virtual account generation requires a Paystack secret key. Please contact support to get your dedicated account assigned.</div>';
+        btn.disabled = false;
+        btn.textContent = '🏦 Generate My Virtual Account';
+      }
+    })
+    .catch(function() {
+      alertEl.innerHTML = '<div class="alert alert-info">Virtual account service not configured yet. Contact support to get your dedicated account.</div>';
+      btn.disabled = false;
+      btn.textContent = '🏦 Generate My Virtual Account';
+    });
   }
 
   function loadVirtualAccount() {
