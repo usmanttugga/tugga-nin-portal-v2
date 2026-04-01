@@ -867,6 +867,14 @@
   </div>
 </div>
 
+<!-- PAGE LOADER -->
+<div id="pageLoader">
+  <div class="loader-ring">
+    <img src="../img/logo.svg" class="loader-logo" alt="Loading..."/>
+  </div>
+  <span class="loader-text">Please wait...</span>
+</div>
+
 <!-- SERVICE MODAL -->
 <div class="modal-overlay" id="serviceModal">
   <div class="modal">
@@ -1043,11 +1051,19 @@
   }
   initFirebaseSync();
 
+  // ── Page Loader ────────────────────────────────────
+  function showLoader() { document.getElementById('pageLoader').classList.add('active'); }
+  function hideLoader() { document.getElementById('pageLoader').classList.remove('active'); }
+
   // Override showSection to render service history when a service section is shown
   const _origShowSection = showSection;
   window.showSection = function(id) {
-    _origShowSection(id);
-    renderServiceHistory(id);
+    showLoader();
+    setTimeout(function() {
+      _origShowSection(id);
+      renderServiceHistory(id);
+      hideLoader();
+    }, 350);
   };
 
   // Save wallet to Firebase when deducted
@@ -1233,22 +1249,25 @@
 
   function openServiceModal(title, desc, type, price) {
     if (!checkAvailable(title)) return;
-    currentService = { title, desc, type, price: parseInt(price) };
-    document.getElementById("modalTitle").textContent = title;
-    document.getElementById("modalDesc").textContent = desc;
-    document.getElementById("modalPrice").textContent = "Fee: " + fmt(price);
-    document.getElementById("modalAlert").innerHTML = "";
-    let fields;
-    if (type === "bvn") fields = BVN_FIELDS;
-    else if (NIN_VAL_FIELDS[title]) fields = NIN_VAL_FIELDS[title];
-    else if (NIN_ONLY_SVCS.includes(title)) fields = NIN_ONLY_FIELDS;
-    else fields = NIN_FIELDS;
-    document.getElementById("modalFields").innerHTML = fields;
-    // Dynamic button label
-    const btnLabels = { 'VNIN Slip': 'Generate Slip' };
-    const btn = document.querySelector('#serviceModal .btn-primary');
-    if (btn) btn.textContent = btnLabels[title] || 'Submit Request';
-    openModal("serviceModal");
+    showLoader();
+    setTimeout(function() {
+      currentService = { title, desc, type, price: parseInt(price) };
+      document.getElementById("modalTitle").textContent = title;
+      document.getElementById("modalDesc").textContent = desc;
+      document.getElementById("modalPrice").textContent = "Fee: " + fmt(price);
+      document.getElementById("modalAlert").innerHTML = "";
+      let fields;
+      if (type === "bvn") fields = BVN_FIELDS;
+      else if (NIN_VAL_FIELDS[title]) fields = NIN_VAL_FIELDS[title];
+      else if (NIN_ONLY_SVCS.includes(title)) fields = NIN_ONLY_FIELDS;
+      else fields = NIN_FIELDS;
+      document.getElementById("modalFields").innerHTML = fields;
+      const btnLabels = { 'VNIN Slip': 'Generate Slip' };
+      const btn = document.querySelector('#serviceModal .btn-primary');
+      if (btn) btn.textContent = btnLabels[title] || 'Submit Request';
+      hideLoader();
+      openModal("serviceModal");
+    }, 350);
   }
 
   function submitService() {
@@ -1457,28 +1476,30 @@
   function openNinVerifyModal(serviceKey) {
     var svcNames = {'verify-nin':'Verify with NIN','phone-verify':'Phone Number Verification','bio-data':'Bio Data Verification','fingerprint':'FingerPrint Verification'};
     if (!checkAvailable(svcNames[serviceKey])) return;
-    refreshPricing();
-    currentNinService = serviceKey;
-    const svc = NIN_VERIFY_SERVICES[serviceKey];
-    document.getElementById('ninVerifyTitle').textContent = svc.icon + ' ' + svc.title;
-    document.getElementById('ninVerifyAlert').innerHTML = '';
-    document.getElementById('ninVerifyResult').style.display = 'none';
-    document.getElementById('ninVerifyResult').innerHTML = '';
-    // Reset to step 1
-    document.getElementById('ninVerifyStep1').style.display = 'block';
-    document.getElementById('ninVerifyStep2').style.display = 'none';
-    document.querySelectorAll('.slip-choice').forEach(function(c) {
-      c.style.border = '2px solid #e2e8f0';
-      c.style.background = '';
-    });
-    _selectedSlip = '';
-    document.getElementById('slipChoiceErr').textContent = '';
-    // Show price on each slip card based on method + slip type
-    ['Normal Slip','Verification Information Slip','Premium Slip','Standard Slip'].forEach(function(slip) {
-      var el = document.getElementById('slipPrice-' + slip);
-      if (el) el.textContent = fmt(getNinVerifyFee(serviceKey, slip));
-    });
-    openModal('ninVerifyModal');
+    showLoader();
+    setTimeout(function() {
+      refreshPricing();
+      currentNinService = serviceKey;
+      const svc = NIN_VERIFY_SERVICES[serviceKey];
+      document.getElementById('ninVerifyTitle').textContent = svc.icon + ' ' + svc.title;
+      document.getElementById('ninVerifyAlert').innerHTML = '';
+      document.getElementById('ninVerifyResult').style.display = 'none';
+      document.getElementById('ninVerifyResult').innerHTML = '';
+      document.getElementById('ninVerifyStep1').style.display = 'block';
+      document.getElementById('ninVerifyStep2').style.display = 'none';
+      document.querySelectorAll('.slip-choice').forEach(function(c) {
+        c.style.border = '2px solid #e2e8f0';
+        c.style.background = '';
+      });
+      _selectedSlip = '';
+      document.getElementById('slipChoiceErr').textContent = '';
+      ['Normal Slip','Verification Information Slip','Premium Slip','Standard Slip'].forEach(function(slip) {
+        var el = document.getElementById('slipPrice-' + slip);
+        if (el) el.textContent = fmt(getNinVerifyFee(serviceKey, slip));
+      });
+      hideLoader();
+      openModal('ninVerifyModal');
+    }, 350);
   }
 
   function chooseSlip(el, slipName) {
