@@ -1079,8 +1079,11 @@
   // Override showSection to render service history when a service section is shown
   const _origShowSection = showSection;
 
-  // ── Section navigation stack ───────────────────────
-  const _sectionStack = [];
+  // ── Section navigation ─────────────────────────────
+  let _currentSection = 'sec-home';
+  let _prevSection = null;
+  let _isGoingBack = false;
+
   const _sectionLabels = {
     'sec-home': 'Home', 'sec-history': 'History', 'sec-wallet': 'Wallet',
     'sec-nin': 'NIN Services', 'sec-nin-verify': 'NIN Verification',
@@ -1088,7 +1091,6 @@
     'sec-ipe': 'IPE Clearance', 'sec-vnin': 'VNIN Slip', 'sec-nin-person': 'NIN Personalization',
     'sec-bvn': 'BVN Services', 'sec-airtime': 'Buy Airtime', 'sec-data': 'Buy Data'
   };
-  // Which section is the parent of each sub-section
   const _sectionParent = {
     'sec-nin-verify': 'sec-nin', 'sec-nin-validation': 'sec-nin',
     'sec-nin-modification': 'sec-nin', 'sec-ipe': 'sec-nin',
@@ -1116,16 +1118,18 @@
   }
 
   function _goBack() {
-    if (_sectionStack.length > 1) {
-      _sectionStack.pop(); // remove current
-      const prev = _sectionStack[_sectionStack.length - 1];
-      _sectionStack.pop(); // will be re-pushed by showSection
-      window.showSection(prev);
+    if (_prevSection) {
+      _isGoingBack = true;
+      window.showSection(_prevSection);
     }
   }
 
   window.showSection = function(id) {
-    _sectionStack.push(id);
+    if (!_isGoingBack) {
+      _prevSection = _currentSection;
+    }
+    _isGoingBack = false;
+    _currentSection = id;
     showLoader();
     setTimeout(function() {
       _origShowSection(id);
@@ -2444,19 +2448,15 @@
   // Push a history entry on load so back button stays on this page
   history.pushState({ page: 'dashboard' }, '', window.location.href);
 
-  // Intercept back button — go back in section stack, or close sidebar
+  // Intercept back button — go back to previous section, or close sidebar
   window.addEventListener('popstate', function(e) {
     const sidebar = document.querySelector('.sidebar');
     if (sidebar && sidebar.classList.contains('open')) {
       sidebar.classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('open');
-    } else if (_sectionStack.length > 1) {
-      _sectionStack.pop();
-      const prev = _sectionStack[_sectionStack.length - 1];
-      _sectionStack.pop();
-      window.showSection(prev);
+    } else {
+      _goBack();
     }
-    // Re-push so back button always stays on dashboard
     history.pushState({ page: 'dashboard' }, '', window.location.href);
   });
 
