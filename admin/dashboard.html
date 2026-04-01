@@ -542,7 +542,7 @@
     const tbody = document.getElementById("allTxnTable");
     if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No transactions</td></tr>'; return; }
     tbody.innerHTML = filtered.map(t => {
-      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status;
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'success' ? 'Success' : t.status;
       const badgeClass = t.status === 'submitted' ? 'pending' : t.status === 'validated' ? 'success' : t.status === 'success' ? 'success' : 'failed';
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600">👁 View</button>`;
       const validateBtn = t.status === 'submitted'
@@ -630,7 +630,7 @@
       const isMod = MOD_SVCS.includes(t.service);
       const isPerson = PERSON_SVCS.includes(t.service);
       const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'success' ? 'Success' : t.status;
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap">👁 View</button>`;
       const actionBtn = needsValidation
         ? isIPE
@@ -822,7 +822,7 @@
     document.getElementById('rdTitle').textContent = t.service;
 
     const badgeClass = t.status === 'validated' ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-    const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status;
+    const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'success' ? 'Success' : t.status;
     document.getElementById('rdMeta').innerHTML =
       `<span>Ref: <strong>${t.id}</strong></span>` +
       `<span>User ID: <strong>${t.userId || '—'}</strong></span>` +
