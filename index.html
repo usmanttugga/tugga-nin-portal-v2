@@ -245,6 +245,14 @@
   </div>
 </div>
 
+<!-- Page Loader -->
+<div id="pageLoader">
+  <div class="loader-ring">
+    <img src="img/logo.svg" class="loader-logo" alt="Loading..."/>
+  </div>
+  <span class="loader-text">Please wait...</span>
+</div>
+
 <!-- Forgot Password Modal -->
 <div class="modal-overlay" id="forgot-modal">
   <div class="modal">
@@ -326,6 +334,9 @@
     btn.textContent = loading ? "Please wait…" : label;
   }
 
+  function showLoader() { document.getElementById('pageLoader').classList.add('active'); }
+  function hideLoader() { document.getElementById('pageLoader').classList.remove('active'); }
+
   /* ── tab switching ───────────────────────────────────── */
   function switchTab(tab) {
     document.querySelectorAll(".tab-btn").forEach((b, i) => {
@@ -369,6 +380,7 @@
     if (!email || !pw) { showMsg("msg-login", "Please fill in all fields.", "error"); return; }
 
     setLoading("btn-login", true, "Sign In");
+    showLoader();
     try {
       await waitFB();
       const c = await window._signIn(window._auth, email, pw);
@@ -383,6 +395,7 @@
         // Block suspended users from logging in
         if (userData.status === 'Suspended') {
           setLoading("btn-login", false, "Sign In");
+          hideLoader();
           showMsg("msg-login", "Your account has been suspended. Please contact support.", "error");
           return;
         }
@@ -392,6 +405,7 @@
       window.location.href = role === "admin" ? "admin/dashboard.html" : "user/dashboard.html";
     } catch (e) {
       setLoading("btn-login", false, "Sign In");
+      hideLoader();
       showMsg("msg-login", friendlyError(e.code), "error");
     }
   }
@@ -416,6 +430,7 @@
     }
 
     setLoading("btn-register", true, "Create Account");
+    showLoader();
     try {
       await waitFB();
       const c   = await window._createUser(window._auth, email, pw);
@@ -435,6 +450,7 @@
       setTimeout(() => { window.location.href = "user/dashboard.html"; }, 1200);
     } catch (e) {
       setLoading("btn-register", false, "Create Account");
+      hideLoader();
       showMsg("msg-register", friendlyError(e.code), "error");
     }
   }
