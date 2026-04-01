@@ -235,7 +235,7 @@
       <p class="page-title">VNIN Slip</p>
       <p class="page-sub">Generate your virtual NIN slip.</p>
       <div class="services-grid">
-        <div class="service-card" data-svc="VNIN Slip" onclick="openServiceModal('VNIN Slip','Generate virtual NIN slip','nin', String(_p.vnin||250))">
+        <div class="service-card" data-svc="VNIN Slip" onclick="openServiceModal('VNIN Slip','Generate virtual NIN slip','nin', String((_p&&_p.vnin)||250))">
           <div class="svc-icon">📱</div><h4>Generate VNIN Slip</h4><p>Get virtual NIN slip</p><div class="price" id="price-vnin">₦250</div>
         </div>
       </div>
@@ -1106,7 +1106,6 @@
     document.getElementById("statWallet").textContent = fmt(walletBalance);
     document.getElementById("walletBal").textContent = fmt(walletBalance) + ".00";
     renderHistory();
-    if (typeof SVC_HISTORY_MAP !== 'undefined') renderAllServiceHistories();
   }
 
   function renderHistory() {
