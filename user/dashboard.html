@@ -2454,59 +2454,29 @@
     const btn = document.getElementById('btnGenerateVA');
     const alertEl = document.getElementById('vaGenAlert');
     btn.disabled = true;
-    btn.textContent = 'Generating...';
+    btn.textContent = 'Requesting...';
     alertEl.innerHTML = '';
 
-    // Paystack Dedicated Virtual Account API
-    // Replace PAYSTACK_PUBLIC_KEY with your actual key when ready
-    const PAYSTACK_SECRET_KEY = 'sk_test_6d4f60c0e49cda365f6ee33473daa764c37c80d0';
+    if (!window.fbReady) {
+      alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready. Please try again.</div>';
+      btn.disabled = false;
+      btn.textContent = '🏦 Generate My Virtual Account';
+      return;
+    }
 
-    // In production this MUST be called from your backend (not frontend) to protect your secret key
-    // For now, this is a frontend stub — replace with a Firebase Cloud Function call
-    fetch('https://api.paystack.co/dedicated_account', {
-      method: 'POST',
-      headers: {
-        'Authorization': 'Bearer ' + PAYSTACK_SECRET_KEY,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        customer: user.email,
-        preferred_bank: 'wema-bank',
-        first_name: user.name.split(' ')[0] || user.name,
-        last_name: user.name.split(' ')[1] || '',
-        email: user.email,
-        phone: user.phone || ''
-      })
-    })
-    .then(function(r) { return r.json(); })
-    .then(function(data) {
-      if (data.status && data.data && data.data.account_number) {
-        const va = {
-          bank: data.data.bank.name,
-          account_number: data.data.account_number,
-          account_name: data.data.account_name || user.name
-        };
-        // Save to Firestore
-        if (window.fbReady) {
-          window.fbSetDoc(window.fbDoc(window.fbDB, 'users', user.uid), { virtualAccount: va }, { merge: true });
-        }
-        // Show details
-        document.getElementById('walletVAContent').style.display = 'none';
-        const det = document.getElementById('walletVADetails');
-        det.style.display = 'flex';
-        document.getElementById('walletVABank').textContent   = va.bank;
-        document.getElementById('walletVANumber').textContent = va.account_number;
-        document.getElementById('walletVAName').textContent   = va.account_name;
-        toast('Virtual account generated successfully!');
-      } else {
-        // API not configured yet — show placeholder message
-        alertEl.innerHTML = '<div class="alert alert-info">Virtual account generation requires a Paystack secret key. Please contact support to get your dedicated account assigned.</div>';
-        btn.disabled = false;
-        btn.textContent = '🏦 Generate My Virtual Account';
-      }
-    })
-    .catch(function() {
-      alertEl.innerHTML = '<div class="alert alert-info">Virtual account service not configured yet. Contact support to get your dedicated account.</div>';
+    // Save a VA request to Firestore — admin will create it via Paystack dashboard and assign back
+    window.fbSetDoc(window.fbDoc(window.fbDB, 'va_requests', user.uid || user.id), {
+      userId: user.uid || user.id,
+      name: user.name,
+      email: user.email,
+      phone: user.phone || '',
+      requestedAt: new Date().toISOString(),
+      status: 'pending'
+    }).then(function() {
+      alertEl.innerHTML = '<div class="alert alert-success">✅ Request submitted! Your dedicated account will be assigned within 24 hours. You will see it here once ready.</div>';
+      btn.textContent = '⏳ Request Submitted';
+    }).catch(function(e) {
+      alertEl.innerHTML = '<div class="alert alert-error">Failed to submit request: ' + e.message + '</div>';
       btn.disabled = false;
       btn.textContent = '🏦 Generate My Virtual Account';
     });

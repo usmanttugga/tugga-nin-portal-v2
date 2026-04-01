@@ -81,6 +81,11 @@
         <div><p class="page-title">User Management</p><p class="page-sub">Manage registered users.</p></div>
         <button class="btn-primary" style="width:auto;padding:10px 20px" onclick="openModal('addUserModal')">+ Add User</button>
       </div>
+      <!-- VA Requests -->
+      <div id="vaRequestsBox" style="display:none;background:#f0fdf4;border:1px solid #bbf7d0;border-radius:10px;padding:1rem;margin-bottom:1.5rem">
+        <p style="font-weight:700;color:var(--primary);margin-bottom:0.8rem">🏦 Pending Virtual Account Requests</p>
+        <div id="vaRequestsList"></div>
+      </div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Role</th><th>Wallet</th><th>Status</th><th>Action</th></tr></thead>
@@ -539,6 +544,8 @@
     window.fbSetDoc(window.fbDoc(window.fbDB, 'users', uid), {
       virtualAccount: { bank, account_number: number, account_name: name }
     }, { merge: true }).then(function() {
+      // Mark VA request as fulfilled
+      window.fbSetDoc(window.fbDoc(window.fbDB, 'va_requests', uid), { status: 'assigned' }, { merge: true });
       closeModal('assignVAModal');
       toast('Virtual account assigned to user.');
     }).catch(function(e) {
@@ -1168,6 +1175,24 @@
     window.fbOnSnapshot(window.fbCollection(window.fbDB, "users"), function(snap) {
       const users = snap.docs.map(d => ({ ...d.data(), uid: d.id }));
       window._fbUsers = users;
+
+    // Real-time VA requests
+    window.fbOnSnapshot(window.fbCollection(window.fbDB, "va_requests"), function(snap) {
+      const requests = snap.docs.map(d => ({ ...d.data(), uid: d.id })).filter(r => r.status === 'pending');
+      const box = document.getElementById('vaRequestsBox');
+      const list = document.getElementById('vaRequestsList');
+      if (requests.length) {
+        box.style.display = 'block';
+        list.innerHTML = requests.map(r =>
+          `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #d1fae5;flex-wrap:wrap;gap:0.5rem">
+            <div style="font-size:0.85rem"><strong>${r.name}</strong> — ${r.email} ${r.phone ? '| ' + r.phone : ''}</div>
+            <button onclick="openAssignVA('${r.uid}','${r.name}')" style="background:var(--primary);color:#fff;border:none;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">Assign VA</button>
+          </div>`
+        ).join('');
+      } else {
+        box.style.display = 'none';
+      }
+    });
       document.getElementById("statUsers").textContent = users.filter(u => u.role !== 'admin').length;
       loadUsers();
     });
