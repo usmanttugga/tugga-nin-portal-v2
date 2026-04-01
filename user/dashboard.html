@@ -116,8 +116,8 @@
       <p class="page-sub">All your service requests.</p>
       <div class="table-wrap">
         <table>
-          <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead>
-          <tbody id="historyTable"><tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr></tbody>
+          <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th><th>Action</th></tr></thead>
+          <tbody id="historyTable"><tr><td colspan="7" style="text-align:center;color:#999">No transactions yet</td></tr></tbody>
         </table>
       </div>
     </section>
@@ -1127,7 +1127,7 @@
     const txns = getUserTransactions(user.id);
     const tbody = document.getElementById("historyTable");
     const wbody = document.getElementById("walletTxnTable");
-    if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
+    if (!txns.length) { tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
     tbody.innerHTML = txns.map(t => {
       const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
       const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
@@ -1138,11 +1138,15 @@
           : t.personSlipUrl
             ? `${t.details}<br><a href="${t.personSlipUrl}" target="_blank" download="Personalized-NIN-Slip.pdf" style="font-size:0.8rem;color:#d97706;font-weight:600;text-decoration:none">🎨 Download Personalized Slip</a>`
             : t.details;
+      const downloadBtn = t.slipUrl
+        ? `<a href="${t.slipUrl}" download="NIN-Verification-Slip.txt" style="font-size:0.78rem;background:var(--primary);color:#fff;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600">⬇ Download Slip</a>`
+        : '';
       return `<tr>
         <td>${t.id}</td><td>${t.service}</td><td>${detailsCell}</td>
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
         <td>${t.date}</td>
+        <td>${downloadBtn}</td>
       </tr>`;
     }).join("");
     wbody.innerHTML = txns.map(t => {
@@ -1205,6 +1209,8 @@
 
   // ── Shared submit helper (saves to Firestore with known doc ID) ──
   function submitWithStatus(service, details, fee, status, formData) {
+    const slipUrl = formData && formData.slipUrl ? formData.slipUrl : null;
+    if (slipUrl) delete formData.slipUrl;
     const txn = {
       id: 'TXN' + Date.now(),
       userId: user.id,
@@ -1215,6 +1221,7 @@
       date: new Date().toLocaleString(),
       formData: formData || {}
     };
+    if (slipUrl) txn.slipUrl = slipUrl;
     transactions.unshift(txn);
     localStorage.setItem('tugga_txns', JSON.stringify(transactions));
     if (window.fbReady) {
@@ -1618,18 +1625,24 @@
 
     // Deduct and record
     walletBalance -= slipFee;
-    submitWithStatus(svc.title, inputs.primary, slipFee, 'submitted', { 'Input': inputs.primary, 'Slip Type': _selectedSlip });
-    updateStats();
     syncWalletToFirebase();
     window._lastNinInputs = inputs;
 
     // Show result
     const result = ninMockLookup(currentNinService, inputs);
     const resultEl = document.getElementById('ninVerifyResult');
+
     if (currentNinService === 'bio-data') {
-      resultEl.innerHTML = result.match
-        ? '<span class="badge badge-success">✅ Match</span> Bio data matches the NIN record.'
-        : '<span class="badge badge-failed">❌ No Match</span> Bio data does not match the NIN record.';
+      if (!result.match) {
+        // No match — refund and don't save to history
+        walletBalance += slipFee;
+        syncWalletToFirebase();
+        resultEl.innerHTML = '<span class="badge badge-failed">❌ No Match</span> Bio data does not match the NIN record.';
+        resultEl.style.display = 'block';
+        alertEl.innerHTML = '<div class="alert alert-error">No matching record found. Fee refunded.</div>';
+        return;
+      }
+      resultEl.innerHTML = '<span class="badge badge-success">✅ Match</span> Bio data matches the NIN record.';
     } else {
       resultEl.innerHTML =
         '<span class="badge badge-success">✅ Verified</span>' +
@@ -1646,7 +1659,14 @@
     }
     resultEl.style.display = 'block';
     alertEl.innerHTML = '<div class="alert alert-success">' + svc.title + ' completed successfully!</div>';
-  }
+
+    // Generate PDF slip as base64 and save transaction with status 'success'
+    const slipContent = currentNinService === 'bio-data'
+      ? 'Service: ' + svc.title + '\nResult: Match\nSlip: ' + _selectedSlip + '\nDate: ' + new Date().toLocaleString()
+      : 'Service: ' + svc.title + '\nName: ' + result.name + '\nDOB: ' + result.dob + '\nGender: ' + result.gender + '\nSlip: ' + _selectedSlip + '\nDate: ' + new Date().toLocaleString();
+    const slipDataUrl = 'data:text/plain;base64,' + btoa(unescape(encodeURIComponent(slipContent)));
+    submitWithStatus(svc.title, inputs.primary, slipFee, 'success', { 'Input': inputs.primary, 'Slip Type': _selectedSlip, 'slipUrl': slipDataUrl });
+    updateStats();
 
   let _selectedSlip = '';
   let _lastVerifiedResult = null;
