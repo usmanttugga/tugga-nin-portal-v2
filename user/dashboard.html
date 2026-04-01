@@ -2448,19 +2448,14 @@
   // Push a history entry on load so back button stays on this page
   history.pushState({ page: 'dashboard' }, '', window.location.href);
 
-  // Intercept back button — go back to previous section, or close sidebar
+  // Intercept back button — close sidebar if open, stay on dashboard otherwise
   window.addEventListener('popstate', function(e) {
     const sidebar = document.querySelector('.sidebar');
     if (sidebar && sidebar.classList.contains('open')) {
       sidebar.classList.remove('open');
       document.getElementById('sidebarOverlay').classList.remove('open');
-      history.pushState({ page: 'dashboard' }, '', window.location.href);
-    } else if (_prevSection && _prevSection !== _currentSection) {
-      _goBack();
-      history.pushState({ page: 'dashboard' }, '', window.location.href);
-    } else {
-      history.pushState({ page: 'dashboard' }, '', window.location.href);
     }
+    history.pushState({ page: 'dashboard' }, '', window.location.href);
   });
 
   // Close sidebar on section click (mobile)
