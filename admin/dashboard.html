@@ -127,9 +127,15 @@
           <div class="stat-icon bg-blue">🎨</div><div class="stat-info"><h3 id="ninPersonCount">0</h3><p>NIN Personalization</p></div>
         </div>
       </div>
-      <div style="display:flex;align-items:center;gap:0.8rem;margin:1rem 0 0.5rem">
+      <div style="display:flex;align-items:center;gap:0.8rem;margin:1rem 0 0.5rem;flex-wrap:wrap">
         <span id="ninFilterLabel" style="font-size:0.85rem;color:var(--gray)">Showing: All</span>
         <button onclick="filterNINTable('all')" style="background:none;border:1px solid #e2e8f0;padding:3px 10px;border-radius:6px;font-size:0.8rem;cursor:pointer;color:var(--gray)">Clear filter</button>
+        <input type="text" id="ninSearchInput" placeholder="Search NIN / Tracking ID..." oninput="loadNINStats()"
+          style="padding:5px 10px;border:1px solid #e2e8f0;border-radius:6px;font-size:0.82rem;min-width:200px;flex:1"/>
+        <label style="display:flex;align-items:center;gap:0.4rem;font-size:0.82rem;cursor:pointer;white-space:nowrap">
+          <input type="checkbox" id="ninPendingOnly" onchange="loadNINStats()" style="width:15px;height:15px"/>
+          Pending only
+        </label>
       </div>
       <div class="table-wrap" style="margin-top:0.5rem">
         <table>
@@ -585,7 +591,7 @@
     document.getElementById("ninIpeCount").textContent = nin.filter(t => ninIpeSvcs.includes(t.service)).length;
     document.getElementById("ninPersonCount").textContent = nin.filter(t => ninPersonSvcs.includes(t.service)).length;
 
-    // Apply filter
+    // Apply category filter
     const filterMap = {
       verify:     t => ninVerSvcs.includes(t.service),
       validation: t => ninValSvcs.includes(t.service),
@@ -594,7 +600,23 @@
       personalization: t => ninPersonSvcs.includes(t.service),
       all:        () => true
     };
-    const filtered = nin.filter(filterMap[_ninFilter] || (() => true));
+    let filtered = nin.filter(filterMap[_ninFilter] || (() => true));
+
+    // Apply search filter (NIN / Tracking ID in details field)
+    const searchEl = document.getElementById('ninSearchInput');
+    const searchVal = searchEl ? searchEl.value.trim().toLowerCase() : '';
+    if (searchVal) {
+      filtered = filtered.filter(t =>
+        (t.details && t.details.toLowerCase().includes(searchVal)) ||
+        (t.id && t.id.toLowerCase().includes(searchVal))
+      );
+    }
+
+    // Apply pending-only filter
+    const pendingOnly = document.getElementById('ninPendingOnly');
+    if (pendingOnly && pendingOnly.checked) {
+      filtered = filtered.filter(t => t.status === 'submitted');
+    }
 
     // Services that require admin validation
     const validateSvcs = [...ninValSvcs, ...ninModSvcs, ...ninIpeSvcs, ...ninPersonSvcs];
