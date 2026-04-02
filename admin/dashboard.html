@@ -350,6 +350,14 @@
         </div>
         <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="saveSettings()">Save Settings</button>
       </div>
+
+      <!-- Danger Zone -->
+      <div style="background:#fff5f5;border:1px solid #fed7d7;border-radius:12px;padding:2rem;max-width:560px;box-shadow:var(--card-shadow);margin-top:1.5rem">
+        <p style="font-weight:700;color:#c53030;margin-bottom:0.4rem">⚠️ Danger Zone</p>
+        <p style="font-size:0.85rem;color:#718096;margin-bottom:1rem">This will permanently delete all transaction history and reset all user wallet balances to ₦0. This action cannot be undone.</p>
+        <div id="clearDataAlert"></div>
+        <button style="background:#e53e3e;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-weight:600;cursor:pointer;font-size:0.9rem" onclick="clearAllData()">🗑 Clear All History & Balances</button>
+      </div>
     </section>
 
   </main>
@@ -1374,6 +1382,27 @@
     }
     document.getElementById("settingsAlert").innerHTML = '<div class="alert alert-success">Settings saved successfully!</div>';
     setTimeout(function() { document.getElementById("settingsAlert").innerHTML = ""; }, 3000);
+  }
+
+  async function clearAllData() {
+    const confirmed = prompt('Type CLEAR to confirm wiping all transaction history and wallet balances. This cannot be undone.');
+    if (confirmed !== 'CLEAR') { toast('Cancelled.', 'error'); return; }
+    const alertEl = document.getElementById('clearDataAlert');
+    alertEl.innerHTML = '<div class="alert alert-info">Clearing data, please wait...</div>';
+    if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    try {
+      const txnSnap = await window.fbGetDocs(window.fbCollection(window.fbDB, 'transactions'));
+      await Promise.all(txnSnap.docs.map(d => window.fbDeleteDoc(d.ref)));
+      const userSnap = await window.fbGetDocs(window.fbCollection(window.fbDB, 'users'));
+      await Promise.all(userSnap.docs.map(d => window.fbUpdateDoc(d.ref, { wallet: 0 })));
+      localStorage.removeItem('tugga_txns');
+      alertEl.innerHTML = '<div class="alert alert-success">All history and wallet balances cleared successfully.</div>';
+      setTimeout(() => { alertEl.innerHTML = ''; }, 4000);
+      loadOverview();
+      toast('All data cleared.');
+    } catch (e) {
+      alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>';
+    }
   }
 
   function loadSettingsFields() {
