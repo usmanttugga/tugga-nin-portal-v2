@@ -605,11 +605,14 @@
     document.getElementById("statBalance").textContent = fmt(totalFunding - totalUsage);
     const tbody = document.getElementById("recentTxnTable");
     if (!txns.length) return;
-    tbody.innerHTML = txns.slice(0, 10).map(t => `
-      <tr><td>${t.id}</td><td>User #${t.userId}</td><td>${t.service}</td>
+    tbody.innerHTML = txns.slice(0, 10).map(t => {
+      const badgeClass = t.status === 'success' ? 'success' : t.status === 'submitted' ? 'pending' : t.status === 'failed' ? 'failed' : 'success';
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'delinked' ? 'Delinked' : t.status === 'retrieved' ? 'Retrieved' : t.status === 'failed' ? 'Failed' : t.status === 'success' ? 'Success' : t.status;
+      return `<tr><td>${t.id}</td><td>User #${t.userId}</td><td>${t.service}</td>
       <td>${fmt(t.amount)}</td>
-      <td><span class="badge badge-${t.status === 'success' ? 'success' : t.status === 'submitted' ? 'pending' : t.status === 'failed' ? 'failed' : 'success'}">${t.status}</span></td>
-      <td>${t.date}</td></tr>`).join("");
+      <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
+      <td>${t.date}</td></tr>`;
+    }).join("");
   }
 
   function loadUsers() {
@@ -739,9 +742,6 @@
       const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'success' ? 'Success' : t.status;
       const badgeClass = t.status === 'submitted' ? 'pending' : t.status === 'validated' ? 'success' : t.status === 'success' ? 'success' : t.status === 'failed' ? 'failed' : 'pending';
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600">👁 View</button>`;
-      const validateBtn = t.status === 'submitted'
-        ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;margin-top:4px">✔ Validate</button>`
-        : t.status === 'validated' ? '<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">✔ Done</span>' : '';
       return `<tr>
         <td style="font-size:0.75rem">${t.id}</td>
         <td style="font-size:0.75rem">#${t.userId}</td>
@@ -750,7 +750,7 @@
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
         <td style="font-size:0.75rem">${t.date}</td>
-        <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${viewBtn}${validateBtn}</div></td>
+        <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${viewBtn}</div></td>
       </tr>`;
     }).join("");
   }
