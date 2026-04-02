@@ -249,7 +249,6 @@
               <div class="form-group"><label>Bank Validation (₦)</label><input type="number" id="p_bank_val" value="150"/></div>
               <div class="form-group"><label>Photograph Error (₦)</label><input type="number" id="p_photo_err" value="150"/></div>
               <div class="form-group"><label>SIM Validation (₦)</label><input type="number" id="p_sim_val" value="150"/></div>
-              <div class="form-group"><label>Modification Validation (₦)</label><input type="number" id="p_mod_val" value="150"/></div>
               <div class="form-group"><label>Immigration Validation (₦)</label><input type="number" id="p_imm_val" value="150"/></div>
             </div>
           </div>
@@ -1092,7 +1091,6 @@
       bank_val:     parseInt(document.getElementById("p_bank_val").value) || 150,
       photo_err:    parseInt(document.getElementById("p_photo_err").value) || 150,
       sim_val:      parseInt(document.getElementById("p_sim_val").value) || 150,
-      mod_val:      parseInt(document.getElementById("p_mod_val").value) || 150,
       imm_val:      parseInt(document.getElementById("p_imm_val").value) || 150,
       dob_mod_val:      parseInt(document.getElementById("p_dob_mod_val").value) || 150,
       name_mod_val:     parseInt(document.getElementById("p_name_mod_val").value) || 150,
@@ -1147,7 +1145,6 @@
       document.getElementById("p_bank_val").value     = p.bank_val;
       document.getElementById("p_photo_err").value    = p.photo_err;
       document.getElementById("p_sim_val").value      = p.sim_val;
-      document.getElementById("p_mod_val").value      = p.mod_val;
       document.getElementById("p_imm_val").value      = p.imm_val;
       document.getElementById("p_dob_mod_val").value      = p.dob_mod_val;
       document.getElementById("p_name_mod_val").value     = p.name_mod_val;
