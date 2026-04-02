@@ -690,6 +690,17 @@
     if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
     window.fbUpdateDoc(window.fbDoc(window.fbDB, 'users', uid), { wallet: window.fbIncrement(amount) })
       .then(function() {
+        // Record funding transaction so it appears in stats and history
+        const txn = {
+          id: 'TXN' + Date.now(),
+          userId: uid,
+          service: 'Wallet Funding',
+          details: 'Admin Funding',
+          amount: amount,
+          status: 'success',
+          date: new Date().toLocaleString()
+        };
+        window.fbAddDoc(window.fbCollection(window.fbDB, 'transactions'), txn);
         closeModal('fundWalletModal');
         toast('Wallet funded successfully!');
       })
