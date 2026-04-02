@@ -593,7 +593,7 @@
     tbody.innerHTML = txns.slice(0, 10).map(t => `
       <tr><td>${t.id}</td><td>User #${t.userId}</td><td>${t.service}</td>
       <td>${fmt(t.amount)}</td>
-      <td><span class="badge badge-${t.status === 'success' ? 'success' : 'failed'}">${t.status}</span></td>
+      <td><span class="badge badge-${t.status === 'success' ? 'success' : t.status === 'submitted' ? 'pending' : t.status === 'failed' ? 'failed' : 'success'}">${t.status}</span></td>
       <td>${t.date}</td></tr>`).join("");
   }
 
@@ -711,7 +711,7 @@
     if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No transactions</td></tr>'; return; }
     tbody.innerHTML = filtered.map(t => {
       const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'success' ? 'Success' : t.status;
-      const badgeClass = t.status === 'submitted' ? 'pending' : t.status === 'validated' ? 'success' : t.status === 'success' ? 'success' : 'failed';
+      const badgeClass = t.status === 'submitted' ? 'pending' : t.status === 'validated' ? 'success' : t.status === 'success' ? 'success' : t.status === 'failed' ? 'failed' : 'pending';
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600">👁 View</button>`;
       const validateBtn = t.status === 'submitted'
         ? `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;margin-top:4px">✔ Validate</button>`
@@ -801,7 +801,7 @@
       const isMod = MOD_SVCS.includes(t.service);
       const isPerson = PERSON_SVCS.includes(t.service);
       const isSelf = SELF_SVCS.includes(t.service);
-      const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
+      const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : t.status === 'failed' ? 'failed' : 'success';
       const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'delinked' ? 'Delinked' : t.status === 'retrieved' ? 'Retrieved' : t.status === 'failed' ? 'Failed' : t.status === 'success' ? 'Success' : t.status;
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap">👁 View</button>`;
       const selfActionBtn = t.service === 'Delinking'
@@ -1104,7 +1104,7 @@
 
     document.getElementById('rdTitle').textContent = t.service;
 
-    const badgeClass = t.status === 'validated' ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
+    const badgeClass = t.status === 'validated' ? 'success' : t.status === 'submitted' ? 'pending' : t.status === 'failed' ? 'failed' : 'success';
     const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'success' ? 'Success' : t.status === 'delinked' ? 'Delinked' : t.status === 'retrieved' ? 'Retrieved' : t.status;
     document.getElementById('rdMeta').innerHTML =
       `<span>Ref: <strong>${t.id}</strong></span>` +
