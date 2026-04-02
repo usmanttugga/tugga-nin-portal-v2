@@ -640,7 +640,7 @@
   function loadNINStats() {
     const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
     const ninVerSvcs = ["Verify with NIN", "Phone Number Verification", "Bio Data Verification", "FingerPrint Verification"];
-    const ninValSvcs = ["No Record Found", "Bank Validation", "Photograph Error", "SIM Validation", "Modification Validation", "Immigration Validation"];
+    const ninValSvcs = ["No Record Found", "Bank Validation", "Photograph Error", "SIM Validation", "Modification Validation", "Immigration Validation", "DOB Validation", "Name Validation", "Phone Number Validation", "Address Validation"];
     const ninModSvcs = ["Name Modification", "Phone Number Modification", "Address Modification", "Date of Birth Modification"];
     const ninIpeSvcs = ["Normal Clearance", "Modification Clearance", "Other Error"];
     const ninPersonSvcs = ["NIN Personalization", "VNIN Slip"];
@@ -855,6 +855,10 @@
     'SIM Validation':             ['NIN Number'],
     'Modification Validation':    ['NIN Number'],
     'Immigration Validation':     ['NIN Number'],
+    'DOB Validation':             ['NIN', 'New Tracking ID', 'New Date of Birth'],
+    'Name Validation':            ['NIN', 'New Tracking ID', 'Surname', 'Middle Name', 'Last Name'],
+    'Phone Number Validation':    ['NIN', 'New Tracking ID', 'New Phone Number'],
+    'Address Validation':         ['NIN', 'New Tracking ID', 'Address', 'Town/City', 'LGA of Origin', 'State of Origin', 'LGA of Residence', 'State of Residence'],
     'Photograph Error':           ['NIN Number'],
     'SIM Validation':             ['NIN Number'],
     // NIN Verification

@@ -202,7 +202,7 @@
         <div class="service-card" data-svc="SIM Validation" onclick="openServiceModal('SIM Validation','Validate NIN against SIM registration','nin', String(_p.sim_val||150))">
           <div class="svc-icon">📲</div><h4>SIM Validation</h4><p>Validate NIN via SIM</p><div class="price" id="price-sim-val">₦150</div>
         </div>
-        <div class="service-card" data-svc="Modification Validation" onclick="openServiceModal('Modification Validation','Validate NIN modification request','nin', String(_p.mod_val||150))">
+        <div class="service-card" data-svc="Modification Validation" onclick="showSection('sec-mod-validation')">
           <div class="svc-icon">✏️</div><h4>Modification Validation</h4><p>Validate NIN modification</p><div class="price" id="price-mod-val">₦150</div>
         </div>
         <div class="service-card" data-svc="Immigration Validation" onclick="openServiceModal('Immigration Validation','Validate NIN for immigration purposes','nin', String(_p.imm_val||150))">
@@ -212,7 +212,26 @@
       <div id="svcHistory-sec-nin-validation"></div>
     </section>
 
-    <!-- NIN MODIFICATION SUB-SERVICES -->
+    <!-- MODIFICATION VALIDATION SUB-SERVICES -->
+    <section id="sec-mod-validation" class="content-section section-hidden">
+      <p class="page-title">Modification Validation</p>
+      <p class="page-sub">Select the type of modification to validate.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="DOB Validation" onclick="openModValModal('dob')">
+          <div class="svc-icon">📅</div><h4>Date of Birth Validation</h4><p>Validate DOB modification</p><div class="price" id="price-dob-val">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Name Validation" onclick="openModValModal('name')">
+          <div class="svc-icon">✏️</div><h4>Name Validation</h4><p>Validate name modification</p><div class="price" id="price-name-val">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Phone Number Validation" onclick="openModValModal('phone')">
+          <div class="svc-icon">📞</div><h4>Phone Number Validation</h4><p>Validate phone modification</p><div class="price" id="price-phone-val">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Address Validation" onclick="openModValModal('address')">
+          <div class="svc-icon">🏠</div><h4>Address Validation</h4><p>Validate address modification</p><div class="price" id="price-address-val">₦150</div>
+        </div>
+      </div>
+      <div id="svcHistory-sec-mod-validation"></div>
+    </section>
     <section id="sec-nin-modification" class="content-section section-hidden">
       <p class="page-title">NIN Modification</p>
       <p class="page-sub">Select the data you want to modify on your NIN record.</p>
@@ -897,6 +916,22 @@
   <span class="loader-text">Please wait...</span>
 </div>
 
+<!-- MODIFICATION VALIDATION MODAL -->
+<div class="modal-overlay" id="modValModal">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header">
+      <h3 id="modValTitle">Modification Validation</h3>
+      <button class="modal-close" onclick="closeModal('modValModal')">✕</button>
+    </div>
+    <div id="modValAlert"></div>
+    <div id="modValFields"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="modValPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitModVal()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
 <!-- SERVICE MODAL -->
 <div class="modal-overlay" id="serviceModal">
   <div class="modal">
@@ -1143,7 +1178,8 @@
     'sec-nin': 'NIN Services', 'sec-nin-verify': 'NIN Verification',
     'sec-nin-validation': 'NIN Validation', 'sec-nin-modification': 'NIN Modification',
     'sec-ipe': 'IPE Clearance', 'sec-vnin': 'VNIN Slip', 'sec-nin-person': 'NIN Personalization',
-    'sec-bvn': 'BVN Services', 'sec-airtime': 'Buy Airtime', 'sec-data': 'Buy Data'
+    'sec-bvn': 'BVN Services', 'sec-airtime': 'Buy Airtime', 'sec-data': 'Buy Data',
+    'sec-mod-validation': 'Modification Validation'
   };
   const _sectionParent = {
     'sec-nin': 'sec-home', 'sec-bvn': 'sec-home',
@@ -1151,7 +1187,8 @@
     'sec-history': 'sec-home', 'sec-wallet': 'sec-home',
     'sec-nin-verify': 'sec-nin', 'sec-nin-validation': 'sec-nin',
     'sec-nin-modification': 'sec-nin', 'sec-ipe': 'sec-nin',
-    'sec-vnin': 'sec-nin', 'sec-nin-person': 'sec-nin'
+    'sec-vnin': 'sec-nin', 'sec-nin-person': 'sec-nin',
+    'sec-mod-validation': 'sec-nin-validation'
   };
 
   function _updateBackBar(id) {
@@ -1288,6 +1325,7 @@
   const SVC_HISTORY_MAP = {
     'sec-nin-verify':       ['Verify with NIN','Phone Number Verification','Bio Data Verification','FingerPrint Verification'],
     'sec-nin-validation':   ['No Record Found','Bank Validation','Photograph Error','SIM Validation','Modification Validation','Immigration Validation'],
+    'sec-mod-validation':   ['DOB Validation','Name Validation','Phone Number Validation','Address Validation'],
     'sec-nin-modification': ['Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification'],
     'sec-ipe':              ['Normal Clearance','Modification Clearance','Other Error'],
     'sec-vnin':             ['VNIN Slip'],
@@ -1387,6 +1425,89 @@
     'Modification Validation':`<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
     'Immigration Validation': `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`
   };
+
+  // ── Modification Validation ────────────────────────
+  let _modValType = '';
+  const _modValConfig = {
+    dob: {
+      title: 'Date of Birth Validation',
+      fields: `
+        <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>New Date of Birth</label><input type="date" id="mv_dob"/><span id="mv_dob_err" style="color:var(--accent);font-size:0.8rem"></span></div>`
+    },
+    name: {
+      title: 'Name Validation',
+      fields: `
+        <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>Surname</label><input type="text" id="mv_surname" placeholder="New surname"/></div>
+        <div class="form-group"><label>Middle Name</label><input type="text" id="mv_middlename" placeholder="New middle name (optional)"/></div>
+        <div class="form-group"><label>Last Name</label><input type="text" id="mv_lastname" placeholder="New last name"/></div>`
+    },
+    phone: {
+      title: 'Phone Number Validation',
+      fields: `
+        <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>New Phone Number</label><input type="tel" id="mv_phone" placeholder="08XXXXXXXXXX" maxlength="11"/><span id="mv_phone_err" style="color:var(--accent);font-size:0.8rem"></span></div>`
+    },
+    address: {
+      title: 'Address Validation',
+      fields: `
+        <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>Address</label><input type="text" id="mv_address" placeholder="New residential address"/></div>
+        <div class="form-group"><label>Town / City</label><input type="text" id="mv_town" placeholder="Town or city"/></div>
+        <div class="form-group"><label>LGA of Origin</label><input type="text" id="mv_lga_origin" placeholder="LGA of origin"/></div>
+        <div class="form-group"><label>State of Origin</label><input type="text" id="mv_state_origin" placeholder="State of origin"/></div>
+        <div class="form-group"><label>LGA of Residence</label><input type="text" id="mv_lga_res" placeholder="LGA of residence"/></div>
+        <div class="form-group"><label>State of Residence</label><input type="text" id="mv_state_res" placeholder="State of residence"/></div>`
+    }
+  };
+
+  function openModValModal(type) {
+    const svcName = _modValConfig[type] ? _modValConfig[type].title : 'Modification Validation';
+    if (!checkAvailable('Modification Validation')) return;
+    _modValType = type;
+    refreshPricing();
+    document.getElementById('modValTitle').textContent = svcName;
+    document.getElementById('modValPrice').textContent = 'Fee: ' + fmt(_p.mod_val || 150);
+    document.getElementById('modValAlert').innerHTML = '';
+    document.getElementById('modValFields').innerHTML = _modValConfig[type].fields;
+    openModal('modValModal');
+  }
+
+  function submitModVal() {
+    const cfg = _modValConfig[_modValType];
+    if (!cfg) return;
+    const alertEl = document.getElementById('modValAlert');
+    alertEl.innerHTML = '';
+    const nin      = document.getElementById('mv_nin')?.value.trim() || '';
+    const tracking = document.getElementById('mv_tracking')?.value.trim() || '';
+    let valid = true;
+    if (!isValidNIN(nin)) { document.getElementById('mv_nin_err').textContent = 'NIN must be exactly 11 digits'; valid = false; } else if(document.getElementById('mv_nin_err')) document.getElementById('mv_nin_err').textContent = '';
+    if (!/^[A-Z0-9]{15}$/.test(tracking)) { document.getElementById('mv_tracking_err').textContent = 'Tracking ID must be exactly 15 alphanumeric characters'; valid = false; } else if(document.getElementById('mv_tracking_err')) document.getElementById('mv_tracking_err').textContent = '';
+    if (_modValType === 'phone') {
+      const phone = document.getElementById('mv_phone')?.value.trim() || '';
+      if (!/^\d{11}$/.test(phone)) { document.getElementById('mv_phone_err').textContent = 'Phone must be 11 digits'; valid = false; } else document.getElementById('mv_phone_err').textContent = '';
+    }
+    if (!valid) return;
+    const fee = _p.mod_val || 150;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
+    walletBalance -= fee;
+    const g = id => document.getElementById(id)?.value.trim() || '';
+    const formData = { 'NIN': nin, 'New Tracking ID': tracking };
+    if (_modValType === 'dob')     formData['New Date of Birth'] = g('mv_dob');
+    if (_modValType === 'name')    { formData['Surname'] = g('mv_surname'); formData['Middle Name'] = g('mv_middlename'); formData['Last Name'] = g('mv_lastname'); }
+    if (_modValType === 'phone')   formData['New Phone Number'] = g('mv_phone');
+    if (_modValType === 'address') { formData['Address'] = g('mv_address'); formData['Town/City'] = g('mv_town'); formData['LGA of Origin'] = g('mv_lga_origin'); formData['State of Origin'] = g('mv_state_origin'); formData['LGA of Residence'] = g('mv_lga_res'); formData['State of Residence'] = g('mv_state_res'); }
+    submitWithStatus(cfg.title, nin, fee, 'submitted', formData);
+    updateStats();
+    syncWalletToFirebase();
+    closeModal('modValModal');
+    toast(cfg.title + ' request submitted successfully!');
+  }
 
   function openServiceModal(title, desc, type, price) {
     if (!checkAvailable(title)) return;
@@ -1534,6 +1655,10 @@
       'No Record Found':'grp_nin_val','Bank Validation':'grp_nin_val',
       'Photograph Error':'grp_nin_val','SIM Validation':'grp_nin_val',
       'Modification Validation':'grp_nin_val','Immigration Validation':'grp_nin_val',
+      'DOB Validation':'grp_nin_val','Name Validation':'grp_nin_val',
+      'Phone Number Validation':'grp_nin_val','Address Validation':'grp_nin_val',
+      'DOB Validation':'grp_nin_val','Name Validation':'grp_nin_val',
+      'Phone Number Validation':'grp_nin_val','Address Validation':'grp_nin_val',
       'Name Modification':'grp_nin_mod','Phone Number Modification':'grp_nin_mod',
       'Address Modification':'grp_nin_mod','Date of Birth Modification':'grp_nin_mod',
       'NIN Personalization':'grp_nin_verify','VNIN Slip':'grp_nin_verify',
