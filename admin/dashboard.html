@@ -374,6 +374,25 @@
   </div>
 </div>
 
+<!-- FAIL REQUEST MODAL -->
+<div class="modal-overlay" id="failRequestModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>❌ Mark as Failed</h3>
+      <button class="modal-close" onclick="closeModal('failRequestModal')">✕</button>
+    </div>
+    <div id="failRequestAlert"></div>
+    <p style="font-size:0.88rem;color:var(--gray);margin-bottom:1rem">Provide the reason for failing this request. The user will see this reason.</p>
+    <div class="form-group">
+      <label>Reason for Failure</label>
+      <textarea id="failReason" rows="4" placeholder="e.g. Invalid NIN provided, Tracking ID not found, Documents incomplete..." style="width:100%;padding:10px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:0.9rem;resize:vertical;font-family:inherit"></textarea>
+      <span id="failReasonErr" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <input type="hidden" id="failTxnId"/>
+    <button class="btn-primary" style="background:#e53e3e" onclick="confirmFail()">❌ Mark as Failed</button>
+  </div>
+</div>
+
 <!-- ASSIGN VIRTUAL ACCOUNT MODAL -->
 <div class="modal-overlay" id="assignVAModal">
   <div class="modal" style="max-width:420px">
@@ -701,25 +720,27 @@
     const tbody = document.getElementById("ninTxnTable");
     if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No requests found.</td></tr>'; return; }
     tbody.innerHTML = filtered.map(t => {
-      const needsValidation = validateSvcs.includes(t.service) && t.status === 'submitted';
       const alreadyValidated = t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized';
+      const needsValidation = validateSvcs.includes(t.service) && t.status === 'submitted';
       const isIPE = IPE_SVCS.includes(t.service);
       const isMod = MOD_SVCS.includes(t.service);
       const isPerson = PERSON_SVCS.includes(t.service);
       const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'success' ? 'Success' : t.status;
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'failed' ? 'Failed' : t.status === 'success' ? 'Success' : t.status;
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap">👁 View</button>`;
       const actionBtn = needsValidation
         ? isIPE
           ? `<button onclick="openIPEClearModal('${t.id}')" style="background:#059669;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✅ Cleared</button>`
           : isMod
-            ? `<button onclick="openNINModSlipModal('${t.id}')" style="background:#7c3aed;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✏️ Modified</button>`
+            ? `<button onclick="openNINModSlipModal('${t.id}')" style="background:#7c3aed;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✏️ Modified</button>
+               <button onclick="openFailModal('${t.id}')" style="background:#e53e3e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">❌ Failed</button>`
             : isPerson
               ? `<button onclick="openNINPersonSlipModal('${t.id}')" style="background:#d97706;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">🎨 Personalized</button>`
-              : `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>`
+              : `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>
+                 <button onclick="openFailModal('${t.id}')" style="background:#e53e3e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">❌ Failed</button>`
         : alreadyValidated
           ? `<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">${isIPE ? '✅ Cleared' : isMod ? '✏️ Modified' : isPerson ? '🎨 Personalized' : '✔ Done'}</span>`
-          : '';
+          : t.status === 'failed' ? `<span style="color:#e53e3e;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">❌ Failed</span>` : '';
       return `<tr>
         <td style="font-size:0.75rem;max-width:80px;overflow:hidden;text-overflow:ellipsis">${t.id}</td>
         <td style="font-size:0.75rem">${t.userId || '—'}</td>
@@ -738,6 +759,31 @@
     window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'validated' })
       .then(function() { toast('Request validated — user has been notified.'); loadNINStats(); closeModal('requestDetailsModal'); })
       .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
+  }
+
+  function openFailModal(txnId) {
+    document.getElementById('failTxnId').value = txnId;
+    document.getElementById('failReason').value = '';
+    document.getElementById('failReasonErr').textContent = '';
+    document.getElementById('failRequestAlert').innerHTML = '';
+    closeModal('requestDetailsModal');
+    openModal('failRequestModal');
+  }
+
+  function confirmFail() {
+    const txnId  = document.getElementById('failTxnId').value;
+    const reason = document.getElementById('failReason').value.trim();
+    if (!reason) { document.getElementById('failReasonErr').textContent = 'Please provide a reason.'; return; }
+    document.getElementById('failReasonErr').textContent = '';
+    if (!window.fbReady) { document.getElementById('failRequestAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'failed', failReason: reason })
+      .then(function() {
+        closeModal('failRequestModal');
+        toast('Request marked as failed — user has been notified.');
+        loadNINStats();
+        loadAllTxns();
+      })
+      .catch(function(e) { document.getElementById('failRequestAlert').innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
   }
 
   const IPE_SVCS = ['Normal Clearance', 'Modification Clearance', 'Other Error'];
@@ -943,14 +989,17 @@
     document.getElementById('rdActions').innerHTML = canAct
       ? isIPE
         ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#059669" onclick="openIPEClearModal('${t.id}')">✅ Cleared</button>
+           <button style="background:#e53e3e;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600" onclick="openFailModal('${t.id}')">❌ Failed</button>
            <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
         : isMod
           ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#7c3aed" onclick="openNINModSlipModal('${t.id}')">✏️ Modified</button>
+             <button style="background:#e53e3e;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600" onclick="openFailModal('${t.id}')">❌ Failed</button>
              <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
           : isPerson
             ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#d97706" onclick="openNINPersonSlipModal('${t.id}')">🎨 Personalized</button>
                <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
             : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="validateNINRequest('${t.id}')">✔ Validate</button>
+               <button style="background:#e53e3e;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600" onclick="openFailModal('${t.id}')">❌ Failed</button>
                <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
       : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="closeModal('requestDetailsModal')">Close</button>`;
 

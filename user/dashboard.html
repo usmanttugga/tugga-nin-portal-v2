@@ -1298,14 +1298,16 @@
     if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
     tbody.innerHTML = txns.map(t => {
       const badgeClass = t.status === 'success' ? 'success' : t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized' ? 'success' : t.status === 'pending' ? 'pending' : t.status === 'submitted' ? 'pending' : 'failed';
-      const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
+      const displayStatus = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'failed' ? 'Failed' : t.status;
       const detailsCell = t.clearedTrackingId
         ? `${t.details}<br><span style="font-size:0.8rem;color:#059669;font-weight:600">✅ Old ID: ${t.clearedTrackingId}</span>${t.clearedNin ? `<br><span style="font-size:0.8rem;color:#059669;font-weight:600">NIN: ${t.clearedNin}</span>` : ''}`
         : t.ninSlipUrl
           ? `${t.details}<br><a href="${t.ninSlipUrl}" target="_blank" download="NIN-Slip.pdf" style="font-size:0.8rem;color:#7c3aed;font-weight:600;text-decoration:none">📄 Download NIN Slip</a>`
           : t.personSlipUrl
             ? `${t.details}<br><a href="${t.personSlipUrl}" target="_blank" download="Personalized-NIN-Slip.pdf" style="font-size:0.8rem;color:#d97706;font-weight:600;text-decoration:none">🎨 Download Personalized Slip</a>`
-            : t.details;
+            : t.failReason
+              ? `${t.details}<br><span style="font-size:0.8rem;color:#e53e3e;font-weight:600">❌ Reason: ${t.failReason}</span>`
+              : t.details;
       return `<tr>
         <td>${t.id}</td><td>${t.service}</td><td>${detailsCell}</td>
         <td>${fmt(t.amount)}</td>
@@ -1355,14 +1357,16 @@
             <thead><tr><th>Ref</th><th>Service</th><th>Details</th><th>Amount</th><th>Status</th><th>Date</th>${hasDownload ? '<th>Action</th>' : ''}</tr></thead>
             <tbody>${txns.map(t => {
               const bc = t.status === 'success' || t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized' ? 'success' : t.status === 'pending' || t.status === 'submitted' ? 'pending' : 'failed';
-              const ds = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status;
+              const ds = t.status === 'submitted' ? 'Submitted' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'failed' ? 'Failed' : t.status;
               const det = t.clearedTrackingId
                 ? `${t.details}<br><span style="font-size:0.78rem;color:#059669;font-weight:600">✅ Old ID: ${t.clearedTrackingId}</span>${t.clearedNin ? `<br><span style="font-size:0.78rem;color:#059669;font-weight:600">NIN: ${t.clearedNin}</span>` : ''}`
                 : t.ninSlipUrl
                   ? `${t.details}<br><a href="${t.ninSlipUrl}" target="_blank" download="NIN-Slip.pdf" style="font-size:0.78rem;color:#7c3aed;font-weight:600;text-decoration:none">📄 Download NIN Slip</a>`
                   : t.personSlipUrl
                     ? `${t.details}<br><a href="${t.personSlipUrl}" target="_blank" download="Personalized-NIN-Slip.pdf" style="font-size:0.78rem;color:#d97706;font-weight:600;text-decoration:none">🎨 Download Personalized Slip</a>`
-                    : t.details;
+                    : t.failReason
+                      ? `${t.details}<br><span style="font-size:0.78rem;color:#e53e3e;font-weight:600">❌ Reason: ${t.failReason}</span>`
+                      : t.details;
               const downloadCell = isNinVerify && t.slipUrl
                 ? `<td><a onclick="downloadNINSlipFromHistory('${t.id}')" style="font-size:0.78rem;background:var(--primary);color:#fff;padding:3px 10px;border-radius:6px;text-decoration:none;font-weight:600;cursor:pointer">⬇ Download</a></td>`
                 : (hasDownload ? '<td></td>' : '');
