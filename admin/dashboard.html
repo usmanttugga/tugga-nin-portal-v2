@@ -511,6 +511,68 @@
   </div>
 </div>
 
+<!-- DELINK MODAL -->
+<div class="modal-overlay" id="delinkModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>🔗 Confirm Delink</h3>
+      <button class="modal-close" onclick="closeModal('delinkModal')">✕</button>
+    </div>
+    <div id="delinkAlert"></div>
+    <p style="font-size:0.88rem;color:var(--gray);margin-bottom:1rem">Confirm that the device has been delinked for this request.</p>
+    <input type="hidden" id="delinkTxnId"/>
+    <button class="btn-primary" style="background:#059669" onclick="confirmDelink()">🔗 Delink</button>
+  </div>
+</div>
+
+<!-- EMAIL RETRIEVAL & DELINKING MODAL -->
+<div class="modal-overlay" id="emailDelinkModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>📧 Email Retrieval &amp; Delink</h3>
+      <button class="modal-close" onclick="closeModal('emailDelinkModal')">✕</button>
+    </div>
+    <div id="emailDelinkAlert"></div>
+    <p style="font-size:0.88rem;color:var(--gray);margin-bottom:1rem">Enter the retrieved email address and NIN to complete this request.</p>
+    <div class="form-group">
+      <label>Retrieved Email Address</label>
+      <input type="email" id="ed_email" placeholder="user@example.com"/>
+      <span id="ed_email_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div class="form-group">
+      <label>NIN</label>
+      <input type="text" id="ed_nin" placeholder="11-digit NIN" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')"/>
+      <span id="ed_nin_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <input type="hidden" id="emailDelinkTxnId"/>
+    <button class="btn-primary" style="background:#059669" onclick="confirmEmailDelink()">🔗 Delink</button>
+  </div>
+</div>
+
+<!-- EMAIL RETRIEVAL ONLY MODAL -->
+<div class="modal-overlay" id="emailOnlyModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <h3>📩 Email Retrieval</h3>
+      <button class="modal-close" onclick="closeModal('emailOnlyModal')">✕</button>
+    </div>
+    <div id="emailOnlyAlert"></div>
+    <p style="font-size:0.88rem;color:var(--gray);margin-bottom:1rem">Enter the retrieved email address and NIN for this request.</p>
+    <div class="form-group">
+      <label>Retrieved Email Address</label>
+      <input type="email" id="eo_email" placeholder="user@example.com"/>
+      <span id="eo_email_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div class="form-group">
+      <label>NIN</label>
+      <input type="text" id="eo_nin" placeholder="11-digit NIN" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')"/>
+      <span id="eo_nin_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <input type="hidden" id="emailOnlyTxnId"/>
+    <button class="btn-primary" style="background:#2563eb" onclick="confirmEmailOnly()">📩 Retrieve</button>
+  </div>
+</div>
+
 <script src="../js/app.js?v=8"></script>
 <script type="module" src="../js/firebase.js"></script>
 <script>
@@ -733,27 +795,35 @@
     const tbody = document.getElementById("ninTxnTable");
     if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No requests found.</td></tr>'; return; }
     tbody.innerHTML = filtered.map(t => {
-      const alreadyValidated = t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized';
+      const alreadyValidated = t.status === 'validated' || t.status === 'cleared' || t.status === 'modified' || t.status === 'personalized' || t.status === 'delinked' || t.status === 'retrieved';
       const needsValidation = validateSvcs.includes(t.service) && t.status === 'submitted';
       const isIPE = IPE_SVCS.includes(t.service);
       const isMod = MOD_SVCS.includes(t.service);
       const isPerson = PERSON_SVCS.includes(t.service);
+      const isSelf = SELF_SVCS.includes(t.service);
       const badgeClass = alreadyValidated ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'failed' ? 'Failed' : t.status === 'success' ? 'Success' : t.status;
+      const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'cleared' ? 'Cleared' : t.status === 'modified' ? 'Modified' : t.status === 'personalized' ? 'Personalized' : t.status === 'delinked' ? 'Delinked' : t.status === 'retrieved' ? 'Retrieved' : t.status === 'failed' ? 'Failed' : t.status === 'success' ? 'Success' : t.status;
       const viewBtn = `<button onclick="openRequestDetails('${t.id}')" style="background:var(--accent);color:var(--primary);border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap">👁 View</button>`;
-      const actionBtn = needsValidation
-        ? isIPE
-          ? `<button onclick="openIPEClearModal('${t.id}')" style="background:#059669;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✅ Cleared</button>`
-          : isMod
-            ? `<button onclick="openNINModSlipModal('${t.id}')" style="background:#7c3aed;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✏️ Modified</button>
-               <button onclick="openFailModal('${t.id}')" style="background:#e53e3e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">❌ Failed</button>`
-            : isPerson
-              ? `<button onclick="openNINPersonSlipModal('${t.id}')" style="background:#d97706;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">🎨 Personalized</button>`
-              : `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>
+      const selfActionBtn = t.service === 'Delinking'
+        ? `<button onclick="openDelinkModal('${t.id}')" style="background:#059669;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">🔗 Delink</button>`
+        : t.service === 'Email Retrieval and Delinking'
+          ? `<button onclick="openEmailDelinkModal('${t.id}')" style="background:#059669;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">🔗 Delink</button>`
+          : `<button onclick="openEmailOnlyModal('${t.id}')" style="background:#2563eb;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">📩 Retrieve</button>`;
+      const actionBtn = isSelf && t.status === 'submitted'
+        ? selfActionBtn + `<button onclick="openFailModal('${t.id}')" style="background:#e53e3e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">❌ Failed</button>`
+        : needsValidation
+          ? isIPE
+            ? `<button onclick="openIPEClearModal('${t.id}')" style="background:#059669;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✅ Cleared</button>`
+            : isMod
+              ? `<button onclick="openNINModSlipModal('${t.id}')" style="background:#7c3aed;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✏️ Modified</button>
                  <button onclick="openFailModal('${t.id}')" style="background:#e53e3e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">❌ Failed</button>`
-        : alreadyValidated
-          ? `<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">${isIPE ? '✅ Cleared' : isMod ? '✏️ Modified' : isPerson ? '🎨 Personalized' : '✔ Done'}</span>`
-          : t.status === 'failed' ? `<span style="color:#e53e3e;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">❌ Failed</span>` : '';
+              : isPerson
+                ? `<button onclick="openNINPersonSlipModal('${t.id}')" style="background:#d97706;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">🎨 Personalized</button>`
+                : `<button onclick="validateNINRequest('${t.id}')" style="background:var(--primary);color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">✔ Validate</button>
+                   <button onclick="openFailModal('${t.id}')" style="background:#e53e3e;color:#fff;border:none;padding:4px 10px;border-radius:6px;cursor:pointer;font-size:0.75rem;font-weight:600;white-space:nowrap;margin-top:4px">❌ Failed</button>`
+          : alreadyValidated
+            ? `<span style="color:#059669;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">${isIPE ? '✅ Cleared' : isMod ? '✏️ Modified' : isPerson ? '🎨 Personalized' : t.status === 'delinked' ? '🔗 Delinked' : t.status === 'retrieved' ? '📩 Retrieved' : '✔ Done'}</span>`
+            : t.status === 'failed' ? `<span style="color:#e53e3e;font-size:0.75rem;font-weight:600;display:block;margin-top:2px">❌ Failed</span>` : '';
       return `<tr>
         <td style="font-size:0.75rem;max-width:80px;overflow:hidden;text-overflow:ellipsis">${t.id}</td>
         <td style="font-size:0.75rem">${t.userId || '—'}</td>
@@ -917,6 +987,74 @@
     });
   }
 
+  // ── Self Services ─────────────────────────────────
+  const SELF_SVCS = ['Delinking', 'Email Retrieval and Delinking', 'Email Retrieval Only'];
+
+  function openDelinkModal(txnId) {
+    document.getElementById('delinkTxnId').value = txnId;
+    document.getElementById('delinkAlert').innerHTML = '';
+    closeModal('requestDetailsModal');
+    openModal('delinkModal');
+  }
+
+  function confirmDelink() {
+    const txnId = document.getElementById('delinkTxnId').value;
+    if (!window.fbReady) { document.getElementById('delinkAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'delinked' })
+      .then(function() { closeModal('delinkModal'); toast('Device delinked successfully.'); loadNINStats(); })
+      .catch(function(e) { document.getElementById('delinkAlert').innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
+  }
+
+  function openEmailDelinkModal(txnId) {
+    document.getElementById('emailDelinkTxnId').value = txnId;
+    document.getElementById('ed_email').value = '';
+    document.getElementById('ed_nin').value = '';
+    document.getElementById('ed_email_err').textContent = '';
+    document.getElementById('ed_nin_err').textContent = '';
+    document.getElementById('emailDelinkAlert').innerHTML = '';
+    closeModal('requestDetailsModal');
+    openModal('emailDelinkModal');
+  }
+
+  function confirmEmailDelink() {
+    const txnId = document.getElementById('emailDelinkTxnId').value;
+    const email = document.getElementById('ed_email').value.trim();
+    const nin   = document.getElementById('ed_nin').value.trim();
+    if (!email) { document.getElementById('ed_email_err').textContent = 'Email address is required'; return; }
+    if (!/^\d{11}$/.test(nin)) { document.getElementById('ed_nin_err').textContent = 'NIN must be exactly 11 digits'; return; }
+    document.getElementById('ed_email_err').textContent = '';
+    document.getElementById('ed_nin_err').textContent = '';
+    if (!window.fbReady) { document.getElementById('emailDelinkAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'delinked', retrievedEmail: email, retrievedNin: nin })
+      .then(function() { closeModal('emailDelinkModal'); toast('Email retrieved and device delinked.'); loadNINStats(); })
+      .catch(function(e) { document.getElementById('emailDelinkAlert').innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
+  }
+
+  function openEmailOnlyModal(txnId) {
+    document.getElementById('emailOnlyTxnId').value = txnId;
+    document.getElementById('eo_email').value = '';
+    document.getElementById('eo_nin').value = '';
+    document.getElementById('eo_email_err').textContent = '';
+    document.getElementById('eo_nin_err').textContent = '';
+    document.getElementById('emailOnlyAlert').innerHTML = '';
+    closeModal('requestDetailsModal');
+    openModal('emailOnlyModal');
+  }
+
+  function confirmEmailOnly() {
+    const txnId = document.getElementById('emailOnlyTxnId').value;
+    const email = document.getElementById('eo_email').value.trim();
+    const nin   = document.getElementById('eo_nin').value.trim();
+    if (!email) { document.getElementById('eo_email_err').textContent = 'Email address is required'; return; }
+    if (!/^\d{11}$/.test(nin)) { document.getElementById('eo_nin_err').textContent = 'NIN must be exactly 11 digits'; return; }
+    document.getElementById('eo_email_err').textContent = '';
+    document.getElementById('eo_nin_err').textContent = '';
+    if (!window.fbReady) { document.getElementById('emailOnlyAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'retrieved', retrievedEmail: email, retrievedNin: nin })
+      .then(function() { closeModal('emailOnlyModal'); toast('Email retrieved successfully.'); loadNINStats(); })
+      .catch(function(e) { document.getElementById('emailOnlyAlert').innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
+  }
+
   // Ordered field lists matching each user form exactly
   const SERVICE_FIELD_ORDER = {
     // NIN Validation
@@ -967,7 +1105,7 @@
     document.getElementById('rdTitle').textContent = t.service;
 
     const badgeClass = t.status === 'validated' ? 'success' : t.status === 'submitted' ? 'pending' : 'success';
-    const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'success' ? 'Success' : t.status;
+    const displayStatus = t.status === 'submitted' ? 'Pending' : t.status === 'validated' ? 'Validated' : t.status === 'success' ? 'Success' : t.status === 'delinked' ? 'Delinked' : t.status === 'retrieved' ? 'Retrieved' : t.status;
     document.getElementById('rdMeta').innerHTML =
       `<span>Ref: <strong>${t.id}</strong></span>` +
       `<span>User ID: <strong>${t.userId || '—'}</strong></span>` +
@@ -980,14 +1118,18 @@
     const allData = Object.assign({}, formData);
     if (t.clearedTrackingId) allData['Old Tracking ID'] = t.clearedTrackingId;
     if (t.clearedNin) allData['NIN'] = t.clearedNin;
+    if (t.retrievedEmail) allData['Retrieved Email'] = t.retrievedEmail;
+    if (t.retrievedNin)   allData['Retrieved NIN']   = t.retrievedNin;
     const displayKeys = t.clearedTrackingId
       ? [...orderedKeys.filter(k => allData[k] && allData[k] !== '—'), 'Old Tracking ID', ...(t.clearedNin ? ['NIN'] : [])]
-      : orderedKeys.filter(k => allData[k] && allData[k] !== '—');
+      : t.retrievedEmail
+        ? [...orderedKeys.filter(k => allData[k] && allData[k] !== '—'), 'Retrieved Email', 'Retrieved NIN']
+        : orderedKeys.filter(k => allData[k] && allData[k] !== '—');
 
     const rows = displayKeys.map(k =>
         `<div style="display:flex;justify-content:space-between;align-items:flex-start;padding:0.55rem 0;border-bottom:1px solid #f1f5f9;gap:1rem">
           <span style="color:var(--gray);font-size:0.88rem;white-space:nowrap;flex-shrink:0">${k}</span>
-          <span style="font-weight:${k === 'Old Tracking ID' || k === 'NIN' ? '700;color:#059669' : '500'};font-size:0.88rem;text-align:right;word-break:break-word">${allData[k]}</span>
+          <span style="font-weight:${k === 'Old Tracking ID' || k === 'NIN' || k === 'Retrieved Email' || k === 'Retrieved NIN' ? '700;color:#059669' : '500'};font-size:0.88rem;text-align:right;word-break:break-word">${allData[k]}</span>
         </div>`
       );
 
@@ -998,9 +1140,27 @@
     const isIPE = IPE_SVCS.includes(t.service);
     const isMod = MOD_SVCS.includes(t.service);
     const isPerson = PERSON_SVCS.includes(t.service);
+    const isSelf = SELF_SVCS.includes(t.service);
     const canAct = t.status === 'submitted';
+
+    // Show retrieved email/NIN for completed self-service requests
+    if (t.retrievedEmail) allData['Retrieved Email'] = t.retrievedEmail;
+    if (t.retrievedNin)   allData['Retrieved NIN']   = t.retrievedNin;
+
     document.getElementById('rdActions').innerHTML = canAct
-      ? isIPE
+      ? isSelf
+        ? t.service === 'Delinking'
+          ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#059669" onclick="openDelinkModal('${t.id}')">🔗 Delink</button>
+             <button style="background:#e53e3e;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600" onclick="openFailModal('${t.id}')">❌ Failed</button>
+             <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
+          : t.service === 'Email Retrieval and Delinking'
+            ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#059669" onclick="openEmailDelinkModal('${t.id}')">🔗 Delink</button>
+               <button style="background:#e53e3e;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600" onclick="openFailModal('${t.id}')">❌ Failed</button>
+               <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
+            : `<button class="btn-primary" style="width:auto;padding:10px 24px" onclick="openEmailOnlyModal('${t.id}')">📩 Retrieve</button>
+               <button style="background:#e53e3e;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600" onclick="openFailModal('${t.id}')">❌ Failed</button>
+               <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
+        : isIPE
         ? `<button class="btn-primary" style="width:auto;padding:10px 24px;background:#059669" onclick="openIPEClearModal('${t.id}')">✅ Cleared</button>
            <button style="background:#e53e3e;color:#fff;border:none;padding:10px 20px;border-radius:8px;cursor:pointer;font-weight:600" onclick="openFailModal('${t.id}')">❌ Failed</button>
            <button style="background:none;border:1px solid #e2e8f0;padding:10px 20px;border-radius:8px;cursor:pointer" onclick="closeModal('requestDetailsModal')">Close</button>`
