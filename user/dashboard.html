@@ -161,6 +161,9 @@
         <div class="service-card" data-svc="NIN Personalization" onclick="showSection('sec-nin-person')">
           <div class="svc-icon">🎨</div><h4>NIN Personalization</h4><p>Personalize NIN card</p>
         </div>
+        <div class="service-card" onclick="showSection('sec-selfservices')">
+          <div class="svc-icon">🔧</div><h4>Self Services</h4><p>Delinking & Email services</p>
+        </div>
       </div>
     </section>
 
@@ -293,6 +296,25 @@
       </div>
       <div id="svcHistory-sec-nin-person"></div>
     </section>
+
+    <!-- SELF SERVICES -->
+    <section id="sec-selfservices" class="content-section section-hidden">
+      <p class="page-title">Self Services</p>
+      <p class="page-sub">Manage your NIN email and SIM delinking.</p>
+      <div class="services-grid">
+        <div class="service-card" data-svc="Delinking" onclick="openSelfServiceModal('delinking')">
+          <div class="svc-icon">🔗</div><h4>Delinking</h4><p>Delink SIM from NIN</p><div class="price" id="price-delinking">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Email Retrieval and Delinking" onclick="openSelfServiceModal('email-delink')">
+          <div class="svc-icon">📧</div><h4>Email Retrieval & Delinking</h4><p>Retrieve email and delink</p><div class="price" id="price-email-delink">₦150</div>
+        </div>
+        <div class="service-card" data-svc="Email Retrieval Only" onclick="openSelfServiceModal('email-only')">
+          <div class="svc-icon">📩</div><h4>Email Retrieval Only</h4><p>Retrieve linked email</p><div class="price" id="price-email-only">₦150</div>
+        </div>
+      </div>
+      <div id="svcHistory-sec-selfservices"></div>
+    </section>
+
     <section id="sec-bvn" class="content-section section-hidden">
       <p class="page-title">BVN Services</p>
       <p class="page-sub">Bank Verification Number services.</p>
@@ -932,6 +954,22 @@
   </div>
 </div>
 
+<!-- SELF SERVICES MODAL -->
+<div class="modal-overlay" id="selfServiceModal">
+  <div class="modal" style="max-width:440px">
+    <div class="modal-header">
+      <h3 id="selfServiceTitle">Self Service</h3>
+      <button class="modal-close" onclick="closeModal('selfServiceModal')">✕</button>
+    </div>
+    <div id="selfServiceAlert"></div>
+    <div id="selfServiceFields"></div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="selfServicePrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitSelfService()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
 <!-- SERVICE MODAL -->
 <div class="modal-overlay" id="serviceModal">
   <div class="modal">
@@ -1188,7 +1226,7 @@
     'sec-nin-verify': 'sec-nin', 'sec-nin-validation': 'sec-nin',
     'sec-nin-modification': 'sec-nin', 'sec-ipe': 'sec-nin',
     'sec-vnin': 'sec-nin', 'sec-nin-person': 'sec-nin',
-    'sec-mod-validation': 'sec-nin-validation'
+    'sec-selfservices': 'sec-nin',
   };
 
   function _updateBackBar(id) {
@@ -1328,7 +1366,7 @@
     'sec-nin-verify':       ['Verify with NIN','Phone Number Verification','Bio Data Verification','FingerPrint Verification'],
     'sec-nin-validation':   ['No Record Found','Bank Validation','Photograph Error','SIM Validation','Modification Validation','Immigration Validation'],
     'sec-mod-validation':   ['DOB Modification Validation','Name Modification Validation','Phone Number Modification Validation','Address Modification Validation'],
-    'sec-nin-modification': ['Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification'],
+    'sec-selfservices':     ['Delinking','Email Retrieval and Delinking','Email Retrieval Only'],
     'sec-ipe':              ['Normal Clearance','Modification Clearance','Other Error'],
     'sec-vnin':             ['VNIN Slip'],
     'sec-nin-person':       ['NIN Personalization'],
@@ -1429,6 +1467,66 @@
     'Modification Validation':`<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`,
     'Immigration Validation': `<div class="form-group"><label>NIN Number</label><input type="text" id="f_nin" placeholder="11-digit NIN" maxlength="11"/></div>`
   };
+
+  // ── Self Services ──────────────────────────────────
+  let _selfServiceType = '';
+  const _selfServiceConfig = {
+    delinking: {
+      title: 'Delinking',
+      fields: `
+        <div class="form-group"><label>NIN Number</label><input type="text" id="ss_nin" placeholder="11-digit NIN" maxlength="11"/><span id="ss_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>Email Address</label><input type="email" id="ss_email" placeholder="Your email address"/><span id="ss_email_err" style="color:var(--accent);font-size:0.8rem"></span></div>`
+    },
+    'email-delink': {
+      title: 'Email Retrieval and Delinking',
+      fields: `<div class="form-group"><label>NIN Number</label><input type="text" id="ss_nin" placeholder="11-digit NIN" maxlength="11"/><span id="ss_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>`
+    },
+    'email-only': {
+      title: 'Email Retrieval Only',
+      fields: `<div class="form-group"><label>NIN Number</label><input type="text" id="ss_nin" placeholder="11-digit NIN" maxlength="11"/><span id="ss_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>`
+    }
+  };
+  const _selfServicePriceKey = { delinking: 'delinking', 'email-delink': 'email_delink', 'email-only': 'email_only' };
+
+  function openSelfServiceModal(type) {
+    const cfg = _selfServiceConfig[type];
+    if (!cfg) return;
+    if (!checkAvailable(cfg.title)) return;
+    _selfServiceType = type;
+    refreshPricing();
+    const priceKey = _selfServicePriceKey[type];
+    document.getElementById('selfServiceTitle').textContent = cfg.title;
+    document.getElementById('selfServicePrice').textContent = 'Fee: ' + fmt(_p[priceKey] || 150);
+    document.getElementById('selfServiceAlert').innerHTML = '';
+    document.getElementById('selfServiceFields').innerHTML = cfg.fields;
+    openModal('selfServiceModal');
+  }
+
+  function submitSelfService() {
+    const cfg = _selfServiceConfig[_selfServiceType];
+    if (!cfg) return;
+    const alertEl = document.getElementById('selfServiceAlert');
+    alertEl.innerHTML = '';
+    const nin = document.getElementById('ss_nin')?.value.trim() || '';
+    if (!isValidNIN(nin)) { document.getElementById('ss_nin_err').textContent = 'NIN must be exactly 11 digits'; return; }
+    document.getElementById('ss_nin_err').textContent = '';
+    const formData = { 'NIN Number': nin };
+    if (_selfServiceType === 'delinking') {
+      const email = document.getElementById('ss_email')?.value.trim() || '';
+      if (!email) { document.getElementById('ss_email_err').textContent = 'Email address is required'; return; }
+      document.getElementById('ss_email_err').textContent = '';
+      formData['Email Address'] = email;
+    }
+    const priceKey = _selfServicePriceKey[_selfServiceType];
+    const fee = _p[priceKey] || 150;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
+    walletBalance -= fee;
+    submitWithStatus(cfg.title, nin, fee, 'submitted', formData);
+    updateStats();
+    syncWalletToFirebase();
+    closeModal('selfServiceModal');
+    toast(cfg.title + ' request submitted successfully!');
+  }
 
   // ── Modification Validation ────────────────────────
   let _modValType = '';

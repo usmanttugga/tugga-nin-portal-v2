@@ -131,6 +131,9 @@
         <div class="stat-card" onclick="filterNINTable('personalization')" style="cursor:pointer" title="Show NIN Personalization">
           <div class="stat-icon bg-blue">🎨</div><div class="stat-info"><h3 id="ninPersonCount">0</h3><p>NIN Personalization</p></div>
         </div>
+        <div class="stat-card" onclick="filterNINTable('selfservices')" style="cursor:pointer" title="Show Self Services">
+          <div class="stat-icon bg-green">🔧</div><div class="stat-info"><h3 id="ninSelfSvcCount">0</h3><p>Self Services</p></div>
+        </div>
       </div>
       <div style="display:flex;align-items:center;gap:0.8rem;margin:1rem 0 0.5rem;flex-wrap:wrap">
         <span id="ninFilterLabel" style="font-size:0.85rem;color:var(--gray)">Showing: All</span>
@@ -292,6 +295,14 @@
               <div class="form-group"><label>Normal Clearance (₦)</label><input type="number" id="p_ipe_normal" value="400"/></div>
               <div class="form-group"><label>Modification Clearance (₦)</label><input type="number" id="p_ipe_mod" value="400"/></div>
               <div class="form-group"><label>Other Error (₦)</label><input type="number" id="p_ipe_other" value="400"/></div>
+            </div>
+          </div>
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">🔧 Self Services</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+              <div class="form-group"><label>Delinking (₦)</label><input type="number" id="p_delinking" value="150"/></div>
+              <div class="form-group"><label>Email Retrieval &amp; Delinking (₦)</label><input type="number" id="p_email_delink" value="150"/></div>
+              <div class="form-group"><label>Email Retrieval Only (₦)</label><input type="number" id="p_email_only" value="150"/></div>
             </div>
           </div>
           <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
@@ -662,7 +673,7 @@
 
   function filterNINTable(type) {
     _ninFilter = type;
-    const labels = { all: 'All', verify: 'NIN Verifications', validation: 'NIN Validations', modification: 'Modifications', ipe: 'IPE Clearances', personalization: 'NIN Personalization' };
+    const labels = { all: 'All', verify: 'NIN Verifications', validation: 'NIN Validations', modification: 'Modifications', ipe: 'IPE Clearances', personalization: 'NIN Personalization', selfservices: 'Self Services' };
     document.getElementById('ninFilterLabel').textContent = 'Showing: ' + (labels[type] || 'All');
     loadNINStats();
   }
@@ -674,17 +685,19 @@
     const ninModSvcs = ["Name Modification", "Phone Number Modification", "Address Modification", "Date of Birth Modification"];
     const ninIpeSvcs = ["Normal Clearance", "Modification Clearance", "Other Error"];
     const ninPersonSvcs = ["NIN Personalization", "VNIN Slip"];
+    const ninSelfSvcs = ["Delinking", "Email Retrieval and Delinking", "Email Retrieval Only"];
     const nin = allTxns.filter(t =>
       t.service.includes("NIN") || t.service.includes("VNIN") || t.service.includes("IPE") ||
       ninVerSvcs.includes(t.service) || ninValSvcs.includes(t.service) ||
       ninModSvcs.includes(t.service) || ninIpeSvcs.includes(t.service) ||
-      ninPersonSvcs.includes(t.service)
+      ninPersonSvcs.includes(t.service) || ninSelfSvcs.includes(t.service)
     );
     document.getElementById("ninVerCount").textContent = nin.filter(t => ninVerSvcs.includes(t.service)).length;
     document.getElementById("ninValCount").textContent = nin.filter(t => ninValSvcs.includes(t.service)).length;
     document.getElementById("ninModCount").textContent = nin.filter(t => ninModSvcs.includes(t.service)).length;
     document.getElementById("ninIpeCount").textContent = nin.filter(t => ninIpeSvcs.includes(t.service)).length;
     document.getElementById("ninPersonCount").textContent = nin.filter(t => ninPersonSvcs.includes(t.service)).length;
+    document.getElementById("ninSelfSvcCount").textContent = nin.filter(t => ninSelfSvcs.includes(t.service)).length;
 
     // Apply category filter
     const filterMap = {
@@ -693,6 +706,7 @@
       modification: t => ninModSvcs.includes(t.service),
       ipe:        t => ninIpeSvcs.includes(t.service),
       personalization: t => ninPersonSvcs.includes(t.service),
+      selfservices: t => ninSelfSvcs.includes(t.service),
       all:        () => true
     };
     let filtered = nin.filter(filterMap[_ninFilter] || (() => true));
@@ -1099,7 +1113,10 @@
       name_mod:     parseInt(document.getElementById("p_name_mod").value) || 500,
       phone_mod:    parseInt(document.getElementById("p_phone_mod").value) || 500,
       address_mod:  parseInt(document.getElementById("p_address_mod").value) || 500,
-      dob_mod:      parseInt(document.getElementById("p_dob_mod").value) || 500
+      dob_mod:      parseInt(document.getElementById("p_dob_mod").value) || 500,
+      delinking:    parseInt(document.getElementById("p_delinking").value) || 150,
+      email_delink: parseInt(document.getElementById("p_email_delink").value) || 150,
+      email_only:   parseInt(document.getElementById("p_email_only").value) || 150
     };
     localStorage.setItem("tugga_pricing", JSON.stringify(pricing));
     // Save to Firebase
@@ -1114,7 +1131,7 @@
 
   function loadPricingFields() {
     function applyPricing(saved) {
-      const defaults = { ninmod:500, ninpers:1000, vnin:250, ipe_normal:400, ipe_mod:400, ipe_other:400, bvnver:200, bvnret:150, bvnmod:500, bvnuser:200, nin_normal:200, nin_info:250, nin_premium:350, nin_standard:200, phone_normal:150, phone_info:200, phone_premium:300, phone_standard:150, bio_normal:300, bio_info:350, bio_premium:450, bio_standard:300, fp_normal:200, fp_info:250, fp_premium:350, fp_standard:200, no_record:150, bank_val:150, photo_err:150, sim_val:150, mod_val:150, imm_val:150, dob_mod_val:150, name_mod_val:150, phone_mod_val:150, address_mod_val:150, name_mod:500, phone_mod:500, address_mod:500, dob_mod:500 };
+      const defaults = { ninmod:500, ninpers:1000, vnin:250, ipe_normal:400, ipe_mod:400, ipe_other:400, bvnver:200, bvnret:150, bvnmod:500, bvnuser:200, nin_normal:200, nin_info:250, nin_premium:350, nin_standard:200, phone_normal:150, phone_info:200, phone_premium:300, phone_standard:150, bio_normal:300, bio_info:350, bio_premium:450, bio_standard:300, fp_normal:200, fp_info:250, fp_premium:350, fp_standard:200, no_record:150, bank_val:150, photo_err:150, sim_val:150, mod_val:150, imm_val:150, dob_mod_val:150, name_mod_val:150, phone_mod_val:150, address_mod_val:150, name_mod:500, phone_mod:500, address_mod:500, dob_mod:500, delinking:150, email_delink:150, email_only:150 };
       const p = Object.assign({}, defaults, saved);
       document.getElementById("p_ninpers").value      = p.ninpers;
       document.getElementById("p_vnin").value         = p.vnin;
@@ -1154,6 +1171,9 @@
       document.getElementById("p_phone_mod").value    = p.phone_mod;
       document.getElementById("p_address_mod").value  = p.address_mod;
       document.getElementById("p_dob_mod").value      = p.dob_mod;
+      document.getElementById("p_delinking").value    = p.delinking;
+      document.getElementById("p_email_delink").value = p.email_delink;
+      document.getElementById("p_email_only").value   = p.email_only;
     }
     if (window.fbReady) {
       window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "pricing")).then(function(snap) {
@@ -1319,6 +1339,7 @@
     { label: '✔️ NIN Validation',   key: 'grp_nin_val',    services: ['No Record Found','Bank Validation','Photograph Error','SIM Validation','Modification Validation','Immigration Validation'] },
     { label: '✏️ NIN Modification', key: 'grp_nin_mod',    services: ['Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification'] },
     { label: '✅ IPE Clearance',    key: 'grp_ipe',        services: ['Normal Clearance','Modification Clearance','Other Error'] },
+    { label: '🔧 Self Services',    key: 'grp_selfsvcs',   services: ['Delinking','Email Retrieval and Delinking','Email Retrieval Only'] },
     { label: '🏦 BVN Services',     key: 'grp_bvn',        services: ['BVN Verification','BVN Retrieval','BVN Modification','BVN User'] },
     { label: '📞 Airtime & Data',   key: 'grp_utility',    services: ['Buy Airtime','Buy Data'] }
   ];
