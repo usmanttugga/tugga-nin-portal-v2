@@ -1441,9 +1441,9 @@
       fields: `
         <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
         <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
-        <div class="form-group"><label>Surname</label><input type="text" id="mv_surname" placeholder="New surname"/></div>
-        <div class="form-group"><label>Middle Name</label><input type="text" id="mv_middlename" placeholder="New middle name (optional)"/></div>
-        <div class="form-group"><label>Last Name</label><input type="text" id="mv_lastname" placeholder="New last name"/></div>`
+        <div class="form-group"><label>New Surname</label><input type="text" id="mv_surname" placeholder="New surname"/></div>
+        <div class="form-group"><label>New Middle Name</label><input type="text" id="mv_middlename" placeholder="New middle name (optional)"/></div>
+        <div class="form-group"><label>New Last Name</label><input type="text" id="mv_lastname" placeholder="New last name"/></div>`
     },
     phone: {
       title: 'Phone Number Validation',
@@ -1457,12 +1457,12 @@
       fields: `
         <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
         <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
-        <div class="form-group"><label>Address</label><input type="text" id="mv_address" placeholder="New residential address"/></div>
-        <div class="form-group"><label>Town / City</label><input type="text" id="mv_town" placeholder="Town or city"/></div>
-        <div class="form-group"><label>LGA of Origin</label><input type="text" id="mv_lga_origin" placeholder="LGA of origin"/></div>
-        <div class="form-group"><label>State of Origin</label><input type="text" id="mv_state_origin" placeholder="State of origin"/></div>
-        <div class="form-group"><label>LGA of Residence</label><input type="text" id="mv_lga_res" placeholder="LGA of residence"/></div>
-        <div class="form-group"><label>State of Residence</label><input type="text" id="mv_state_res" placeholder="State of residence"/></div>`
+        <div class="form-group"><label>New Address</label><input type="text" id="mv_address" placeholder="New residential address"/></div>
+        <div class="form-group"><label>New Town / City</label><input type="text" id="mv_town" placeholder="New town or city"/></div>
+        <div class="form-group"><label>New LGA of Origin</label><input type="text" id="mv_lga_origin" placeholder="New LGA of origin"/></div>
+        <div class="form-group"><label>New State of Origin</label><input type="text" id="mv_state_origin" placeholder="New state of origin"/></div>
+        <div class="form-group"><label>New LGA of Residence</label><input type="text" id="mv_lga_res" placeholder="New LGA of residence"/></div>
+        <div class="form-group"><label>New State of Residence</label><input type="text" id="mv_state_res" placeholder="New state of residence"/></div>`
     }
   };
 
@@ -1499,9 +1499,9 @@
     const g = id => document.getElementById(id)?.value.trim() || '';
     const formData = { 'NIN': nin, 'New Tracking ID': tracking };
     if (_modValType === 'dob')     formData['New Date of Birth'] = g('mv_dob');
-    if (_modValType === 'name')    { formData['Surname'] = g('mv_surname'); formData['Middle Name'] = g('mv_middlename'); formData['Last Name'] = g('mv_lastname'); }
+    if (_modValType === 'name')    { formData['New Surname'] = g('mv_surname'); formData['New Middle Name'] = g('mv_middlename'); formData['New Last Name'] = g('mv_lastname'); }
     if (_modValType === 'phone')   formData['New Phone Number'] = g('mv_phone');
-    if (_modValType === 'address') { formData['Address'] = g('mv_address'); formData['Town/City'] = g('mv_town'); formData['LGA of Origin'] = g('mv_lga_origin'); formData['State of Origin'] = g('mv_state_origin'); formData['LGA of Residence'] = g('mv_lga_res'); formData['State of Residence'] = g('mv_state_res'); }
+    if (_modValType === 'address') { formData['New Address'] = g('mv_address'); formData['New Town/City'] = g('mv_town'); formData['New LGA of Origin'] = g('mv_lga_origin'); formData['New State of Origin'] = g('mv_state_origin'); formData['New LGA of Residence'] = g('mv_lga_res'); formData['New State of Residence'] = g('mv_state_res'); }
     submitWithStatus(cfg.title, nin, fee, 'submitted', formData);
     updateStats();
     syncWalletToFirebase();
