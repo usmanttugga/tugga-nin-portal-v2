@@ -592,9 +592,10 @@
     const usageTxns   = txns.filter(t => t.service !== 'Wallet Funding');
     const totalFunding = fundingTxns.reduce((s, t) => s + (t.amount || 0), 0);
     const totalUsage   = usageTxns.reduce((s, t) => s + (t.amount || 0), 0);
+    const totalRevenue = totalFunding + totalUsage;
     document.getElementById("statTxns").textContent    = txns.length;
     document.getElementById("statSuccess").textContent = txns.filter(t => t.status === "success").length;
-    document.getElementById("statRevenue").textContent = fmt(usageTxns.reduce((s, t) => s + (t.amount || 0), 0));
+    document.getElementById("statRevenue").textContent = fmt(totalRevenue);
     document.getElementById("statUsage").textContent   = fmt(totalUsage);
     document.getElementById("statFunding").textContent = fmt(totalFunding);
     document.getElementById("statBalance").textContent = fmt(totalFunding - totalUsage);
