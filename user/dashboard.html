@@ -313,6 +313,9 @@
         <div class="service-card" data-svc="Email Retrieval Only" onclick="openSelfServiceModal('email-only')">
           <div class="svc-icon">📩</div><h4>Email Retrieval Only</h4><p>Retrieve linked email</p><div class="price" id="price-email-only">₦150</div>
         </div>
+        <div class="service-card" data-svc="Date of Birth Attestation" onclick="openDobAttestationModal()">
+          <div class="svc-icon">📜</div><h4>Date of Birth Attestation</h4><p>Attest date of birth on NIN</p><div class="price" id="price-dob-attest">₦500</div>
+        </div>
       </div>
       <div id="svcHistory-sec-selfservices"></div>
     </section>
@@ -746,6 +749,100 @@
     <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
       <span style="font-weight:700;color:var(--accent)" id="dobModPrice"></span>
       <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitDobMod()">Submit Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- DATE OF BIRTH ATTESTATION MODAL -->
+<div class="modal-overlay" id="dobAttestModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-header">
+      <h3>📜 Date of Birth Attestation</h3>
+      <button class="modal-close" onclick="closeModal('dobAttestModal')">✕</button>
+    </div>
+    <div id="dobAttestAlert"></div>
+    <div class="form-group">
+      <label>NIN Number</label>
+      <input type="text" id="da_nin" placeholder="11-digit NIN" maxlength="11"/>
+      <span id="da_nin_err" style="color:var(--accent);font-size:0.8rem"></span>
+    </div>
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">PERSONAL DETAILS</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>Surname</label><input type="text" id="da_surname" placeholder="Surname"/><span id="da_surname_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>First Name</label><input type="text" id="da_firstname" placeholder="First name"/><span id="da_firstname_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>Middle Name</label><input type="text" id="da_middlename" placeholder="Middle name (optional)"/></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" id="da_phone" placeholder="08XXXXXXXXXX" maxlength="11"/><span id="da_phone_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem;margin-top:0.5rem">
+        <div class="form-group"><label>Sex</label><select id="da_sex"><option value="">Select</option><option>Male</option><option>Female</option></select><span id="da_sex_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>Marital Status</label><select id="da_marital"><option value="">Select</option><option>Single</option><option>Married</option><option>Divorced</option><option>Widowed</option></select><span id="da_marital_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+      </div>
+    </div>
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">DATE OF BIRTH TARGET</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>Old DOB (Current)</label><input type="date" id="da_old_dob"/><span id="da_old_dob_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+        <div class="form-group"><label>New DOB (Target)</label><input type="date" id="da_new_dob"/><span id="da_new_dob_err" style="color:var(--accent);font-size:0.8rem"></span></div>
+      </div>
+    </div>
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">ORIGIN & BIRTH</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>State of Origin</label><input type="text" id="da_state_origin" placeholder="State of origin"/></div>
+        <div class="form-group"><label>LGA of Origin</label><input type="text" id="da_lga_origin" placeholder="LGA of origin"/></div>
+        <div class="form-group"><label>Town/Village of Origin</label><input type="text" id="da_town_origin" placeholder="Town or village"/></div>
+        <div class="form-group"><label>Place of Birth</label><input type="text" id="da_place_birth" placeholder="Place of birth"/></div>
+        <div class="form-group"><label>State of Birth</label><input type="text" id="da_state_birth" placeholder="State of birth"/></div>
+        <div class="form-group"><label>LGA of Birth</label><input type="text" id="da_lga_birth" placeholder="LGA of birth"/></div>
+      </div>
+    </div>
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">CONTACT & WORK</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>Current Residential Address</label><input type="text" id="da_res_address" placeholder="Residential address"/></div>
+        <div class="form-group"><label>Highest Level of Education</label><input type="text" id="da_education" placeholder="e.g. B.Sc, HND"/></div>
+        <div class="form-group"><label>Occupation</label><input type="text" id="da_occupation" placeholder="Occupation"/></div>
+        <div class="form-group"><label>Address of Place of Work</label><input type="text" id="da_work_address" placeholder="Work address"/></div>
+        <div class="form-group" style="grid-column:span 2"><label>Requesting Body Address</label><input type="text" id="da_req_body" placeholder="Requesting body address"/></div>
+      </div>
+    </div>
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">FATHER'S DETAILS</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>Surname</label><input type="text" id="da_f_surname" placeholder="Father's surname"/></div>
+        <div class="form-group"><label>First Name</label><input type="text" id="da_f_firstname" placeholder="Father's first name"/></div>
+        <div class="form-group"><label>State of Origin</label><input type="text" id="da_f_state" placeholder="State of origin"/></div>
+        <div class="form-group"><label>LGA of Origin</label><input type="text" id="da_f_lga" placeholder="LGA of origin"/></div>
+        <div class="form-group"><label>Village/Town</label><input type="text" id="da_f_town" placeholder="Village or town"/></div>
+      </div>
+    </div>
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">MOTHER'S DETAILS</p>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.8rem">
+        <div class="form-group"><label>Surname</label><input type="text" id="da_m_surname" placeholder="Mother's surname"/></div>
+        <div class="form-group"><label>First Name</label><input type="text" id="da_m_firstname" placeholder="Mother's first name"/></div>
+        <div class="form-group"><label>Maiden Name</label><input type="text" id="da_m_maiden" placeholder="Maiden name"/></div>
+        <div class="form-group"><label>State of Origin</label><input type="text" id="da_m_state" placeholder="State of origin"/></div>
+        <div class="form-group"><label>LGA of Origin</label><input type="text" id="da_m_lga" placeholder="LGA of origin"/></div>
+        <div class="form-group"><label>Village/Town</label><input type="text" id="da_m_town" placeholder="Village or town"/></div>
+      </div>
+    </div>
+    <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1rem;margin-bottom:1rem">
+      <p style="font-weight:600;margin-bottom:0.8rem;color:var(--dark)">DOCUMENTS & AUTHENTICATION</p>
+      <div class="form-group">
+        <label>Upload Documents</label>
+        <div id="da_doc_list" style="display:flex;flex-direction:column;gap:0.5rem;margin-bottom:0.5rem"></div>
+        <div style="display:flex;gap:0.5rem;align-items:center">
+          <input type="file" id="da_doc_input" accept="image/*,.pdf" style="flex:1"/>
+          <button type="button" onclick="addDobAttestDoc()" style="background:var(--primary);color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer;white-space:nowrap">+ Add</button>
+        </div>
+        <span id="da_doc_err" style="color:var(--accent);font-size:0.8rem"></span>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:1rem">
+      <span style="font-weight:700;color:var(--accent)" id="dobAttestPrice"></span>
+      <button class="btn-primary" style="width:auto;padding:10px 24px" onclick="submitDobAttest()">Submit Request</button>
     </div>
   </div>
 </div>
@@ -1370,7 +1467,7 @@
     'sec-nin-verify':       ['Verify with NIN','Phone Number Verification','Bio Data Verification','FingerPrint Verification'],
     'sec-nin-validation':   ['No Record Found','Bank Validation','Photograph Error','SIM Validation','Modification Validation','Immigration Validation'],
     'sec-mod-validation':   ['DOB Modification Validation','Name Modification Validation','Phone Number Modification Validation','Address Modification Validation'],
-    'sec-selfservices':     ['Delinking','Email Retrieval and Delinking','Email Retrieval Only'],
+    'sec-selfservices':     ['Delinking','Email Retrieval and Delinking','Email Retrieval Only','Date of Birth Attestation'],
     'sec-ipe':              ['Normal Clearance','Modification Clearance','Other Error'],
     'sec-vnin':             ['VNIN Slip'],
     'sec-nin-person':       ['NIN Personalization'],
@@ -1732,6 +1829,10 @@
     set('price-ipe-other',    _p.ipe_other    || 400);
     set('price-vnin',         _p.vnin         || 250);
     set('price-nin-person',   _p.ninpers      || 1000);
+    set('price-delinking',    _p.delinking    || 150);
+    set('price-email-delink', _p.email_delink || 150);
+    set('price-email-only',   _p.email_only   || 150);
+    set('price-dob-attest',   _p.dob_attest   || 500);
   }
 
   // Get fee for a specific method + slip combination
@@ -1777,6 +1878,8 @@
       'Address Modification':'grp_nin_mod','Date of Birth Modification':'grp_nin_mod',
       'NIN Personalization':'grp_nin_verify','VNIN Slip':'grp_nin_verify',
       'Normal Clearance':'grp_ipe','Modification Clearance':'grp_ipe','Other Error':'grp_ipe',
+      'Delinking':'grp_selfsvcs','Email Retrieval and Delinking':'grp_selfsvcs',
+      'Email Retrieval Only':'grp_selfsvcs','Date of Birth Attestation':'grp_selfsvcs',
       'BVN Verification':'grp_bvn','BVN Retrieval':'grp_bvn',
       'BVN Modification':'grp_bvn','BVN User':'grp_bvn',
       'Buy Airtime':'grp_utility','Buy Data':'grp_utility'
@@ -2180,6 +2283,95 @@
         <div class="nin-num">${nin.replace(/(\d{4})(\d{3})(\d{4})/,'$1 $2 $3')}</div>
       </div></body></html>`;
     }
+  }
+
+  // ── Date of Birth Attestation ──────────────────────
+  function openDobAttestationModal() {
+    if (!checkAvailable('Date of Birth Attestation')) return;
+    refreshPricing();
+    document.getElementById('dobAttestPrice').textContent = 'Fee: ' + fmt(_p.dob_attest || 500);
+    document.getElementById('dobAttestAlert').innerHTML = '';
+    ['da_nin','da_surname','da_firstname','da_middlename','da_phone','da_sex','da_marital',
+     'da_old_dob','da_new_dob','da_state_origin','da_lga_origin','da_town_origin',
+     'da_place_birth','da_state_birth','da_lga_birth','da_res_address','da_education',
+     'da_occupation','da_work_address','da_req_body',
+     'da_f_surname','da_f_firstname','da_f_state','da_f_lga','da_f_town',
+     'da_m_surname','da_m_firstname','da_m_maiden','da_m_state','da_m_lga','da_m_town'
+    ].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+    document.getElementById('da_doc_list').innerHTML = '';
+    document.getElementById('da_doc_input').value = '';
+    window._daDocs = [];
+    openModal('dobAttestModal');
+  }
+
+  function addDobAttestDoc() {
+    const input = document.getElementById('da_doc_input');
+    const file = input.files[0];
+    if (!file) return;
+    if (!window._daDocs) window._daDocs = [];
+    const idx = window._daDocs.length;
+    window._daDocs.push(file);
+    const item = document.createElement('div');
+    item.style.cssText = 'display:flex;justify-content:space-between;align-items:center;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:6px 10px;font-size:0.85rem';
+    item.id = 'da_doc_item_' + idx;
+    item.innerHTML = `<span>📄 ${file.name}</span><button type="button" onclick="removeDobAttestDoc(${idx})" style="background:none;border:none;color:var(--accent);cursor:pointer;font-size:1rem">✕</button>`;
+    document.getElementById('da_doc_list').appendChild(item);
+    input.value = '';
+  }
+
+  function removeDobAttestDoc(idx) {
+    if (window._daDocs) window._daDocs.splice(idx, 1);
+    const item = document.getElementById('da_doc_item_' + idx);
+    if (item) item.remove();
+  }
+
+  function submitDobAttest() {
+    const nin     = document.getElementById('da_nin').value.trim();
+    const surname = document.getElementById('da_surname').value.trim();
+    const firstname = document.getElementById('da_firstname').value.trim();
+    const phone   = document.getElementById('da_phone').value.trim();
+    const sex     = document.getElementById('da_sex').value;
+    const marital = document.getElementById('da_marital').value;
+    const oldDob  = document.getElementById('da_old_dob').value;
+    const newDob  = document.getElementById('da_new_dob').value;
+    const docs    = window._daDocs || [];
+    const alertEl = document.getElementById('dobAttestAlert');
+    alertEl.innerHTML = '';
+    let valid = true;
+    if (!isValidNIN(nin)) { document.getElementById('da_nin_err').textContent = 'NIN must be exactly 11 digits'; valid = false; } else document.getElementById('da_nin_err').textContent = '';
+    if (!surname)    { document.getElementById('da_surname_err').textContent = 'Required'; valid = false; } else document.getElementById('da_surname_err').textContent = '';
+    if (!firstname)  { document.getElementById('da_firstname_err').textContent = 'Required'; valid = false; } else document.getElementById('da_firstname_err').textContent = '';
+    if (!phone)      { document.getElementById('da_phone_err').textContent = 'Required'; valid = false; } else document.getElementById('da_phone_err').textContent = '';
+    if (!sex)        { document.getElementById('da_sex_err').textContent = 'Required'; valid = false; } else document.getElementById('da_sex_err').textContent = '';
+    if (!marital)    { document.getElementById('da_marital_err').textContent = 'Required'; valid = false; } else document.getElementById('da_marital_err').textContent = '';
+    if (!oldDob)     { document.getElementById('da_old_dob_err').textContent = 'Required'; valid = false; } else document.getElementById('da_old_dob_err').textContent = '';
+    if (!newDob)     { document.getElementById('da_new_dob_err').textContent = 'Required'; valid = false; } else document.getElementById('da_new_dob_err').textContent = '';
+    if (!docs.length) { document.getElementById('da_doc_err').textContent = 'Please upload at least one document'; valid = false; } else document.getElementById('da_doc_err').textContent = '';
+    if (!valid) return;
+    const fee = _p.dob_attest || 500;
+    if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance. Please fund your wallet.</div>'; return; }
+    walletBalance -= fee;
+    const g = id => document.getElementById(id)?.value.trim() || '—';
+    submitWithStatus('Date of Birth Attestation', nin, fee, 'submitted', {
+      'NIN Number': nin, 'Surname': surname, 'First Name': firstname,
+      'Middle Name': g('da_middlename'), 'Phone Number': phone,
+      'Sex': sex, 'Marital Status': marital,
+      'Old DOB': oldDob, 'New DOB': newDob,
+      'State of Origin': g('da_state_origin'), 'LGA of Origin': g('da_lga_origin'),
+      'Town of Origin': g('da_town_origin'), 'Place of Birth': g('da_place_birth'),
+      'State of Birth': g('da_state_birth'), 'LGA of Birth': g('da_lga_birth'),
+      'Residential Address': g('da_res_address'), 'Education': g('da_education'),
+      'Occupation': g('da_occupation'), 'Work Address': g('da_work_address'),
+      'Requesting Body': g('da_req_body'),
+      "Father's Surname": g('da_f_surname'), "Father's First Name": g('da_f_firstname'),
+      "Father's State": g('da_f_state'), "Father's LGA": g('da_f_lga'), "Father's Town": g('da_f_town'),
+      "Mother's Surname": g('da_m_surname'), "Mother's First Name": g('da_m_firstname'),
+      "Mother's Maiden Name": g('da_m_maiden'), "Mother's State": g('da_m_state'),
+      "Mother's LGA": g('da_m_lga'), "Mother's Town": g('da_m_town')
+    });
+    updateStats();
+    closeModal('dobAttestModal');
+    toast('Date of Birth Attestation request submitted successfully!');
   }
 
   // ── Name Modification ─────────────────────────────
