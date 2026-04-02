@@ -65,6 +65,9 @@
         <div class="stat-card"><div class="stat-icon bg-green">📋</div><div class="stat-info"><h3 id="statTxns">0</h3><p>Total Transactions</p></div></div>
         <div class="stat-card"><div class="stat-icon bg-orange">✅</div><div class="stat-info"><h3 id="statSuccess">0</h3><p>Successful</p></div></div>
         <div class="stat-card"><div class="stat-icon bg-red">💰</div><div class="stat-info"><h3 id="statRevenue">₦0</h3><p>Total Revenue</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-blue">📊</div><div class="stat-info"><h3 id="statUsage">₦0</h3><p>Total Usage</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-green">🏦</div><div class="stat-info"><h3 id="statFunding">₦0</h3><p>Total Funding</p></div></div>
+        <div class="stat-card"><div class="stat-icon bg-orange">⚖️</div><div class="stat-info"><h3 id="statBalance">₦0</h3><p>Balance</p></div></div>
       </div>
       <p class="page-title" style="font-size:1rem;margin-bottom:1rem">Recent Transactions</p>
       <div class="table-wrap">
@@ -585,9 +588,16 @@
 
   function loadOverview() {
     const txns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
-    document.getElementById("statTxns").textContent = txns.length;
+    const fundingTxns = txns.filter(t => t.service === 'Wallet Funding');
+    const usageTxns   = txns.filter(t => t.service !== 'Wallet Funding');
+    const totalFunding = fundingTxns.reduce((s, t) => s + (t.amount || 0), 0);
+    const totalUsage   = usageTxns.reduce((s, t) => s + (t.amount || 0), 0);
+    document.getElementById("statTxns").textContent    = txns.length;
     document.getElementById("statSuccess").textContent = txns.filter(t => t.status === "success").length;
-    document.getElementById("statRevenue").textContent = fmt(txns.reduce((s, t) => s + t.amount, 0));
+    document.getElementById("statRevenue").textContent = fmt(usageTxns.reduce((s, t) => s + (t.amount || 0), 0));
+    document.getElementById("statUsage").textContent   = fmt(totalUsage);
+    document.getElementById("statFunding").textContent = fmt(totalFunding);
+    document.getElementById("statBalance").textContent = fmt(totalFunding - totalUsage);
     const tbody = document.getElementById("recentTxnTable");
     if (!txns.length) return;
     tbody.innerHTML = txns.slice(0, 10).map(t => `
