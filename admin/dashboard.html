@@ -253,6 +253,18 @@
               <div class="form-group"><label>Immigration Validation (₦)</label><input type="number" id="p_imm_val" value="150"/></div>
             </div>
           </div>
+          <!-- Modification Validation Types -->
+          <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
+            <p style="font-weight:600;margin-bottom:1rem;color:var(--dark)">✏️ Modification Validation Types</p>
+            <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem">
+              <div class="form-group"><label>DOB Modification Validation (₦)</label><input type="number" id="p_dob_mod_val" value="150"/></div>
+              <div class="form-group"><label>Name Modification Validation (₦)</label><input type="number" id="p_name_mod_val" value="150"/></div>
+              <div class="form-group"><label>Phone Number Modification Validation (₦)</label><input type="number" id="p_phone_mod_val" value="150"/></div>
+              <div class="form-group"><label>Address Modification Validation (₦)</label><input type="number" id="p_address_mod_val" value="150"/></div>
+            </div>
+          </div>
+            </div>
+          </div>
 
           <!-- Other NIN Services -->
           <div style="border:1px solid #e2e8f0;border-radius:10px;padding:1.2rem">
@@ -640,7 +652,7 @@
   function loadNINStats() {
     const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
     const ninVerSvcs = ["Verify with NIN", "Phone Number Verification", "Bio Data Verification", "FingerPrint Verification"];
-    const ninValSvcs = ["No Record Found", "Bank Validation", "Photograph Error", "SIM Validation", "Modification Validation", "Immigration Validation", "DOB Validation", "Name Validation", "Phone Number Validation", "Address Validation"];
+    const ninValSvcs = ["No Record Found", "Bank Validation", "Photograph Error", "SIM Validation", "Modification Validation", "Immigration Validation", "DOB Modification Validation", "Name Modification Validation", "Phone Number Modification Validation", "Address Modification Validation"];
     const ninModSvcs = ["Name Modification", "Phone Number Modification", "Address Modification", "Date of Birth Modification"];
     const ninIpeSvcs = ["Normal Clearance", "Modification Clearance", "Other Error"];
     const ninPersonSvcs = ["NIN Personalization", "VNIN Slip"];
@@ -855,10 +867,10 @@
     'SIM Validation':             ['NIN Number'],
     'Modification Validation':    ['NIN Number'],
     'Immigration Validation':     ['NIN Number'],
-    'DOB Validation':             ['NIN', 'New Tracking ID', 'New Date of Birth'],
-    'Name Validation':            ['NIN', 'New Tracking ID', 'New Surname', 'New Middle Name', 'New Last Name'],
-    'Phone Number Validation':    ['NIN', 'New Tracking ID', 'New Phone Number'],
-    'Address Validation':         ['NIN', 'New Tracking ID', 'New Address', 'New Town/City', 'New LGA of Origin', 'New State of Origin', 'New LGA of Residence', 'New State of Residence'],
+    'DOB Modification Validation':             ['NIN', 'New Tracking ID', 'New Date of Birth'],
+    'Name Modification Validation':            ['NIN', 'New Tracking ID', 'New Surname', 'New Middle Name', 'New Last Name'],
+    'Phone Number Modification Validation':    ['NIN', 'New Tracking ID', 'New Phone Number'],
+    'Address Modification Validation':         ['NIN', 'New Tracking ID', 'New Address', 'New Town/City', 'New LGA of Origin', 'New State of Origin', 'New LGA of Residence', 'New State of Residence'],
     'Photograph Error':           ['NIN Number'],
     'SIM Validation':             ['NIN Number'],
     // NIN Verification
@@ -1033,6 +1045,10 @@
       sim_val:      parseInt(document.getElementById("p_sim_val").value) || 150,
       mod_val:      parseInt(document.getElementById("p_mod_val").value) || 150,
       imm_val:      parseInt(document.getElementById("p_imm_val").value) || 150,
+      dob_mod_val:      parseInt(document.getElementById("p_dob_mod_val").value) || 150,
+      name_mod_val:     parseInt(document.getElementById("p_name_mod_val").value) || 150,
+      phone_mod_val:    parseInt(document.getElementById("p_phone_mod_val").value) || 150,
+      address_mod_val:  parseInt(document.getElementById("p_address_mod_val").value) || 150,
       name_mod:     parseInt(document.getElementById("p_name_mod").value) || 500,
       phone_mod:    parseInt(document.getElementById("p_phone_mod").value) || 500,
       address_mod:  parseInt(document.getElementById("p_address_mod").value) || 500,
@@ -1051,7 +1067,7 @@
 
   function loadPricingFields() {
     function applyPricing(saved) {
-      const defaults = { ninmod:500, ninpers:1000, vnin:250, ipe_normal:400, ipe_mod:400, ipe_other:400, bvnver:200, bvnret:150, bvnmod:500, bvnuser:200, nin_normal:200, nin_info:250, nin_premium:350, nin_standard:200, phone_normal:150, phone_info:200, phone_premium:300, phone_standard:150, bio_normal:300, bio_info:350, bio_premium:450, bio_standard:300, fp_normal:200, fp_info:250, fp_premium:350, fp_standard:200, no_record:150, bank_val:150, photo_err:150, sim_val:150, mod_val:150, imm_val:150, name_mod:500, phone_mod:500, address_mod:500, dob_mod:500 };
+      const defaults = { ninmod:500, ninpers:1000, vnin:250, ipe_normal:400, ipe_mod:400, ipe_other:400, bvnver:200, bvnret:150, bvnmod:500, bvnuser:200, nin_normal:200, nin_info:250, nin_premium:350, nin_standard:200, phone_normal:150, phone_info:200, phone_premium:300, phone_standard:150, bio_normal:300, bio_info:350, bio_premium:450, bio_standard:300, fp_normal:200, fp_info:250, fp_premium:350, fp_standard:200, no_record:150, bank_val:150, photo_err:150, sim_val:150, mod_val:150, imm_val:150, dob_mod_val:150, name_mod_val:150, phone_mod_val:150, address_mod_val:150, name_mod:500, phone_mod:500, address_mod:500, dob_mod:500 };
       const p = Object.assign({}, defaults, saved);
       document.getElementById("p_ninpers").value      = p.ninpers;
       document.getElementById("p_vnin").value         = p.vnin;
@@ -1084,6 +1100,10 @@
       document.getElementById("p_sim_val").value      = p.sim_val;
       document.getElementById("p_mod_val").value      = p.mod_val;
       document.getElementById("p_imm_val").value      = p.imm_val;
+      document.getElementById("p_dob_mod_val").value      = p.dob_mod_val;
+      document.getElementById("p_name_mod_val").value     = p.name_mod_val;
+      document.getElementById("p_phone_mod_val").value    = p.phone_mod_val;
+      document.getElementById("p_address_mod_val").value  = p.address_mod_val;
       document.getElementById("p_name_mod").value     = p.name_mod;
       document.getElementById("p_phone_mod").value    = p.phone_mod;
       document.getElementById("p_address_mod").value  = p.address_mod;

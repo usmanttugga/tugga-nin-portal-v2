@@ -203,7 +203,7 @@
           <div class="svc-icon">📲</div><h4>SIM Validation</h4><p>Validate NIN via SIM</p><div class="price" id="price-sim-val">₦150</div>
         </div>
         <div class="service-card" data-svc="Modification Validation" onclick="showSection('sec-mod-validation')">
-          <div class="svc-icon">✏️</div><h4>Modification Validation</h4><p>Validate NIN modification</p><div class="price" id="price-mod-val">₦150</div>
+          <div class="svc-icon">✏️</div><h4>Modification Validation</h4><p>Validate NIN modification</p>
         </div>
         <div class="service-card" data-svc="Immigration Validation" onclick="openServiceModal('Immigration Validation','Validate NIN for immigration purposes','nin', String(_p.imm_val||150))">
           <div class="svc-icon">✈️</div><h4>Immigration Validation</h4><p>Validate NIN for immigration</p><div class="price" id="price-imm-val">₦150</div>
@@ -217,17 +217,17 @@
       <p class="page-title">Modification Validation</p>
       <p class="page-sub">Select the type of modification to validate.</p>
       <div class="services-grid">
-        <div class="service-card" data-svc="DOB Validation" onclick="openModValModal('dob')">
-          <div class="svc-icon">📅</div><h4>Date of Birth Validation</h4><p>Validate DOB modification</p><div class="price" id="price-dob-val">₦150</div>
+        <div class="service-card" data-svc="DOB Modification Validation" onclick="openModValModal('dob')">
+          <div class="svc-icon">📅</div><h4>DOB Modification Validation</h4><p>Validate DOB modification</p><div class="price" id="price-dob-val">₦150</div>
         </div>
-        <div class="service-card" data-svc="Name Validation" onclick="openModValModal('name')">
-          <div class="svc-icon">✏️</div><h4>Name Validation</h4><p>Validate name modification</p><div class="price" id="price-name-val">₦150</div>
+        <div class="service-card" data-svc="Name Modification Validation" onclick="openModValModal('name')">
+          <div class="svc-icon">✏️</div><h4>Name Modification Validation</h4><p>Validate name modification</p><div class="price" id="price-name-val">₦150</div>
         </div>
-        <div class="service-card" data-svc="Phone Number Validation" onclick="openModValModal('phone')">
-          <div class="svc-icon">📞</div><h4>Phone Number Validation</h4><p>Validate phone modification</p><div class="price" id="price-phone-val">₦150</div>
+        <div class="service-card" data-svc="Phone Number Modification Validation" onclick="openModValModal('phone')">
+          <div class="svc-icon">📞</div><h4>Phone Number Modification Validation</h4><p>Validate phone modification</p><div class="price" id="price-phone-val">₦150</div>
         </div>
-        <div class="service-card" data-svc="Address Validation" onclick="openModValModal('address')">
-          <div class="svc-icon">🏠</div><h4>Address Validation</h4><p>Validate address modification</p><div class="price" id="price-address-val">₦150</div>
+        <div class="service-card" data-svc="Address Modification Validation" onclick="openModValModal('address')">
+          <div class="svc-icon">🏠</div><h4>Address Modification Validation</h4><p>Validate address modification</p><div class="price" id="price-address-val">₦150</div>
         </div>
       </div>
       <div id="svcHistory-sec-mod-validation"></div>
@@ -1325,7 +1325,7 @@
   const SVC_HISTORY_MAP = {
     'sec-nin-verify':       ['Verify with NIN','Phone Number Verification','Bio Data Verification','FingerPrint Verification'],
     'sec-nin-validation':   ['No Record Found','Bank Validation','Photograph Error','SIM Validation','Modification Validation','Immigration Validation'],
-    'sec-mod-validation':   ['DOB Validation','Name Validation','Phone Number Validation','Address Validation'],
+    'sec-mod-validation':   ['DOB Modification Validation','Name Modification Validation','Phone Number Modification Validation','Address Modification Validation'],
     'sec-nin-modification': ['Name Modification','Phone Number Modification','Address Modification','Date of Birth Modification'],
     'sec-ipe':              ['Normal Clearance','Modification Clearance','Other Error'],
     'sec-vnin':             ['VNIN Slip'],
@@ -1430,14 +1430,14 @@
   let _modValType = '';
   const _modValConfig = {
     dob: {
-      title: 'Date of Birth Validation',
+      title: 'DOB Modification Validation',
       fields: `
         <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
         <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
         <div class="form-group"><label>New Date of Birth</label><input type="date" id="mv_dob"/><span id="mv_dob_err" style="color:var(--accent);font-size:0.8rem"></span></div>`
     },
     name: {
-      title: 'Name Validation',
+      title: 'Name Modification Validation',
       fields: `
         <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
         <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
@@ -1446,14 +1446,14 @@
         <div class="form-group"><label>New Last Name</label><input type="text" id="mv_lastname" placeholder="New last name"/></div>`
     },
     phone: {
-      title: 'Phone Number Validation',
+      title: 'Phone Number Modification Validation',
       fields: `
         <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
         <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
         <div class="form-group"><label>New Phone Number</label><input type="tel" id="mv_phone" placeholder="08XXXXXXXXXX" maxlength="11"/><span id="mv_phone_err" style="color:var(--accent);font-size:0.8rem"></span></div>`
     },
     address: {
-      title: 'Address Validation',
+      title: 'Address Modification Validation',
       fields: `
         <div class="form-group"><label>NIN Number</label><input type="text" id="mv_nin" placeholder="11-digit NIN" maxlength="11"/><span id="mv_nin_err" style="color:var(--accent);font-size:0.8rem"></span></div>
         <div class="form-group"><label>New Tracking ID</label><input type="text" id="mv_tracking" placeholder="15-CHARACTER TRACKING ID" maxlength="15" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'')"/><span id="mv_tracking_err" style="color:var(--accent);font-size:0.8rem"></span></div>
@@ -1471,8 +1471,9 @@
     if (!checkAvailable('Modification Validation')) return;
     _modValType = type;
     refreshPricing();
+    const priceMap = { dob: _p.dob_mod_val||150, name: _p.name_mod_val||150, phone: _p.phone_mod_val||150, address: _p.address_mod_val||150 };
     document.getElementById('modValTitle').textContent = svcName;
-    document.getElementById('modValPrice').textContent = 'Fee: ' + fmt(_p.mod_val || 150);
+    document.getElementById('modValPrice').textContent = 'Fee: ' + fmt(priceMap[type] || 150);
     document.getElementById('modValAlert').innerHTML = '';
     document.getElementById('modValFields').innerHTML = _modValConfig[type].fields;
     openModal('modValModal');
@@ -1493,7 +1494,8 @@
       if (!/^\d{11}$/.test(phone)) { document.getElementById('mv_phone_err').textContent = 'Phone must be 11 digits'; valid = false; } else document.getElementById('mv_phone_err').textContent = '';
     }
     if (!valid) return;
-    const fee = _p.mod_val || 150;
+    const priceMap = { dob: _p.dob_mod_val||150, name: _p.name_mod_val||150, phone: _p.phone_mod_val||150, address: _p.address_mod_val||150 };
+    const fee = priceMap[_modValType] || 150;
     if (walletBalance < fee) { alertEl.innerHTML = '<div class="alert alert-error">Insufficient wallet balance.</div>'; return; }
     walletBalance -= fee;
     const g = id => document.getElementById(id)?.value.trim() || '';
@@ -1609,6 +1611,10 @@
     set('price-sim-val',      _p.sim_val      || 150);
     set('price-mod-val',      _p.mod_val      || 150);
     set('price-imm-val',      _p.imm_val      || 150);
+    set('price-dob-val',      _p.dob_mod_val  || 150);
+    set('price-name-val',     _p.name_mod_val || 150);
+    set('price-phone-val',    _p.phone_mod_val|| 150);
+    set('price-address-val',  _p.address_mod_val||150);
     set('price-name-mod',     _p.name_mod     || 500);
     set('price-phone-mod',    _p.phone_mod    || 500);
     set('price-address-mod',  _p.address_mod  || 500);
@@ -1655,10 +1661,10 @@
       'No Record Found':'grp_nin_val','Bank Validation':'grp_nin_val',
       'Photograph Error':'grp_nin_val','SIM Validation':'grp_nin_val',
       'Modification Validation':'grp_nin_val','Immigration Validation':'grp_nin_val',
-      'DOB Validation':'grp_nin_val','Name Validation':'grp_nin_val',
-      'Phone Number Validation':'grp_nin_val','Address Validation':'grp_nin_val',
-      'DOB Validation':'grp_nin_val','Name Validation':'grp_nin_val',
-      'Phone Number Validation':'grp_nin_val','Address Validation':'grp_nin_val',
+      'DOB Modification Validation':'grp_nin_val','Name Modification Validation':'grp_nin_val',
+      'Phone Number Modification Validation':'grp_nin_val','Address Modification Validation':'grp_nin_val',
+      'DOB Modification Validation':'grp_nin_val','Name Modification Validation':'grp_nin_val',
+      'Phone Number Modification Validation':'grp_nin_val','Address Modification Validation':'grp_nin_val',
       'Name Modification':'grp_nin_mod','Phone Number Modification':'grp_nin_mod',
       'Address Modification':'grp_nin_mod','Date of Birth Modification':'grp_nin_mod',
       'NIN Personalization':'grp_nin_verify','VNIN Slip':'grp_nin_verify',
