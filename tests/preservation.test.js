@@ -230,18 +230,18 @@ describe('Property 2b — logout preservation', () => {
   });
 
   test('logout() removes tugga_user from localStorage', () => {
-    localStorage.setItem('tugga_user', JSON.stringify({
+    localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify({
       id: 2, name: 'Admin User', email: 'admin@tugga.com', role: 'admin'
     }));
 
     window.logout();
 
-    expect(localStorage.getItem('tugga_user')).toBeNull();
+    expect(localStorage.getItem('tuggaNinPortalV2_tugga_user')).toBeNull();
   });
 
   test('logout() redirects to ../index.html when on /admin/ path', () => {
     window.location.pathname = '/admin/dashboard.html';
-    localStorage.setItem('tugga_user', JSON.stringify({ id: 2, role: 'admin' }));
+    localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify({ id: 2, role: 'admin' }));
 
     window.logout();
 
@@ -257,9 +257,9 @@ describe('Property 2b — logout preservation', () => {
     ];
 
     for (const user of users) {
-      localStorage.setItem('tugga_user', JSON.stringify(user));
+      localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify(user));
       window.logout();
-      expect(localStorage.getItem('tugga_user')).toBeNull();
+      expect(localStorage.getItem('tuggaNinPortalV2_tugga_user')).toBeNull();
       // Re-stub location for next iteration
       window.location = { href: '', pathname: '/admin/dashboard.html' };
     }
@@ -409,7 +409,7 @@ describe('Property 2e — openAdminProfile population (fix-validation)', () => {
   test.each(adminProfiles)(
     'openAdminProfile() opens #adminProfileModal for admin "$name"',
     (admin) => {
-      localStorage.setItem('tugga_user', JSON.stringify(admin));
+      localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify(admin));
 
       // On unfixed code: openAdminProfile is undefined → this throws/fails
       expect(typeof window.openAdminProfile).toBe('function');
@@ -423,7 +423,7 @@ describe('Property 2e — openAdminProfile population (fix-validation)', () => {
   test.each(adminProfiles)(
     'openAdminProfile() displays correct name "$name" in #apName',
     (admin) => {
-      localStorage.setItem('tugga_user', JSON.stringify(admin));
+      localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify(admin));
 
       expect(typeof window.openAdminProfile).toBe('function');
       window.openAdminProfile();
@@ -436,7 +436,7 @@ describe('Property 2e — openAdminProfile population (fix-validation)', () => {
   test.each(adminProfiles)(
     'openAdminProfile() displays correct role "$role" in #apRole',
     (admin) => {
-      localStorage.setItem('tugga_user', JSON.stringify(admin));
+      localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify(admin));
 
       expect(typeof window.openAdminProfile).toBe('function');
       window.openAdminProfile();

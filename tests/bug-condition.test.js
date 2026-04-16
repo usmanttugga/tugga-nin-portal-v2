@@ -97,7 +97,7 @@ test('1b — openAdminProfile() is defined and adds .open to #adminProfileModal'
   loadAppJs();
 
   // Seed a user in localStorage so getCurrentUser() returns something
-  localStorage.setItem('tugga_user', JSON.stringify({
+  localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify({
     id: 2, name: 'Admin User', email: 'admin@tugga.com', role: 'admin'
   }));
 
