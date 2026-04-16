@@ -1,3 +1,7 @@
+// ── App Identity ─────────────────────────────────────
+// Unique prefix prevents localStorage conflicts with other apps on same domain
+const APP_KEY = 'tuggaNinPortalV2_';
+
 // ── Auth ──────────────────────────────────────────────
 const USERS = [
   { id: 1, name: "John Doe", email: "user@tugga.com", password: "user123", role: "user", wallet: 5000, nin: "12345678901", phone: "08012345678", registeredAt: "2024-01-15" },
@@ -5,7 +9,7 @@ const USERS = [
 ];
 
 function getCurrentUser() {
-  return JSON.parse(localStorage.getItem("tugga_user") || "null");
+  return JSON.parse(localStorage.getItem(APP_KEY + "tugga_user") || "null");
 }
 
 let currentUser = getCurrentUser();
@@ -16,7 +20,7 @@ function login(email, password) {
   
   // If not found, check localStorage users
   if (!user) {
-    const storedUsers = JSON.parse(localStorage.getItem("tugga_all_users") || "[]");
+    const storedUsers = JSON.parse(localStorage.getItem(APP_KEY + "tugga_all_users") || "[]");
     user = storedUsers.find(u => u.email === email && u.password === password);
   }
   
@@ -27,7 +31,7 @@ function login(email, password) {
   const userSession = { ...user };
   delete userSession.password;
   
-  localStorage.setItem("tugga_user", JSON.stringify(userSession));
+  localStorage.setItem(APP_KEY + "tugga_user", JSON.stringify(userSession));
   return userSession;
 }
 
@@ -36,7 +40,7 @@ function logout() {
   if (window.authService && window.authService.logout) {
     window.authService.logout().catch(err => console.warn('Firebase logout error:', err));
   }
-  localStorage.removeItem("tugga_user");
+  localStorage.removeItem(APP_KEY + "tugga_user");
   window.location.href = window.location.pathname.includes('/admin/') || window.location.pathname.includes('/user/')
     ? '../index.html' : 'index.html';
 }
@@ -61,7 +65,7 @@ function requireAuth(role) {
 }
 
 // ── Transactions ──────────────────────────────────────
-let transactions = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+let transactions = JSON.parse(localStorage.getItem(APP_KEY + "tugga_txns") || "[]");
 
 function addTransaction(userId, service, details, amount, status = "success") {
   const txn = {
@@ -71,7 +75,7 @@ function addTransaction(userId, service, details, amount, status = "success") {
   };
   // Save to localStorage always (offline support)
   transactions.unshift(txn);
-  localStorage.setItem("tugga_txns", JSON.stringify(transactions));
+  localStorage.setItem(APP_KEY + "tugga_txns", JSON.stringify(transactions));
 
   // Also save to Firestore if Firebase is ready
   if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {

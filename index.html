@@ -796,7 +796,7 @@
           }
           
           // Store user data in localStorage for quick access
-          localStorage.setItem("tugga_user", JSON.stringify(userData));
+          localStorage.setItem("tuggaNinPortalV2_tugga_user", JSON.stringify(userData));
           
           // Redirect based on role
           window.location.href = userData.role === "admin" ? "admin/dashboard.html" : "user/dashboard.html";
@@ -897,7 +897,7 @@
           await window.databaseService.createUser(firebaseUser.uid, userData);
           
           // Store user data in localStorage for quick access
-          localStorage.setItem("tugga_user", JSON.stringify(userData));
+          localStorage.setItem("tuggaNinPortalV2_tugga_user", JSON.stringify(userData));
           
           showMsg("msg-register", "Account created successfully! Redirecting...", "success");
           setTimeout(() => {
@@ -915,7 +915,7 @@
       }
       
       // Fallback to localStorage registration
-      let users = JSON.parse(localStorage.getItem("tugga_all_users") || "[]");
+      let users = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_all_users") || "[]");
       
       // Check if email already exists
       if (users.find(u => u.email === email)) {
@@ -943,12 +943,12 @@
 
       // Add to users array
       users.push(newUser);
-      localStorage.setItem("tugga_all_users", JSON.stringify(users));
+      localStorage.setItem("tuggaNinPortalV2_tugga_all_users", JSON.stringify(users));
 
       // Auto-login the new user
       const userForSession = { ...newUser };
       delete userForSession.password; // Don't store password in session
-      localStorage.setItem("tugga_user", JSON.stringify(userForSession));
+      localStorage.setItem("tuggaNinPortalV2_tugga_user", JSON.stringify(userForSession));
 
       showMsg("msg-register", "Account created successfully! Redirecting...", "success");
       setTimeout(() => {
@@ -1019,7 +1019,7 @@
       }
       
       // Fallback to localStorage password reset
-      let users = JSON.parse(localStorage.getItem("tugga_all_users") || "[]");
+      let users = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_all_users") || "[]");
       
       // Check if email exists
       const userIndex = users.findIndex(u => u.email === email);
@@ -1035,7 +1035,7 @@
       
       // Update user's password
       users[userIndex].password = tempPassword;
-      localStorage.setItem("tugga_all_users", JSON.stringify(users));
+      localStorage.setItem("tuggaNinPortalV2_tugga_all_users", JSON.stringify(users));
 
       setLoading("btn-forgot", false, "Reset Password");
       showMsg("msg-forgot", `Password reset successful! Your temporary password is: ${tempPassword}. Please login and change it immediately.`, "success");
