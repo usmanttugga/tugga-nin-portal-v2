@@ -147,9 +147,15 @@ export async function getAllUsers() {
   if (!db) throw new Error('Firestore not initialized');
 
   return retryOperation(async () => {
-    const usersQuery = query(collection(db, 'users'), orderBy('registeredAt', 'desc'));
-    const snapshot = await getDocs(usersQuery);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // No orderBy to avoid requiring a composite index
+    const snapshot = await getDocs(collection(db, 'users'));
+    const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort client-side by registeredAt descending
+    return users.sort((a, b) => {
+      const aTime = a.registeredAt ? (a.registeredAt.seconds || new Date(a.registeredAt).getTime() / 1000) : 0;
+      const bTime = b.registeredAt ? (b.registeredAt.seconds || new Date(b.registeredAt).getTime() / 1000) : 0;
+      return bTime - aTime;
+    });
   });
 }
 
@@ -230,14 +236,20 @@ export async function getUserTransactions(userId, limitCount = 100) {
   if (!db) throw new Error('Firestore not initialized');
 
   return retryOperation(async () => {
+    // Filter by userId only — no orderBy to avoid requiring a composite index
     const txnQuery = query(
       collection(db, 'transactions'),
       where('userId', '==', userId),
-      orderBy('date', 'desc'),
       limit(limitCount)
     );
     const snapshot = await getDocs(txnQuery);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const txns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort client-side by date descending
+    return txns.sort((a, b) => {
+      const aTime = a.date ? (a.date.seconds || new Date(a.date).getTime() / 1000) : 0;
+      const bTime = b.date ? (b.date.seconds || new Date(b.date).getTime() / 1000) : 0;
+      return bTime - aTime;
+    });
   });
 }
 
@@ -251,13 +263,19 @@ export async function getAllTransactions(limitCount = 200) {
   if (!db) throw new Error('Firestore not initialized');
 
   return retryOperation(async () => {
+    // Use limit only — no orderBy to avoid requiring a composite index
     const txnQuery = query(
       collection(db, 'transactions'),
-      orderBy('date', 'desc'),
       limit(limitCount)
     );
     const snapshot = await getDocs(txnQuery);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    const txns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    // Sort client-side by date descending
+    return txns.sort((a, b) => {
+      const aTime = a.date ? (a.date.seconds || new Date(a.date).getTime() / 1000) : 0;
+      const bTime = b.date ? (b.date.seconds || new Date(b.date).getTime() / 1000) : 0;
+      return bTime - aTime;
+    });
   });
 }
 
@@ -406,8 +424,7 @@ export async function getVirtualAccountRequests(status = 'pending') {
   return retryOperation(async () => {
     const requestsQuery = query(
       collection(db, 'virtualAccountRequests'),
-      where('status', '==', status),
-      orderBy('requestedAt', 'desc')
+      where('status', '==', status)
     );
     const snapshot = await getDocs(requestsQuery);
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -555,7 +572,6 @@ export function subscribeToUserTransactions(userId, callback, errorCallback, lim
   const txnQuery = query(
     collection(db, 'transactions'),
     where('userId', '==', userId),
-    orderBy('date', 'desc'),
     limit(limitCount)
   );
   
@@ -599,7 +615,6 @@ export function subscribeToAllTransactions(callback, errorCallback, limitCount =
 
   const txnQuery = query(
     collection(db, 'transactions'),
-    orderBy('date', 'desc'),
     limit(limitCount)
   );
   
@@ -687,8 +702,7 @@ export function subscribeToVirtualAccountRequests(callback, errorCallback) {
 
   const requestsQuery = query(
     collection(db, 'virtualAccountRequests'),
-    where('status', '==', 'pending'),
-    orderBy('requestedAt', 'desc')
+    where('status', '==', 'pending')
   );
   
   const unsubscribe = onSnapshot(
