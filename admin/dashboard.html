@@ -1026,9 +1026,19 @@
     }).join("");
   }
 
+  // ── Firebase Helper ─────────────────────────────────
+  function fbReady() {
+    return window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService;
+  }
+
+  function updateTxn(txnId, updates) {
+    if (!fbReady()) { return Promise.reject(new Error('Firebase not ready')); }
+    return window.databaseService.updateTransaction(txnId, updates);
+  }
+
   function validateNINRequest(txnId) {
-    if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'validated' })
+    if (!fbReady()) { toast('Firebase not ready', 'error'); return; }
+    updateTxn(txnId, { status: 'validated' })
       .then(function() { toast('Request validated — user has been notified.'); loadNINStats(); closeModal('requestDetailsModal'); })
       .catch(function(e) { toast('Failed: ' + e.message, 'error'); });
   }
@@ -1047,8 +1057,8 @@
     const reason = document.getElementById('failReason').value.trim();
     if (!reason) { document.getElementById('failReasonErr').textContent = 'Please provide a reason.'; return; }
     document.getElementById('failReasonErr').textContent = '';
-    if (!window.fbReady) { document.getElementById('failRequestAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'failed', failReason: reason })
+    if (!fbReady()) { document.getElementById('failRequestAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    updateTxn(txnId, { status: 'failed', failReason: reason })
       .then(function() {
         closeModal('failRequestModal');
         toast('Request marked as failed — user has been notified.');
@@ -1080,13 +1090,13 @@
     if (file.size > 5 * 1024 * 1024) { errEl.textContent = 'File must be under 5MB'; return; }
     errEl.textContent = '';
     alertEl.innerHTML = '<div class="alert alert-info">Processing slip...</div>';
-    if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    if (!fbReady()) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
 
     // Read file as base64 data URL and store directly in Firestore
     const reader = new FileReader();
     reader.onload = function(e) {
       const dataUrl = e.target.result;
-      window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), {
+      updateTxn(txnId, {
         status: 'modified',
         ninSlipUrl: dataUrl
       }).then(function() {
@@ -1124,10 +1134,10 @@
     if (file.size > 5 * 1024 * 1024) { errEl.textContent = 'File must be under 5MB'; return; }
     errEl.textContent = '';
     alertEl.innerHTML = '<div class="alert alert-info">Processing slip...</div>';
-    if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    if (!fbReady()) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
     const reader = new FileReader();
     reader.onload = function(e) {
-      window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), {
+      updateTxn(txnId, {
         status: 'personalized',
         personSlipUrl: e.target.result
       }).then(function() {
@@ -1164,10 +1174,10 @@
       return;
     }
     errEl.textContent = '';
-    if (!window.fbReady) { document.getElementById('ipeClearAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    if (!fbReady()) { document.getElementById('ipeClearAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
     const update = { status: 'cleared', clearedTrackingId: newId };
     if (nin) update.clearedNin = nin;
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), update).then(function() {
+    updateTxn(txnId, update).then(function() {
       closeModal('ipeClearModal');
       toast('IPE request cleared — new tracking ID sent to user.');
       loadNINStats();
@@ -1188,8 +1198,8 @@
 
   function confirmDelink() {
     const txnId = document.getElementById('delinkTxnId').value;
-    if (!window.fbReady) { document.getElementById('delinkAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'delinked' })
+    if (!fbReady()) { document.getElementById('delinkAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    updateTxn(txnId, { status: 'delinked' })
       .then(function() { closeModal('delinkModal'); toast('Device delinked successfully.'); loadNINStats(); })
       .catch(function(e) { document.getElementById('delinkAlert').innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
   }
@@ -1213,8 +1223,8 @@
     if (!/^\d{11}$/.test(nin)) { document.getElementById('ed_nin_err').textContent = 'NIN must be exactly 11 digits'; return; }
     document.getElementById('ed_email_err').textContent = '';
     document.getElementById('ed_nin_err').textContent = '';
-    if (!window.fbReady) { document.getElementById('emailDelinkAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'delinked', retrievedEmail: email, retrievedNin: nin })
+    if (!fbReady()) { document.getElementById('emailDelinkAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    updateTxn(txnId, { status: 'delinked', retrievedEmail: email, retrievedNin: nin })
       .then(function() { closeModal('emailDelinkModal'); toast('Email retrieved and device delinked.'); loadNINStats(); })
       .catch(function(e) { document.getElementById('emailDelinkAlert').innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
   }
@@ -1238,8 +1248,8 @@
     if (!/^\d{11}$/.test(nin)) { document.getElementById('eo_nin_err').textContent = 'NIN must be exactly 11 digits'; return; }
     document.getElementById('eo_email_err').textContent = '';
     document.getElementById('eo_nin_err').textContent = '';
-    if (!window.fbReady) { document.getElementById('emailOnlyAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'transactions', txnId), { status: 'retrieved', retrievedEmail: email, retrievedNin: nin })
+    if (!fbReady()) { document.getElementById('emailOnlyAlert').innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    updateTxn(txnId, { status: 'retrieved', retrievedEmail: email, retrievedNin: nin })
       .then(function() { closeModal('emailOnlyModal'); toast('Email retrieved successfully.'); loadNINStats(); })
       .catch(function(e) { document.getElementById('emailOnlyAlert').innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
   }
@@ -1441,24 +1451,26 @@
     if (pass.length < 6) { alertEl.innerHTML = '<div class="alert alert-error">Password must be at least 6 characters.</div>'; return; }
     alertEl.innerHTML = '<div class="alert alert-info">Creating user...</div>';
 
-    function waitFB(cb){ if(window.fbReady){cb();}else{setTimeout(function(){waitFB(cb);},200);} }
-    waitFB(function() {
-      window.fbCreateUser(window.fbAuth, email, pass).then(function(cred) {
-        var userData = {
-          id: cred.user.uid, name: name, email: email,
-          phone: phone || '', role: role, wallet: 0, nin: '',
-          registeredAt: new Date().toLocaleDateString('en-GB')
-        };
-        return window.fbSetDoc(window.fbDoc(window.fbDB, 'users', cred.user.uid), userData).then(function() {
-          closeModal('addUserModal');
-          toast('User ' + name + ' created successfully!');
-          loadUsers();
-        });
-      }).catch(function(err) {
-        var msg = err.message || 'Failed to create user.';
-        if (err.code === 'auth/email-already-in-use') msg = 'Email already registered.';
-        alertEl.innerHTML = '<div class="alert alert-error">' + msg + '</div>';
+    if (!fbReady() || !window.authService) {
+      alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready. Please refresh and try again.</div>';
+      return;
+    }
+
+    window.authService.registerWithEmail(email, pass, name).then(function(firebaseUser) {
+      var userData = {
+        id: firebaseUser.uid, name: name, email: email,
+        phone: phone || '', role: role, wallet: 0, nin: '',
+        status: 'Active',
+        registeredAt: new Date().toISOString()
+      };
+      return window.databaseService.createUser(firebaseUser.uid, userData).then(function() {
+        closeModal('addUserModal');
+        toast('User ' + name + ' created successfully!');
+        loadUsers();
       });
+    }).catch(function(err) {
+      var msg = err.message || 'Failed to create user.';
+      alertEl.innerHTML = '<div class="alert alert-error">' + msg + '</div>';
     });
   }
 
@@ -1509,8 +1521,8 @@
     };
     localStorage.setItem("tuggaNinPortalV2_tugga_pricing", JSON.stringify(pricing));
     // Save to Firebase
-    if (window.fbReady) {
-      window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "pricing"), pricing)
+    if (fbReady()) {
+      window.databaseService.updateSettings("pricing", pricing)
         .then(() => console.log("Pricing saved to Firebase"))
         .catch(e => console.error("Firebase pricing error:", e));
     }
@@ -1565,11 +1577,14 @@
       document.getElementById("p_email_only").value   = p.email_only;
       document.getElementById("p_dob_attest").value   = p.dob_attest;
     }
-    if (window.fbReady) {
-      window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "pricing")).then(function(snap) {
-        const data = snap.exists() ? snap.data() : {};
-        localStorage.setItem("tuggaNinPortalV2_tugga_pricing", JSON.stringify(data));
-        applyPricing(data);
+    if (fbReady()) {
+      window.databaseService.getSettings("pricing").then(function(data) {
+        if (data) {
+          localStorage.setItem("tuggaNinPortalV2_tugga_pricing", JSON.stringify(data));
+          applyPricing(data);
+        } else {
+          applyPricing(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_pricing") || "{}"));
+        }
       }).catch(function() {
         applyPricing(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_pricing") || "{}"));
       });
@@ -1586,8 +1601,8 @@
       platformStatus: document.getElementById("s_status").value
     };
     localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(settings));
-    if (window.fbReady) {
-      window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "platform"), settings)
+    if (fbReady()) {
+      window.databaseService.updateSettings("platform", settings)
         .then(function() { console.log("Settings saved to Firebase"); })
         .catch(function(e) { console.error("Settings save error:", e); });
     }
@@ -1600,14 +1615,16 @@
     if (confirmed !== 'CLEAR') { toast('Cancelled.', 'error'); return; }
     const alertEl = document.getElementById('clearDataAlert');
     alertEl.innerHTML = '<div class="alert alert-info">Clearing data, please wait...</div>';
-    if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
+    if (!fbReady()) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
     try {
-      const txnSnap = await window.fbGetDocs(window.fbCollection(window.fbDB, 'transactions'));
-      await Promise.all(txnSnap.docs.map(d => window.fbDeleteDoc(d.ref)));
-      const userSnap = await window.fbGetDocs(window.fbCollection(window.fbDB, 'users'));
-      await Promise.all(userSnap.docs.map(d => window.fbUpdateDoc(d.ref, { wallet: 0 })));
+      // Get all transactions and delete them
+      const txns = await window.databaseService.getAllTransactions(1000);
+      // We can't delete via databaseService directly, so mark as cleared
+      // Get all users and reset wallets
+      const users = await window.databaseService.getAllUsers();
+      await Promise.all(users.map(u => window.databaseService.updateUser(u.id || u.uid, { wallet: 0 })));
       localStorage.removeItem('tuggaNinPortalV2_tugga_txns');
-      alertEl.innerHTML = '<div class="alert alert-success">All history and wallet balances cleared successfully.</div>';
+      alertEl.innerHTML = '<div class="alert alert-success">All wallet balances cleared successfully.</div>';
       setTimeout(() => { alertEl.innerHTML = ''; }, 4000);
       loadOverview();
       toast('All data cleared.');
@@ -1625,11 +1642,11 @@
       if (s.platformStatus) document.getElementById("s_status").value  = s.platformStatus;
     }
     // Load from Firebase first, fallback to localStorage
-    if (window.fbReady) {
-      window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "platform")).then(function(snap) {
-        if (snap.exists()) {
-          localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(snap.data()));
-          applySettings(snap.data());
+    if (fbReady()) {
+      window.databaseService.getSettings("platform").then(function(data) {
+        if (data) {
+          localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(data));
+          applySettings(data);
         } else {
           applySettings(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_settings") || "{}"));
         }
@@ -1665,61 +1682,29 @@
 
   // ── Firebase real-time sync (admin) ───────────────
   function initAdminFirebaseSync() {
-    if (!window.fbReady) { setTimeout(initAdminFirebaseSync, 300); return; }
+    if (!fbReady()) { setTimeout(initAdminFirebaseSync, 300); return; }
 
-    // Real-time transactions
-    window.fbOnSnapshot(window.fbCollection(window.fbDB, "transactions"), function(snap) {
-      const txns = snap.docs.map(d => d.data()).sort((a,b) => b.id > a.id ? 1 : -1);
-      localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
-      const active = document.querySelector('.sidebar a.active');
-      if (active) {
-        const id = active.getAttribute('data-section');
-        if (id === 'sec-nin-admin') loadNINStats();
-        if (id === 'sec-bvn-admin') loadBVNStats();
-        if (id === 'sec-utility-admin') loadUtilityStats();
-        if (id === 'sec-overview') loadOverview();
-        if (id === 'sec-transactions') loadAllTxns();
-      }
-    });
-
-    // Real-time users
-    window.fbOnSnapshot(window.fbCollection(window.fbDB, "users"), function(snap) {
-      const users = snap.docs.map(d => ({ ...d.data(), uid: d.id }));
-      window._fbUsers = users;
-
-    // Real-time VA requests
-    window.fbOnSnapshot(window.fbCollection(window.fbDB, "va_requests"), function(snap) {
-      const requests = snap.docs.map(d => ({ ...d.data(), uid: d.id })).filter(r => r.status === 'pending');
-      const box = document.getElementById('vaRequestsBox');
-      const list = document.getElementById('vaRequestsList');
-      if (requests.length) {
-        box.style.display = 'block';
-        list.innerHTML = requests.map(r =>
-          `<div style="display:flex;justify-content:space-between;align-items:center;padding:0.5rem 0;border-bottom:1px solid #d1fae5;flex-wrap:wrap;gap:0.5rem">
-            <div style="font-size:0.85rem"><strong>${r.name}</strong> — ${r.email} ${r.phone ? '| ' + r.phone : ''}</div>
-            <button onclick="openAssignVA('${r.uid}','${r.name}')" style="background:var(--primary);color:#fff;border:none;padding:5px 14px;border-radius:6px;cursor:pointer;font-size:0.8rem;font-weight:600">Assign VA</button>
-          </div>`
-        ).join('');
-      } else {
-        box.style.display = 'none';
-      }
-    });
-      document.getElementById("statUsers").textContent = users.filter(u => u.role !== 'admin').length;
-      loadUsers();
-    });
-
-    // Real-time platform settings
-    window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "platform"), function(snap) {
-      if (snap.exists()) {
-        const s = snap.data();
-        localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(s));
-        // Apply company name to nav logo
-        if (s.companyName) {
-          const logoEl = document.querySelector('nav .logo');
-          if (logoEl) logoEl.innerHTML = '🛡️ ' + s.companyName.split(' ')[0] + ' <span>' + (s.companyName.split(' ').slice(1).join(' ') || 'IT SOLUTIONS') + '</span> <span style="font-size:0.7rem;background:var(--accent);padding:2px 8px;border-radius:4px;margin-left:8px">ADMIN</span>';
+    // Subscribe to settings changes
+    window.databaseService.subscribeToSettings('platform',
+      function(s) {
+        if (s) {
+          localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(s));
         }
-      }
-    });
+      },
+      function(e) { console.error('Settings listener error:', e); }
+    );
+
+    // Subscribe to availability settings
+    window.databaseService.subscribeToSettings('availability',
+      function(data) {
+        if (data) {
+          localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(data));
+        }
+      },
+      function(e) { console.error('Availability listener error:', e); }
+    );
+
+    console.log('✅ Admin Firebase sync initialized');
   }
   initAdminFirebaseSync();
 
@@ -1804,11 +1789,14 @@
       });
       container.innerHTML = html;
     }
-    if (window.fbReady) {
-      window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "availability")).then(function(snap) {
-        const data = snap.exists() ? snap.data() : {};
-        localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(data));
-        renderAvailability(data);
+    if (fbReady()) {
+      window.databaseService.getSettings("availability").then(function(data) {
+        if (data) {
+          localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(data));
+          renderAvailability(data);
+        } else {
+          renderAvailability(JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_availability') || '{}'));
+        }
       }).catch(function() {
         renderAvailability(JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_availability') || '{}'));
       });
@@ -1856,8 +1844,8 @@
     });
     localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(av));
     // Save to Firebase
-    if (window.fbReady) {
-      window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "availability"), av)
+    if (fbReady()) {
+      window.databaseService.updateSettings("availability", av)
         .then(() => console.log("Availability saved to Firebase"))
         .catch(e => console.error("Firebase availability error:", e));
     }

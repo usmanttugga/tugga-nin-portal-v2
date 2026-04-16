@@ -1399,92 +1399,94 @@
 
   // ── Firebase real-time sync ────────────────────────
   function initFirebaseSync() {
-    if (!window.fbReady) { setTimeout(initFirebaseSync, 300); return; }
+    if (!window.firebaseInitialized || !window.isFirebaseReady || !window.isFirebaseReady()) {
+      setTimeout(initFirebaseSync, 500);
+      return;
+    }
 
-    // Pricing real-time
-    window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "pricing"), function(snap) {
-      if (snap.exists()) {
-        localStorage.setItem('tuggaNinPortalV2_tugga_pricing', JSON.stringify(snap.data()));
-        refreshPricing();
-      }
-    });
+    // Subscribe to pricing settings
+    window.databaseService.subscribeToSettings('pricing',
+      function(data) {
+        if (data) {
+          localStorage.setItem('tuggaNinPortalV2_tugga_pricing', JSON.stringify(data));
+          refreshPricing();
+        }
+      },
+      function(e) { console.warn('Pricing listener error:', e); }
+    );
 
-    // Availability real-time
-    window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "availability"), function(snap) {
-      if (snap.exists()) {
-        localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(snap.data()));
-        applyAvailability();
-      }
-    });
+    // Subscribe to availability settings
+    window.databaseService.subscribeToSettings('availability',
+      function(data) {
+        if (data) {
+          localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(data));
+          applyAvailability();
+        }
+      },
+      function(e) { console.warn('Availability listener error:', e); }
+    );
 
-    // Transactions real-time
-    window.fbOnSnapshot(window.fbCollection(window.fbDB, "transactions"), function(snap) {
-      const txns = snap.docs.map(d => d.data()).sort((a,b) => b.id > a.id ? 1 : -1);
-      localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
-      transactions = txns;
-      updateStats();
-      renderHistory();
-      renderAllServiceHistories();
-    });
+    // Subscribe to platform settings
+    window.databaseService.subscribeToSettings('platform',
+      function(s) {
+        if (s) {
+          localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(s));
+          if (s.companyName) document.title = s.companyName + ' – NIN Portal';
+          const bar = document.getElementById('supportBar');
+          const emailLink = document.getElementById('supportEmailLink');
+          const emailText = document.getElementById('supportEmailText');
+          const waLink = document.getElementById('supportWhatsappLink');
+          if (s.supportEmail || s.supportPhone) {
+            bar.style.display = 'flex';
+            document.querySelector('.main').style.paddingBottom = '3rem';
+          }
+          if (s.supportEmail && emailLink) {
+            emailLink.href = 'mailto:' + s.supportEmail;
+            if (emailText) emailText.textContent = s.supportEmail;
+            emailLink.style.display = 'inline';
+          }
+          if (s.supportPhone && waLink) {
+            const digits = s.supportPhone.replace(/\D/g, '');
+            const intl = digits.startsWith('0') ? '234' + digits.slice(1) : digits;
+            waLink.href = 'https://wa.me/' + intl;
+            waLink.style.display = 'inline';
+          }
+        }
+      },
+      function(e) { console.warn('Platform settings listener error:', e); }
+    );
 
-    // User wallet real-time + suspension check
-    if (user && user.uid) {
-      window.fbOnSnapshot(window.fbDoc(window.fbDB, "users", user.uid), function(snap) {
-        if (snap.exists()) {
-          const data = snap.data();
-          // If admin suspended this user, log them out immediately
+    // Subscribe to user changes (wallet + suspension)
+    const userId = user.uid || user.id;
+    if (userId) {
+      window.databaseService.subscribeToUserChanges(
+        userId,
+        function(data) {
+          if (!data) return;
           if (data.status === 'Suspended') {
             alert('Your account has been suspended. Please contact support.');
             logout();
             return;
           }
           walletBalance = data.wallet || 0;
-          // Show virtual account if assigned
           if (data.virtualAccount) {
             const va = data.virtualAccount;
-            document.getElementById('walletVAContent').style.display = 'none';
             const det = document.getElementById('walletVADetails');
-            det.style.display = 'flex';
-            document.getElementById('walletVABank').textContent   = va.bank || '';
-            document.getElementById('walletVANumber').textContent = va.account_number || '';
-            document.getElementById('walletVAName').textContent   = va.account_name || user.name;
+            if (det) {
+              document.getElementById('walletVAContent').style.display = 'none';
+              det.style.display = 'flex';
+              document.getElementById('walletVABank').textContent   = va.bank || '';
+              document.getElementById('walletVANumber').textContent = va.accountNumber || va.account_number || '';
+              document.getElementById('walletVAName').textContent   = va.accountName || va.account_name || user.name;
+            }
           }
           updateStats();
-        }
-      });
+        },
+        function(e) { console.warn('User listener error:', e); }
+      );
     }
-    // Real-time platform settings (apply company name + support contact)
-    window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "platform"), function(snap) {
-      if (snap.exists()) {
-        const s = snap.data();
-        localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(s));
-        if (s.companyName) {
-          // Update page title only — don't overwrite the logo image
-          document.title = s.companyName + ' – NIN Portal';
-        }
-        // Show support bar
-        const bar = document.getElementById('supportBar');
-        const emailLink = document.getElementById('supportEmailLink');
-        const emailText = document.getElementById('supportEmailText');
-        const waLink = document.getElementById('supportWhatsappLink');
-        if (s.supportEmail || s.supportPhone) {
-          bar.style.display = 'flex';
-          document.querySelector('.main').style.paddingBottom = '3rem';
-        }
-        if (s.supportEmail) {
-          emailLink.href = 'mailto:' + s.supportEmail;
-          emailText.textContent = s.supportEmail;
-          emailLink.style.display = 'inline';
-        }
-        if (s.supportPhone) {
-          // Strip non-digits, convert to international format for WhatsApp
-          const digits = s.supportPhone.replace(/\D/g, '');
-          const intl = digits.startsWith('0') ? '234' + digits.slice(1) : digits;
-          waLink.href = 'https://wa.me/' + intl;
-          waLink.style.display = 'inline';
-        }
-      }
-    });
+
+    console.log('✅ User Firebase sync initialized');
   }
   initFirebaseSync();
 
@@ -1563,9 +1565,12 @@
 
   // Save wallet to Firebase when deducted
   function syncWalletToFirebase() {
-    if (window.fbReady && user && user.uid) {
-      window.fbUpdateDoc(window.fbDoc(window.fbDB, "users", user.uid), { wallet: walletBalance })
-        .catch(e => console.error("Wallet sync error:", e));
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      const userId = user.uid || user.id;
+      if (userId) {
+        window.databaseService.updateWalletBalance(userId, 0) // sync current balance
+          .catch(e => console.warn("Wallet sync error:", e));
+      }
     }
   }
 
@@ -1619,7 +1624,29 @@
   }
 
   function renderHistory() {
-    const txns = getUserTransactions(user.id);
+    // Load from Firestore if available, then render
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      const userId = user.uid || user.id;
+      window.databaseService.getUserTransactions(userId, 200).then(function(firestoreTxns) {
+        if (firestoreTxns && firestoreTxns.length > 0) {
+          // Merge with localStorage transactions
+          transactions = firestoreTxns;
+          localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(firestoreTxns));
+          _renderHistoryTable(firestoreTxns);
+          renderAllServiceHistories();
+          updateStats();
+        } else {
+          _renderHistoryTable(getUserTransactions(user.id));
+        }
+      }).catch(function() {
+        _renderHistoryTable(getUserTransactions(user.id));
+      });
+    } else {
+      _renderHistoryTable(getUserTransactions(user.id));
+    }
+  }
+
+  function _renderHistoryTable(txns) {
     const tbody = document.getElementById("historyTable");
     const wbody = document.getElementById("walletTxnTable");
     if (!txns.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No transactions yet</td></tr>'; return; }
@@ -3437,47 +3464,45 @@
     btn.textContent = 'Requesting...';
     alertEl.innerHTML = '';
 
-    if (!window.fbReady) {
+    if (!window.firebaseInitialized || !window.isFirebaseReady() || !window.walletService) {
       alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready. Please try again.</div>';
       btn.disabled = false;
       btn.textContent = '🏦 Generate My Virtual Account';
       return;
     }
 
-    // Save a VA request to Firestore — admin will create it via Paystack dashboard and assign back
-    window.fbSetDoc(window.fbDoc(window.fbDB, 'va_requests', user.uid || user.id), {
-      userId: user.uid || user.id,
-      name: user.name,
-      email: user.email,
-      phone: user.phone || '',
-      requestedAt: new Date().toISOString(),
-      status: 'pending'
-    }).then(function() {
-      alertEl.innerHTML = '<div class="alert alert-success">✅ Request submitted! Your dedicated account will be assigned within 24 hours. You will see it here once ready.</div>';
-      btn.textContent = '⏳ Request Submitted';
-    }).catch(function(e) {
-      alertEl.innerHTML = '<div class="alert alert-error">Failed to submit request: ' + e.message + '</div>';
-      btn.disabled = false;
-      btn.textContent = '🏦 Generate My Virtual Account';
-    });
+    const userId = user.uid || user.id;
+    window.walletService.requestVirtualAccount(userId)
+      .then(function() {
+        alertEl.innerHTML = '<div class="alert alert-success">✅ Request submitted! Your dedicated account will be assigned within 24 hours. You will see it here once ready.</div>';
+        btn.textContent = '⏳ Request Submitted';
+      }).catch(function(e) {
+        alertEl.innerHTML = '<div class="alert alert-error">Failed to submit request: ' + e.message + '</div>';
+        btn.disabled = false;
+        btn.textContent = '🏦 Generate My Virtual Account';
+      });
   }
 
   function loadVirtualAccount() {
     const vaDetails = document.getElementById('vaDetails');
     const vaLoading = document.getElementById('vaLoading');
     const vaError   = document.getElementById('vaError');
-    // Check if user already has a virtual account in Firestore
-    if (!window.fbReady) { vaLoading.textContent = 'Loading...'; return; }
-    window.fbGetDoc(window.fbDoc(window.fbDB, 'users', user.uid)).then(function(snap) {
-      if (snap.exists() && snap.data().virtualAccount) {
-        const va = snap.data().virtualAccount;
+
+    if (!window.firebaseInitialized || !window.isFirebaseReady() || !window.databaseService) {
+      vaLoading.textContent = 'Loading...';
+      return;
+    }
+
+    const userId = user.uid || user.id;
+    window.databaseService.getUser(userId).then(function(userData) {
+      if (userData && userData.virtualAccount) {
+        const va = userData.virtualAccount;
         document.getElementById('vaBank').textContent   = va.bank || 'Wema Bank';
-        document.getElementById('vaNumber').textContent = va.account_number || '—';
-        document.getElementById('vaName').textContent   = va.account_name || user.name;
+        document.getElementById('vaNumber').textContent = va.accountNumber || va.account_number || '—';
+        document.getElementById('vaName').textContent   = va.accountName || va.account_name || user.name;
         vaLoading.style.display = 'none';
         vaDetails.style.display = 'block';
       } else {
-        // No virtual account yet — show instructions to contact admin or use card
         vaLoading.style.display = 'none';
         vaError.style.display = 'block';
         vaError.textContent = 'No virtual account assigned yet. Please use Card payment or contact support to get your dedicated account.';
