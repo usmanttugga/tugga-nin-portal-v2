@@ -651,9 +651,8 @@
     // Try Firestore first
     if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
       window.databaseService.getAllTransactions(500).then(function(txns) {
-        const active = txns.filter(t => t.status !== 'cleared');
-        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(active));
-        renderOverview(active);
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderOverview(txns);
       }).catch(function(e) {
         console.error('Error loading transactions from Firestore:', e);
         renderOverview(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]"));
@@ -884,9 +883,8 @@
   function loadAllTxns(filter = "") {
     if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
       window.databaseService.getAllTransactions(500).then(function(txns) {
-        const active = txns.filter(t => t.status !== 'cleared');
-        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(active));
-        renderAllTxns(active, filter);
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderAllTxns(txns, filter);
       }).catch(function(e) {
         console.error('Error loading transactions:', e);
         renderAllTxns(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]"), filter);
@@ -932,9 +930,8 @@
     const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
     if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
       window.databaseService.getAllTransactions(500).then(function(txns) {
-        const active = txns.filter(t => t.status !== 'cleared');
-        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(active));
-        renderNINStats(active);
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderNINStats(txns);
       }).catch(function() { renderNINStats(allTxns); });
     } else {
       renderNINStats(allTxns);
@@ -1445,9 +1442,8 @@
     const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
     if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
       window.databaseService.getAllTransactions(500).then(function(txns) {
-        const active = txns.filter(t => t.status !== 'cleared');
-        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(active));
-        renderBVNStats(active);
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderBVNStats(txns);
       }).catch(function() { renderBVNStats(allTxns); });
     } else {
       renderBVNStats(allTxns);
@@ -1469,9 +1465,8 @@
     const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
     if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
       window.databaseService.getAllTransactions(500).then(function(txns) {
-        const active = txns.filter(t => t.status !== 'cleared');
-        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(active));
-        renderUtilityStats(active);
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderUtilityStats(txns);
       }).catch(function() { renderUtilityStats(allTxns); });
     } else {
       renderUtilityStats(allTxns);
@@ -1665,18 +1660,16 @@
     alertEl.innerHTML = '<div class="alert alert-info">Clearing data, please wait...</div>';
     if (!fbReady()) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
     try {
-      // Only clear completed/historical transactions — NOT pending (submitted) ones
-      const txns = await window.databaseService.getAllTransactions(1000);
-      const completedTxns = txns.filter(t => t.status !== 'submitted' && t.status !== 'cleared');
-      await Promise.all(completedTxns.map(t => window.databaseService.updateTransaction(t.id, { status: 'cleared', clearedAt: new Date().toISOString() })));
       // Reset all user wallet balances to ₦0
       const users = await window.databaseService.getAllUsers();
       await Promise.all(users.map(u => window.databaseService.updateUser(u.id || u.uid, { wallet: 0 })));
+      // Clear local transaction cache
       localStorage.removeItem('tuggaNinPortalV2_tugga_txns');
-      alertEl.innerHTML = `<div class="alert alert-success">Cleared ${completedTxns.length} transaction(s) and reset ${users.length} user wallet balance(s) to ₦0. Pending requests are preserved.</div>`;
-      setTimeout(() => { alertEl.innerHTML = ''; }, 5000);
+      alertEl.innerHTML = `<div class="alert alert-success">Reset ${users.length} user wallet balance(s) to ₦0.</div>`;
+      setTimeout(() => { alertEl.innerHTML = ''; }, 4000);
       loadOverview();
-      toast('History and balances cleared.');
+      loadUsers();
+      toast('All balances cleared.');
     } catch (e) {
       alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>';
     }
