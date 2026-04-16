@@ -638,7 +638,7 @@
   ];
 
   function loadOverview() {
-    const txns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const txns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
     const fundingTxns = txns.filter(t => t.service === 'Wallet Funding');
     const usageTxns   = txns.filter(t => t.service !== 'Wallet Funding');
     const totalFunding = fundingTxns.reduce((s, t) => s + (t.amount || 0), 0);
@@ -686,7 +686,7 @@
   }
 
   function loadUsersFromLocalStorage() {
-    const lsUsers = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    const lsUsers = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_all_users') || '[]');
     const users = lsUsers.length ? lsUsers : (window._fbUsers || MOCK_USERS);
     window._fbUsers = users;
     renderUsersTable(users);
@@ -800,11 +800,11 @@
     }
 
     // Fallback: localStorage
-    const users = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    const users = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_all_users') || '[]');
     const idx = users.findIndex(u => String(u.id) === String(uid) || u.uid === uid);
     if (idx === -1) { alertEl.innerHTML = '<div class="alert alert-error">User not found.</div>'; return; }
     users[idx].wallet = (users[idx].wallet || 0) + amount;
-    localStorage.setItem('tugga_all_users', JSON.stringify(users));
+    localStorage.setItem('tuggaNinPortalV2_tugga_all_users', JSON.stringify(users));
     closeModal('fundWalletModal');
     toast('Wallet funded successfully!');
     loadUsers();
@@ -818,9 +818,9 @@
       return;
     }
     // Fallback: localStorage
-    const users = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    const users = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_all_users') || '[]');
     const idx = users.findIndex(u => String(u.id) === String(uid) || u.uid === uid);
-    if (idx !== -1) { users[idx].status = 'Suspended'; localStorage.setItem('tugga_all_users', JSON.stringify(users)); }
+    if (idx !== -1) { users[idx].status = 'Suspended'; localStorage.setItem('tuggaNinPortalV2_tugga_all_users', JSON.stringify(users)); }
     toast('User suspended.'); loadUsers();
   }
 
@@ -832,9 +832,9 @@
       return;
     }
     // Fallback: localStorage
-    const users = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    const users = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_all_users') || '[]');
     const idx = users.findIndex(u => String(u.id) === String(uid) || u.uid === uid);
-    if (idx !== -1) { users[idx].status = 'Active'; localStorage.setItem('tugga_all_users', JSON.stringify(users)); }
+    if (idx !== -1) { users[idx].status = 'Active'; localStorage.setItem('tuggaNinPortalV2_tugga_all_users', JSON.stringify(users)); }
     toast('User unsuspended.'); loadUsers();
   }
 
@@ -850,14 +850,14 @@
       return;
     }
     // Fallback: localStorage
-    let users = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    let users = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_all_users') || '[]');
     users = users.filter(u => String(u.id) !== String(uid) && u.uid !== uid);
-    localStorage.setItem('tugga_all_users', JSON.stringify(users));
+    localStorage.setItem('tuggaNinPortalV2_tugga_all_users', JSON.stringify(users));
     toast('User deleted successfully.'); loadUsers();
   }
 
   function loadAllTxns(filter = "") {
-    const txns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const txns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
     const filtered = filter ? txns.filter(t => t.id.includes(filter) || t.service.toLowerCase().includes(filter.toLowerCase())) : txns;
     const tbody = document.getElementById("allTxnTable");
     if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No transactions</td></tr>'; return; }
@@ -890,7 +890,7 @@
   }
 
   function loadNINStats() {
-    const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
     const ninVerSvcs = ["Verify with NIN", "Phone Number Verification", "Bio Data Verification", "FingerPrint Verification"];
     const ninValSvcs = ["No Record Found", "Bank Validation", "Photograph Error", "SIM Validation", "Modification Validation", "Immigration Validation", "DOB Modification Validation", "Name Modification Validation", "Phone Number Modification Validation", "Address Modification Validation"];
     const ninModSvcs = ["Name Modification", "Phone Number Modification", "Address Modification", "Date of Birth Modification"];
@@ -1249,7 +1249,7 @@
   };
 
   function openRequestDetails(txnId) {
-    const allTxns = JSON.parse(localStorage.getItem('tugga_txns') || '[]');
+    const allTxns = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_txns') || '[]');
     const t = allTxns.find(x => x.id === txnId);
     if (!t) { toast('Request not found', 'error'); return; }
 
@@ -1335,7 +1335,7 @@
   }
 
   function loadBVNStats() {
-    const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
     const bvn = allTxns.filter(t => t.service.includes("BVN"));
     document.getElementById("bvnVerCount").textContent  = bvn.filter(t => t.service === "BVN Verification").length;
     document.getElementById("bvnRetCount").textContent  = bvn.filter(t => t.service === "BVN Retrieval").length;
@@ -1347,7 +1347,7 @@
   }
 
   function loadUtilityStats() {
-    const allTxns = JSON.parse(localStorage.getItem("tugga_txns") || "[]");
+    const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
     const util = allTxns.filter(t => t.service.includes("Airtime") || t.service.includes("Data"));
     document.getElementById("airtimeCount").textContent  = util.filter(t => t.service.includes("Airtime")).length;
     document.getElementById("dataCount").textContent     = util.filter(t => t.service.includes("Data")).length;
@@ -1434,7 +1434,7 @@
       email_only:   parseInt(document.getElementById("p_email_only").value) || 150,
       dob_attest:   parseInt(document.getElementById("p_dob_attest").value) || 500
     };
-    localStorage.setItem("tugga_pricing", JSON.stringify(pricing));
+    localStorage.setItem("tuggaNinPortalV2_tugga_pricing", JSON.stringify(pricing));
     // Save to Firebase
     if (window.fbReady) {
       window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "pricing"), pricing)
@@ -1495,13 +1495,13 @@
     if (window.fbReady) {
       window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "pricing")).then(function(snap) {
         const data = snap.exists() ? snap.data() : {};
-        localStorage.setItem("tugga_pricing", JSON.stringify(data));
+        localStorage.setItem("tuggaNinPortalV2_tugga_pricing", JSON.stringify(data));
         applyPricing(data);
       }).catch(function() {
-        applyPricing(JSON.parse(localStorage.getItem("tugga_pricing") || "{}"));
+        applyPricing(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_pricing") || "{}"));
       });
     } else {
-      applyPricing(JSON.parse(localStorage.getItem("tugga_pricing") || "{}"));
+      applyPricing(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_pricing") || "{}"));
     }
   }
 
@@ -1512,7 +1512,7 @@
       supportPhone:   document.getElementById("s_phone").value.trim(),
       platformStatus: document.getElementById("s_status").value
     };
-    localStorage.setItem("tugga_settings", JSON.stringify(settings));
+    localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(settings));
     if (window.fbReady) {
       window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "platform"), settings)
         .then(function() { console.log("Settings saved to Firebase"); })
@@ -1533,7 +1533,7 @@
       await Promise.all(txnSnap.docs.map(d => window.fbDeleteDoc(d.ref)));
       const userSnap = await window.fbGetDocs(window.fbCollection(window.fbDB, 'users'));
       await Promise.all(userSnap.docs.map(d => window.fbUpdateDoc(d.ref, { wallet: 0 })));
-      localStorage.removeItem('tugga_txns');
+      localStorage.removeItem('tuggaNinPortalV2_tugga_txns');
       alertEl.innerHTML = '<div class="alert alert-success">All history and wallet balances cleared successfully.</div>';
       setTimeout(() => { alertEl.innerHTML = ''; }, 4000);
       loadOverview();
@@ -1555,16 +1555,16 @@
     if (window.fbReady) {
       window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "platform")).then(function(snap) {
         if (snap.exists()) {
-          localStorage.setItem("tugga_settings", JSON.stringify(snap.data()));
+          localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(snap.data()));
           applySettings(snap.data());
         } else {
-          applySettings(JSON.parse(localStorage.getItem("tugga_settings") || "{}"));
+          applySettings(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_settings") || "{}"));
         }
       }).catch(function() {
-        applySettings(JSON.parse(localStorage.getItem("tugga_settings") || "{}"));
+        applySettings(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_settings") || "{}"));
       });
     } else {
-      applySettings(JSON.parse(localStorage.getItem("tugga_settings") || "{}"));
+      applySettings(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_settings") || "{}"));
     }
   }
 
@@ -1597,7 +1597,7 @@
     // Real-time transactions
     window.fbOnSnapshot(window.fbCollection(window.fbDB, "transactions"), function(snap) {
       const txns = snap.docs.map(d => d.data()).sort((a,b) => b.id > a.id ? 1 : -1);
-      localStorage.setItem('tugga_txns', JSON.stringify(txns));
+      localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
       const active = document.querySelector('.sidebar a.active');
       if (active) {
         const id = active.getAttribute('data-section');
@@ -1639,7 +1639,7 @@
     window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "platform"), function(snap) {
       if (snap.exists()) {
         const s = snap.data();
-        localStorage.setItem("tugga_settings", JSON.stringify(s));
+        localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(s));
         // Apply company name to nav logo
         if (s.companyName) {
           const logoEl = document.querySelector('nav .logo');
@@ -1672,7 +1672,7 @@
       window.databaseService.subscribeToSettings(
         (settings) => {
           if (settings) {
-            localStorage.setItem('tugga_settings', JSON.stringify(settings));
+            localStorage.setItem('tuggaNinPortalV2_tugga_settings', JSON.stringify(settings));
           }
         },
         (err) => console.error('Settings listener error:', err)
@@ -1689,7 +1689,7 @@
 
   // ── Service Availability ───────────────────────────
   function getAvailability() {
-    return JSON.parse(localStorage.getItem('tugga_availability') || '{}');
+    return JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_availability') || '{}');
   }
 
   const SERVICE_GROUPS = [
@@ -1734,13 +1734,13 @@
     if (window.fbReady) {
       window.fbGetDoc(window.fbDoc(window.fbDB, "settings", "availability")).then(function(snap) {
         const data = snap.exists() ? snap.data() : {};
-        localStorage.setItem('tugga_availability', JSON.stringify(data));
+        localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(data));
         renderAvailability(data);
       }).catch(function() {
-        renderAvailability(JSON.parse(localStorage.getItem('tugga_availability') || '{}'));
+        renderAvailability(JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_availability') || '{}'));
       });
     } else {
-      renderAvailability(JSON.parse(localStorage.getItem('tugga_availability') || '{}'));
+      renderAvailability(JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_availability') || '{}'));
     }
   }
 
@@ -1781,7 +1781,7 @@
         av[svc] = av[g.key] && (cb ? cb.checked : true);
       });
     });
-    localStorage.setItem('tugga_availability', JSON.stringify(av));
+    localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(av));
     // Save to Firebase
     if (window.fbReady) {
       window.fbSetDoc(window.fbDoc(window.fbDB, "settings", "availability"), av)

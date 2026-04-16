@@ -1402,7 +1402,7 @@
     // Pricing real-time
     window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "pricing"), function(snap) {
       if (snap.exists()) {
-        localStorage.setItem('tugga_pricing', JSON.stringify(snap.data()));
+        localStorage.setItem('tuggaNinPortalV2_tugga_pricing', JSON.stringify(snap.data()));
         refreshPricing();
       }
     });
@@ -1410,7 +1410,7 @@
     // Availability real-time
     window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "availability"), function(snap) {
       if (snap.exists()) {
-        localStorage.setItem('tugga_availability', JSON.stringify(snap.data()));
+        localStorage.setItem('tuggaNinPortalV2_tugga_availability', JSON.stringify(snap.data()));
         applyAvailability();
       }
     });
@@ -1418,7 +1418,7 @@
     // Transactions real-time
     window.fbOnSnapshot(window.fbCollection(window.fbDB, "transactions"), function(snap) {
       const txns = snap.docs.map(d => d.data()).sort((a,b) => b.id > a.id ? 1 : -1);
-      localStorage.setItem('tugga_txns', JSON.stringify(txns));
+      localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
       transactions = txns;
       updateStats();
       renderHistory();
@@ -1455,7 +1455,7 @@
     window.fbOnSnapshot(window.fbDoc(window.fbDB, "settings", "platform"), function(snap) {
       if (snap.exists()) {
         const s = snap.data();
-        localStorage.setItem("tugga_settings", JSON.stringify(s));
+        localStorage.setItem("tuggaNinPortalV2_tugga_settings", JSON.stringify(s));
         if (s.companyName) {
           // Update page title only — don't overwrite the logo image
           document.title = s.companyName + ' – NIN Portal';
@@ -1601,7 +1601,7 @@
     if (newPwd !== confirm)                      { document.getElementById('pwd_confirm_err').textContent = 'Passwords do not match'; valid = false; } else document.getElementById('pwd_confirm_err').textContent = '';
     if (!valid) return;
     user.password = newPwd;
-    localStorage.setItem('tugga_user', JSON.stringify(user));
+    localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify(user));
     alertEl.innerHTML = '<div class="alert alert-success">Password updated successfully!</div>';
     setTimeout(() => closeModal('changePwdModal'), 1500);
   }
@@ -1726,7 +1726,7 @@
     };
     if (slipUrl) txn.slipUrl = slipUrl;
     transactions.unshift(txn);
-    localStorage.setItem('tugga_txns', JSON.stringify(transactions));
+    localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(transactions));
     if (window.fbReady) {
       window.fbSetDoc(window.fbDoc(window.fbDB, 'transactions', txn.id), txn)
         .catch(e => console.error('Firebase txn error:', e));
@@ -1967,7 +1967,7 @@
     };
     // Store locally
     transactions.unshift(txn);
-    localStorage.setItem("tugga_txns", JSON.stringify(transactions));
+    localStorage.setItem("tuggaNinPortalV2_tugga_txns", JSON.stringify(transactions));
     // Save to Firestore with known doc ID so status can be updated later
     if (window.fbReady) {
       window.fbSetDoc(window.fbDoc(window.fbDB, 'transactions', txn.id), txn)
@@ -1979,7 +1979,7 @@
   }
 
   // ── NIN Verification Sub-Services ─────────────────
-  let _p = JSON.parse(localStorage.getItem("tugga_pricing") || "{}");
+  let _p = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_pricing") || "{}");
 
   const NIN_VERIFY_SERVICES = {
     'verify-nin':   { title: 'Verify with NIN',           fee: 200, icon: '🪪', desc: 'Enter an 11-digit NIN to retrieve identity details.' },
@@ -1991,7 +1991,7 @@
   let currentNinService = '';
 
   function refreshPricing() {
-    _p = JSON.parse(localStorage.getItem("tugga_pricing") || "{}");
+    _p = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_pricing") || "{}");
     // NIN Verify fees are now per slip type — base fee is the Normal Slip price
     NIN_VERIFY_SERVICES['verify-nin'].fee   = _p.nin_normal   || 200;
     NIN_VERIFY_SERVICES['phone-verify'].fee = _p.phone_normal || 150;
@@ -2042,12 +2042,12 @@
 
   // Auto-refresh prices when admin saves pricing in another tab
   window.addEventListener('storage', function(e) {
-    if (e.key === 'tugga_pricing') refreshPricing();
-    if (e.key === 'tugga_availability') applyAvailability();
+    if (e.key === 'tuggaNinPortalV2_tugga_pricing') refreshPricing();
+    if (e.key === 'tuggaNinPortalV2_tugga_availability') applyAvailability();
   });
 
   function getAvailability() {
-    return JSON.parse(localStorage.getItem('tugga_availability') || '{}');
+    return JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_availability') || '{}');
   }
 
   function isAvailable(svc) {
@@ -2441,7 +2441,7 @@
   }
 
   function downloadNINSlipFromHistory(txnId) {
-    const txns = JSON.parse(localStorage.getItem('tugga_txns') || '[]');
+    const txns = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_txns') || '[]');
     const t = txns.find(x => x.id === txnId);
     if (!t || !t.slipUrl) return;
     const win = window.open('', '_blank', 'width=900,height=700');
@@ -3472,7 +3472,7 @@
             if (window.databaseService) {
               window.databaseService.getUser(user.id || user.uid).then(userData => {
                 if (userData) {
-                  localStorage.setItem('tugga_user', JSON.stringify(userData));
+                  localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify(userData));
                   walletBalance = userData.wallet || 0;
                   updateStats();
                 }
@@ -3613,7 +3613,7 @@
 
   // ── Load Support Details ───────────────────────────
   function loadSupportDetails() {
-    const settings = JSON.parse(localStorage.getItem('tugga_settings') || '{}');
+    const settings = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_settings') || '{}');
     
     // Update Support section
     const supportEmail = settings.supportEmail || 'support@tugga.com';
@@ -3667,9 +3667,9 @@
             updateStats();
             
             // Update localStorage
-            const storedUser = JSON.parse(localStorage.getItem('tugga_user') || '{}');
+            const storedUser = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_user') || '{}');
             storedUser.wallet = userData.wallet;
-            localStorage.setItem('tugga_user', JSON.stringify(storedUser));
+            localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify(storedUser));
           }
         },
         (error) => {
