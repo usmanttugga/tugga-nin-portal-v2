@@ -88,45 +88,57 @@
     <section id="sec-services" class="content-section section-hidden">
       <p class="page-title">All Services</p>
       <p class="page-sub">Choose a service category to get started.</p>
-      
-      <div class="services-grid" style="max-width: 900px;">
-        <!-- NIN Services Card -->
-        <div class="service-card" onclick="showSection('sec-nin')" style="cursor: pointer;">
-          <div class="svc-icon" style="font-size: 3rem;">🪪</div>
-          <h4>NIN Services</h4>
-          <p>National Identity Number verification, validation, modification and more</p>
-          <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            <span style="background: rgba(4, 120, 87, 0.1); color: #047857; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Verification</span>
-            <span style="background: rgba(4, 120, 87, 0.1); color: #047857; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Validation</span>
-            <span style="background: rgba(4, 120, 87, 0.1); color: #047857; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Modification</span>
-            <span style="background: rgba(4, 120, 87, 0.1); color: #047857; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">+5 more</span>
+
+      <!-- Service Category Cards — full-width hero layout -->
+      <div style="display:flex;flex-direction:column;gap:1rem;max-width:700px;">
+
+        <!-- NIN Services -->
+        <div onclick="showSection('sec-nin')" style="cursor:pointer;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #e5e7eb;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1.25rem;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(4,120,87,0.15)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)';this.style.transform='translateY(0)'">
+          <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#047857,#059669);display:flex;align-items:center;justify-content:center;font-size:1.75rem;flex-shrink:0;">🪪</div>
+          <div style="flex:1;min-width:0;">
+            <h4 style="font-size:1rem;font-weight:700;color:#1f2937;margin:0 0 0.25rem;">NIN Services</h4>
+            <p style="font-size:0.82rem;color:#6b7280;margin:0 0 0.6rem;line-height:1.4;">National Identity Number verification, validation, modification and more</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">
+              <span style="background:rgba(4,120,87,0.1);color:#047857;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Verification</span>
+              <span style="background:rgba(4,120,87,0.1);color:#047857;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Validation</span>
+              <span style="background:rgba(4,120,87,0.1);color:#047857;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Modification</span>
+              <span style="background:rgba(4,120,87,0.1);color:#047857;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">+5 more</span>
+            </div>
           </div>
+          <div style="color:#9ca3af;font-size:1.2rem;flex-shrink:0;">›</div>
         </div>
 
-        <!-- BVN Services Card -->
-        <div class="service-card" onclick="showSection('sec-bvn')" style="cursor: pointer;">
-          <div class="svc-icon" style="font-size: 3rem;">🏦</div>
-          <h4>BVN Services</h4>
-          <p>Bank Verification Number services for verification, retrieval and modification</p>
-          <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            <span style="background: rgba(6, 182, 212, 0.1); color: #0891b2; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Verification</span>
-            <span style="background: rgba(6, 182, 212, 0.1); color: #0891b2; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Retrieval</span>
-            <span style="background: rgba(6, 182, 212, 0.1); color: #0891b2; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Modification</span>
+        <!-- BVN Services -->
+        <div onclick="showSection('sec-bvn')" style="cursor:pointer;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #e5e7eb;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1.25rem;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(8,145,178,0.15)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)';this.style.transform='translateY(0)'">
+          <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#0891b2,#06b6d4);display:flex;align-items:center;justify-content:center;font-size:1.75rem;flex-shrink:0;">🏦</div>
+          <div style="flex:1;min-width:0;">
+            <h4 style="font-size:1rem;font-weight:700;color:#1f2937;margin:0 0 0.25rem;">BVN Services</h4>
+            <p style="font-size:0.82rem;color:#6b7280;margin:0 0 0.6rem;line-height:1.4;">Bank Verification Number services for verification, retrieval and modification</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">
+              <span style="background:rgba(8,145,178,0.1);color:#0891b2;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Verification</span>
+              <span style="background:rgba(8,145,178,0.1);color:#0891b2;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Retrieval</span>
+              <span style="background:rgba(8,145,178,0.1);color:#0891b2;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Modification</span>
+            </div>
           </div>
+          <div style="color:#9ca3af;font-size:1.2rem;flex-shrink:0;">›</div>
         </div>
 
-        <!-- Airtime & Data Card -->
-        <div class="service-card" onclick="showSection('sec-airtime-data')" style="cursor: pointer;">
-          <div class="svc-icon" style="font-size: 3rem;">📱</div>
-          <h4>Airtime & Data</h4>
-          <p>Buy airtime and data bundles for all major networks instantly</p>
-          <div style="margin-top: 1rem; display: flex; flex-wrap: wrap; gap: 0.5rem;">
-            <span style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">MTN</span>
-            <span style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Airtel</span>
-            <span style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">Glo</span>
-            <span style="background: rgba(14, 165, 233, 0.1); color: #0ea5e9; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem;">9mobile</span>
+        <!-- Airtime & Data -->
+        <div onclick="showSection('sec-airtime-data')" style="cursor:pointer;background:#fff;border-radius:16px;box-shadow:0 2px 12px rgba(0,0,0,0.08);border:1px solid #e5e7eb;padding:1.25rem 1.5rem;display:flex;align-items:center;gap:1.25rem;transition:box-shadow 0.2s,transform 0.2s;" onmouseover="this.style.boxShadow='0 6px 24px rgba(14,165,233,0.15)';this.style.transform='translateY(-2px)'" onmouseout="this.style.boxShadow='0 2px 12px rgba(0,0,0,0.08)';this.style.transform='translateY(0)'">
+          <div style="width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#0ea5e9,#38bdf8);display:flex;align-items:center;justify-content:center;font-size:1.75rem;flex-shrink:0;">📱</div>
+          <div style="flex:1;min-width:0;">
+            <h4 style="font-size:1rem;font-weight:700;color:#1f2937;margin:0 0 0.25rem;">Airtime & Data</h4>
+            <p style="font-size:0.82rem;color:#6b7280;margin:0 0 0.6rem;line-height:1.4;">Buy airtime and data bundles for all major networks instantly</p>
+            <div style="display:flex;flex-wrap:wrap;gap:0.35rem;">
+              <span style="background:rgba(14,165,233,0.1);color:#0ea5e9;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">MTN</span>
+              <span style="background:rgba(14,165,233,0.1);color:#0ea5e9;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Airtel</span>
+              <span style="background:rgba(14,165,233,0.1);color:#0ea5e9;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">Glo</span>
+              <span style="background:rgba(14,165,233,0.1);color:#0ea5e9;padding:0.2rem 0.5rem;border-radius:20px;font-size:0.72rem;font-weight:600;">9mobile</span>
+            </div>
           </div>
+          <div style="color:#9ca3af;font-size:1.2rem;flex-shrink:0;">›</div>
         </div>
+
       </div>
     </section>
 
@@ -1344,17 +1356,7 @@
         console.log('✅ Firebase initialized successfully');
         window.firebaseInitialized = true;
         
-        // Check for localStorage data migration
-        if (await migrationService.hasLocalStorageData()) {
-          const migrationStatus = await migrationService.getMigrationStatus();
-          if (!migrationStatus.completed) {
-            // Show migration prompt
-            if (window.showMigrationPrompt) {
-              window.showMigrationPrompt();
-            }
-          }
-        }
-        
+        // Migration disabled - Firebase is primary storage
         // Set up real-time listeners for wallet and transactions
         if (window.setupRealtimeListeners) {
           window.setupRealtimeListeners();
@@ -3681,97 +3683,6 @@
     } catch (error) {
       console.error('Error setting up real-time listeners:', error);
     }
-  };
-
-  // ── Migration Prompt ────────────────────────────────
-  window.showMigrationPrompt = function() {
-    // Check if user dismissed migration recently (within 7 days)
-    const dismissedAt = localStorage.getItem('migration_dismissed_at');
-    if (dismissedAt) {
-      const daysSinceDismissal = (Date.now() - parseInt(dismissedAt)) / (1000 * 60 * 60 * 24);
-      if (daysSinceDismissal < 7) {
-        console.log('Migration prompt dismissed recently - not showing');
-        return;
-      }
-    }
-    
-    // Show migration modal
-    const modalHTML = `
-      <div class="modal-overlay open" id="migrationModal" style="z-index: 10000;">
-        <div class="modal" style="max-width: 500px;">
-          <div class="modal-header">
-            <h3>🔄 Migrate Your Data to Cloud</h3>
-          </div>
-          <div class="modal-body">
-            <p style="margin-bottom: 1rem; color: var(--gray); line-height: 1.6;">
-              We've detected data stored locally on this device. Would you like to migrate it to the cloud for access across all your devices?
-            </p>
-            <div style="background: var(--light); padding: 1rem; border-radius: 8px; margin-bottom: 1rem;">
-              <p style="font-size: 0.85rem; color: var(--gray); margin-bottom: 0.5rem;"><strong>Benefits:</strong></p>
-              <ul style="font-size: 0.85rem; color: var(--gray); margin-left: 1.5rem; line-height: 1.8;">
-                <li>Access your data from any device</li>
-                <li>Automatic backup and sync</li>
-                <li>Real-time updates</li>
-                <li>Enhanced security</li>
-              </ul>
-            </div>
-            <div id="migrationProgress" style="display: none;">
-              <div style="background: var(--light); padding: 1rem; border-radius: 8px; text-align: center;">
-                <p style="font-size: 0.9rem; color: var(--primary);">Migrating your data...</p>
-              </div>
-            </div>
-            <div id="migrationResult" style="display: none;"></div>
-          </div>
-          <div class="modal-footer" style="display: flex; gap: 0.8rem; margin-top: 1.5rem;">
-            <button class="btn-secondary" onclick="dismissMigration()" style="flex: 1;">Not Now</button>
-            <button class="btn-primary" onclick="startMigration()" style="flex: 1.5;">Migrate Now</button>
-          </div>
-        </div>
-      </div>
-    `;
-    
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-  };
-
-  window.startMigration = async function() {
-    const progressEl = document.getElementById('migrationProgress');
-    const resultEl = document.getElementById('migrationResult');
-    const buttons = document.querySelectorAll('#migrationModal button');
-    
-    // Show progress
-    progressEl.style.display = 'block';
-    buttons.forEach(btn => btn.disabled = true);
-    
-    try {
-      // Perform migration
-      await window.migrationService.migrateAllData((progress) => {
-        console.log('Migration progress:', progress);
-      });
-      
-      // Success
-      progressEl.style.display = 'none';
-      resultEl.innerHTML = '<div class="alert alert-success">✅ Migration completed successfully! Your data is now in the cloud.</div>';
-      resultEl.style.display = 'block';
-      
-      // Close modal after 3 seconds
-      setTimeout(() => {
-        document.getElementById('migrationModal').remove();
-        location.reload(); // Reload to use Firebase data
-      }, 3000);
-      
-    } catch (error) {
-      console.error('Migration error:', error);
-      progressEl.style.display = 'none';
-      resultEl.innerHTML = '<div class="alert alert-error">❌ Migration failed: ' + error.message + '</div>';
-      resultEl.style.display = 'block';
-      buttons.forEach(btn => btn.disabled = false);
-    }
-  };
-
-  window.dismissMigration = function() {
-    // Store dismissal timestamp
-    localStorage.setItem('migration_dismissed_at', Date.now().toString());
-    document.getElementById('migrationModal').remove();
   };
 
   // Load support details on page load
