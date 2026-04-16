@@ -1753,6 +1753,9 @@
       function(e) { console.error('Availability listener error:', e); }
     );
 
+    // Reload data now that Firebase is confirmed ready
+    loadOverview();
+    loadUsers();
     console.log('✅ Admin Firebase sync initialized');
   }
   initAdminFirebaseSync();
@@ -1772,23 +1775,34 @@
 
   // ── Firebase Data Loader ────────────────────────────
   window.loadFirebaseData = function() {
-    if (!window.firebaseInitialized || !window.isFirebaseReady()) return;
-    // Load all admin data now that Firebase is ready
+    if (!window.firebaseInitialized || !window.isFirebaseReady || !window.isFirebaseReady()) return;
     loadOverview();
     loadUsers();
     console.log('✅ Admin Firebase data loaded');
   };
 
-  // Initial load — also retry once Firebase becomes ready
-  loadOverview();
-  loadUsers();
-  // Retry after a short delay in case Firebase wasn't ready yet on first call
-  setTimeout(function() {
-    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady()) {
-      loadOverview();
-      loadUsers();
+  // Wait for Firebase + databaseService to be ready, then load data
+  // This handles the async module loading race condition
+  (function waitForFirebaseAndLoad() {
+    var attempts = 0;
+    var maxAttempts = 40; // 10 seconds max (40 × 250ms)
+    function check() {
+      attempts++;
+      if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+        console.log('✅ Firebase ready after ' + attempts + ' checks — loading admin data');
+        loadOverview();
+        loadUsers();
+      } else if (attempts < maxAttempts) {
+        setTimeout(check, 250);
+      } else {
+        // Firebase never became ready — load from localStorage fallback
+        console.warn('⚠️ Firebase not ready after 10s — loading from localStorage');
+        loadOverview();
+        loadUsers();
+      }
     }
-  }, 2000);
+    check();
+  })();
 
   // ── Service Availability ───────────────────────────
   function getAvailability() {
