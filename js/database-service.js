@@ -262,21 +262,6 @@ export async function getAllTransactions(limitCount = 200) {
 }
 
 /**
- * Delete transaction from Firestore
- * @param {string} transactionId - Transaction ID
- * @returns {Promise<void>}
- */
-export async function deleteTransaction(transactionId) {
-  const db = getFirestoreInstance();
-  if (!db) throw new Error('Firestore not initialized');
-
-  return retryOperation(async () => {
-    await deleteDoc(doc(db, 'transactions', transactionId));
-    console.log('Transaction deleted from Firestore:', transactionId);
-  });
-}
-
-/**
  * Update transaction in Firestore
  * @param {string} transactionId - Transaction ID
  * @param {object} updates - Fields to update
@@ -474,7 +459,6 @@ window.databaseService = {
   getUserTransactions,
   getAllTransactions,
   updateTransaction,
-  deleteTransaction,
   getSettings,
   updateSettings,
   updateWalletBalance,
