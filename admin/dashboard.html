@@ -638,7 +638,21 @@
   ];
 
   function loadOverview() {
-    const txns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
+    // Try Firestore first
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.getAllTransactions(500).then(function(txns) {
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderOverview(txns);
+      }).catch(function(e) {
+        console.error('Error loading transactions from Firestore:', e);
+        renderOverview(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]"));
+      });
+    } else {
+      renderOverview(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]"));
+    }
+  }
+
+  function renderOverview(txns) {
     const fundingTxns = txns.filter(t => t.service === 'Wallet Funding');
     const usageTxns   = txns.filter(t => t.service !== 'Wallet Funding');
     const totalFunding = fundingTxns.reduce((s, t) => s + (t.amount || 0), 0);
@@ -857,7 +871,20 @@
   }
 
   function loadAllTxns(filter = "") {
-    const txns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.getAllTransactions(500).then(function(txns) {
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderAllTxns(txns, filter);
+      }).catch(function(e) {
+        console.error('Error loading transactions:', e);
+        renderAllTxns(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]"), filter);
+      });
+    } else {
+      renderAllTxns(JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]"), filter);
+    }
+  }
+
+  function renderAllTxns(txns, filter) {
     const filtered = filter ? txns.filter(t => t.id.includes(filter) || t.service.toLowerCase().includes(filter.toLowerCase())) : txns;
     const tbody = document.getElementById("allTxnTable");
     if (!filtered.length) { tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#999">No transactions</td></tr>'; return; }
@@ -891,6 +918,17 @@
 
   function loadNINStats() {
     const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.getAllTransactions(500).then(function(txns) {
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderNINStats(txns);
+      }).catch(function() { renderNINStats(allTxns); });
+    } else {
+      renderNINStats(allTxns);
+    }
+  }
+
+  function renderNINStats(allTxns) {
     const ninVerSvcs = ["Verify with NIN", "Phone Number Verification", "Bio Data Verification", "FingerPrint Verification"];
     const ninValSvcs = ["No Record Found", "Bank Validation", "Photograph Error", "SIM Validation", "Modification Validation", "Immigration Validation", "DOB Modification Validation", "Name Modification Validation", "Phone Number Modification Validation", "Address Modification Validation"];
     const ninModSvcs = ["Name Modification", "Phone Number Modification", "Address Modification", "Date of Birth Modification"];
@@ -1249,9 +1287,22 @@
   };
 
   function openRequestDetails(txnId) {
+    // Try Firestore first, fallback to localStorage
     const allTxns = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_txns') || '[]');
-    const t = allTxns.find(x => x.id === txnId);
-    if (!t) { toast('Request not found', 'error'); return; }
+    const t = allTxns.find(x => x.id === txnId || x.ref === txnId);
+    if (t) {
+      renderRequestDetails(t);
+    } else if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.getTransaction(txnId).then(function(txn) {
+        if (txn) renderRequestDetails(txn);
+        else toast('Request not found', 'error');
+      }).catch(function() { toast('Request not found', 'error'); });
+    } else {
+      toast('Request not found', 'error');
+    }
+  }
+
+  function renderRequestDetails(t) {
 
     document.getElementById('rdTitle').textContent = t.service;
 
@@ -1336,6 +1387,17 @@
 
   function loadBVNStats() {
     const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.getAllTransactions(500).then(function(txns) {
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderBVNStats(txns);
+      }).catch(function() { renderBVNStats(allTxns); });
+    } else {
+      renderBVNStats(allTxns);
+    }
+  }
+
+  function renderBVNStats(allTxns) {
     const bvn = allTxns.filter(t => t.service.includes("BVN"));
     document.getElementById("bvnVerCount").textContent  = bvn.filter(t => t.service === "BVN Verification").length;
     document.getElementById("bvnRetCount").textContent  = bvn.filter(t => t.service === "BVN Retrieval").length;
@@ -1348,6 +1410,17 @@
 
   function loadUtilityStats() {
     const allTxns = JSON.parse(localStorage.getItem("tuggaNinPortalV2_tugga_txns") || "[]");
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.getAllTransactions(500).then(function(txns) {
+        localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(txns));
+        renderUtilityStats(txns);
+      }).catch(function() { renderUtilityStats(allTxns); });
+    } else {
+      renderUtilityStats(allTxns);
+    }
+  }
+
+  function renderUtilityStats(allTxns) {
     const util = allTxns.filter(t => t.service.includes("Airtime") || t.service.includes("Data"));
     document.getElementById("airtimeCount").textContent  = util.filter(t => t.service.includes("Airtime")).length;
     document.getElementById("dataCount").textContent     = util.filter(t => t.service.includes("Data")).length;

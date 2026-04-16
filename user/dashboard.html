@@ -1718,7 +1718,7 @@
     if (slipUrl) delete formData.slipUrl;
     const txn = {
       id: 'TXN' + Date.now(),
-      userId: user.id,
+      userId: user.id || user.uid,
       service: service,
       details: details,
       amount: fee,
@@ -1729,10 +1729,33 @@
     if (slipUrl) txn.slipUrl = slipUrl;
     transactions.unshift(txn);
     localStorage.setItem('tuggaNinPortalV2_tugga_txns', JSON.stringify(transactions));
-    if (window.fbReady) {
-      window.fbSetDoc(window.fbDoc(window.fbDB, 'transactions', txn.id), txn)
-        .catch(e => console.error('Firebase txn error:', e));
+
+    // Save to Firestore using new Firebase service
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.createTransaction({
+        userId: txn.userId,
+        service: txn.service,
+        details: txn.details,
+        amount: txn.amount,
+        status: txn.status,
+        ref: txn.id,
+        formData: txn.formData,
+        slipUrl: slipUrl || null,
+        date: new Date().toISOString()
+      }).then(function(docId) {
+        console.log('✅ Transaction saved to Firestore:', docId);
+      }).catch(function(e) {
+        console.error('❌ Firestore transaction error:', e);
+      });
+
+      // Also deduct wallet in Firestore
+      if (fee > 0) {
+        const userId = user.id || user.uid;
+        window.databaseService.updateWalletBalance(userId, -fee)
+          .catch(function(e) { console.error('Wallet deduction error:', e); });
+      }
     }
+
     return txn;
   }
 
@@ -1970,10 +1993,29 @@
     // Store locally
     transactions.unshift(txn);
     localStorage.setItem("tuggaNinPortalV2_tugga_txns", JSON.stringify(transactions));
-    // Save to Firestore with known doc ID so status can be updated later
-    if (window.fbReady) {
-      window.fbSetDoc(window.fbDoc(window.fbDB, 'transactions', txn.id), txn)
-        .catch(e => console.error("Firebase txn error:", e));
+    // Save to Firestore using new Firebase service
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.createTransaction({
+        userId: txn.userId,
+        service: txn.service,
+        details: txn.details,
+        amount: txn.amount,
+        status: txn.status,
+        ref: txn.id,
+        formData: txn.formData,
+        date: new Date().toISOString()
+      }).then(function(docId) {
+        console.log('✅ Transaction saved to Firestore:', docId);
+      }).catch(function(e) {
+        console.error('❌ Firestore transaction error:', e);
+      });
+
+      // Deduct wallet in Firestore
+      if (currentService.price > 0) {
+        const userId = user.id || user.uid;
+        window.databaseService.updateWalletBalance(userId, -currentService.price)
+          .catch(function(e) { console.error('Wallet deduction error:', e); });
+      }
     }
     closeModal("serviceModal");
     toast(currentService.title + " request submitted successfully!");
