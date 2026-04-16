@@ -263,7 +263,7 @@ export function initGlobalErrorHandler() {
     // Handle Firebase unauthenticated errors
     if (error && error.code === 'unauthenticated') {
       console.warn('User unauthenticated - redirecting to login');
-      localStorage.removeItem('tugga_user');
+      localStorage.removeItem('tuggaNinPortalV2_tugga_user');
       window.location.href = '../index.html';
     }
   });

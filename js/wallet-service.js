@@ -28,7 +28,7 @@ const PAYSTACK_PUBLIC_KEY = 'pk_test_YOUR_PAYSTACK_PUBLIC_KEY';
 export async function getWalletBalance(userId) {
   if (!isFirebaseReady()) {
     // Fallback to localStorage
-    const userStr = localStorage.getItem('tugga_user');
+    const userStr = localStorage.getItem('tuggaNinPortalV2_tugga_user');
     if (userStr) {
       const user = JSON.parse(userStr);
       return user.wallet || 0;
@@ -65,14 +65,14 @@ export async function deductFromWallet(userId, amount, reason) {
 
   if (!isFirebaseReady()) {
     // Fallback to localStorage
-    const userStr = localStorage.getItem('tugga_user');
+    const userStr = localStorage.getItem('tuggaNinPortalV2_tugga_user');
     if (userStr) {
       const user = JSON.parse(userStr);
       user.wallet = (user.wallet || 0) - amount;
-      localStorage.setItem('tugga_user', JSON.stringify(user));
+      localStorage.setItem('tuggaNinPortalV2_tugga_user', JSON.stringify(user));
       
       // Record transaction in localStorage
-      const transactions = JSON.parse(localStorage.getItem('tugga_transactions') || '[]');
+      const transactions = JSON.parse(localStorage.getItem('tuggaNinPortalV2_tugga_transactions') || '[]');
       transactions.push({
         userId: userId,
         service: 'Wallet Deduction',
@@ -82,7 +82,7 @@ export async function deductFromWallet(userId, amount, reason) {
         date: new Date().toISOString(),
         ref: generateRef()
       });
-      localStorage.setItem('tugga_transactions', JSON.stringify(transactions));
+      localStorage.setItem('tuggaNinPortalV2_tugga_transactions', JSON.stringify(transactions));
       
       return user.wallet;
     }
@@ -311,7 +311,7 @@ export async function requestVirtualAccount(userId) {
 export async function getVirtualAccount(userId) {
   if (!isFirebaseReady()) {
     // Fallback to localStorage
-    const userStr = localStorage.getItem('tugga_user');
+    const userStr = localStorage.getItem('tuggaNinPortalV2_tugga_user');
     if (userStr) {
       const user = JSON.parse(userStr);
       return user.virtualAccount || null;

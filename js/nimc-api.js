@@ -414,7 +414,7 @@ const NIMC_API = {
       matchScore: this.calculateMatchScore(fieldMatches),
       matchLevel: this.getMatchLevel(this.calculateMatchScore(fieldMatches)),
       slipId: 'SLIP-' + Date.now(),
-      generatedBy: 'TUGGA IT SOLUTIONS'
+      generatedBy: 'GET ID FIX'
     };
 
     // Add additional info for premium/verification_info slips

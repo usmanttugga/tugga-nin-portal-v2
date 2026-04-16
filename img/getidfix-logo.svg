@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#047857;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#0891b2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0284c7;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#10b981;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="6" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+  </defs>
+
+  <!-- Outer circle background -->
+  <circle cx="100" cy="100" r="96" fill="url(#bgGrad)" filter="url(#shadow)"/>
+
+  <!-- Inner circle ring -->
+  <circle cx="100" cy="100" r="88" fill="none" stroke="rgba(255,255,255,0.15)" stroke-width="2"/>
+
+  <!-- Shield shape -->
+  <path d="M100 38 L138 55 L138 95 Q138 128 100 148 Q62 128 62 95 L62 55 Z"
+        fill="url(#shieldGrad)" opacity="0.9"/>
+
+  <!-- Shield inner highlight -->
+  <path d="M100 46 L132 61 L132 95 Q132 122 100 140 Q68 122 68 95 L68 61 Z"
+        fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1.5"/>
+
+  <!-- ID card icon inside shield -->
+  <rect x="78" y="72" width="44" height="32" rx="4" fill="white" opacity="0.95"/>
+  <rect x="82" y="76" width="12" height="12" rx="2" fill="url(#bgGrad)"/>
+  <rect x="98" y="78" width="20" height="2.5" rx="1" fill="#94a3b8"/>
+  <rect x="98" y="83" width="14" height="2" rx="1" fill="#cbd5e1"/>
+  <rect x="82" y="92" width="36" height="2" rx="1" fill="#e2e8f0"/>
+  <rect x="82" y="96" width="28" height="2" rx="1" fill="#e2e8f0"/>
+
+  <!-- Checkmark / fix indicator -->
+  <circle cx="126" cy="108" r="10" fill="#10b981"/>
+  <path d="M121 108 L124.5 111.5 L131 105" stroke="white" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- GET ID FIX text -->
+  <text x="100" y="168" font-family="'Segoe UI', Arial, sans-serif" font-size="13" font-weight="800"
+        fill="white" text-anchor="middle" letter-spacing="2">GET ID FIX</text>
+
+  <!-- Tagline -->
+  <text x="100" y="182" font-family="'Segoe UI', Arial, sans-serif" font-size="7" font-weight="400"
+        fill="rgba(255,255,255,0.75)" text-anchor="middle" letter-spacing="1">IDENTITY SOLUTIONS</text>
+</svg>

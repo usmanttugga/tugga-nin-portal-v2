@@ -10,17 +10,17 @@ import { getCurrentUser } from './auth-service.js';
 import { isFirebaseReady } from './firebase-config.js';
 
 // Migration status key
-const MIGRATION_STATUS_KEY = 'tugga_migration_status';
-const MIGRATION_DISMISSED_KEY = 'tugga_migration_dismissed';
+const MIGRATION_STATUS_KEY = 'tuggaNinPortalV2_tugga_migration_status';
+const MIGRATION_DISMISSED_KEY = 'tuggaNinPortalV2_tugga_migration_dismissed';
 
 /**
  * Check if localStorage has data to migrate
  * @returns {boolean} True if migration data exists
  */
 export function hasLocalStorageData() {
-  const users = localStorage.getItem('tugga_all_users');
-  const transactions = localStorage.getItem('tugga_transactions');
-  const currentUser = localStorage.getItem('tugga_user');
+  const users = localStorage.getItem('tuggaNinPortalV2_tugga_all_users');
+  const transactions = localStorage.getItem('tuggaNinPortalV2_tugga_transactions');
+  const currentUser = localStorage.getItem('tuggaNinPortalV2_tugga_user');
   
   return !!(users || transactions || currentUser);
 }
@@ -119,7 +119,7 @@ export async function migrateUserData(userId) {
 
   try {
     // Get current user from localStorage
-    const currentUserStr = localStorage.getItem('tugga_user');
+    const currentUserStr = localStorage.getItem('tuggaNinPortalV2_tugga_user');
     if (currentUserStr) {
       const userData = JSON.parse(currentUserStr);
       
@@ -145,7 +145,7 @@ export async function migrateUserData(userId) {
     }
 
     // Get all users from localStorage
-    const allUsersStr = localStorage.getItem('tugga_all_users');
+    const allUsersStr = localStorage.getItem('tuggaNinPortalV2_tugga_all_users');
     if (allUsersStr) {
       const allUsers = JSON.parse(allUsersStr);
       
@@ -188,7 +188,7 @@ export async function migrateTransactions(userId) {
 
   try {
     // Get transactions from localStorage
-    const transactionsStr = localStorage.getItem('tugga_transactions');
+    const transactionsStr = localStorage.getItem('tuggaNinPortalV2_tugga_transactions');
     if (!transactionsStr) {
       result.success = true;
       return result;

@@ -100,14 +100,14 @@ export async function logout() {
   if (!auth) {
     // Clear local session even if Firebase not available
     currentAuthUser = null;
-    localStorage.removeItem('tugga_user');
+    localStorage.removeItem('tuggaNinPortalV2_tugga_user');
     return;
   }
 
   try {
     await signOut(auth);
     currentAuthUser = null;
-    localStorage.removeItem('tugga_user');
+    localStorage.removeItem('tuggaNinPortalV2_tugga_user');
     console.log('User logged out successfully');
   } catch (error) {
     console.error('Logout error:', error);
@@ -145,7 +145,7 @@ export function getCurrentUser() {
   
   if (!auth) {
     // Fallback to localStorage
-    const storedUser = localStorage.getItem('tugga_user');
+    const storedUser = localStorage.getItem('tuggaNinPortalV2_tugga_user');
     return storedUser ? JSON.parse(storedUser) : null;
   }
 
@@ -190,7 +190,7 @@ export function isAuthenticated() {
   
   if (!auth) {
     // Fallback to localStorage check
-    return localStorage.getItem('tugga_user') !== null;
+    return localStorage.getItem('tuggaNinPortalV2_tugga_user') !== null;
   }
 
   return auth.currentUser !== null;
