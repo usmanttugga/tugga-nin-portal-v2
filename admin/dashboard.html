@@ -1773,26 +1773,22 @@
   // ── Firebase Data Loader ────────────────────────────
   window.loadFirebaseData = function() {
     if (!window.firebaseInitialized || !window.isFirebaseReady()) return;
-
-    // Set up real-time listener for users
-    try {
-      window.databaseService.subscribeToSettings(
-        (settings) => {
-          if (settings) {
-            localStorage.setItem('tuggaNinPortalV2_tugga_settings', JSON.stringify(settings));
-          }
-        },
-        (err) => console.error('Settings listener error:', err)
-      );
-      console.log('✅ Admin real-time listeners active');
-    } catch (e) {
-      console.error('Error setting up admin listeners:', e);
-    }
+    // Load all admin data now that Firebase is ready
+    loadOverview();
+    loadUsers();
+    console.log('✅ Admin Firebase data loaded');
   };
 
-  // Initial load
+  // Initial load — also retry once Firebase becomes ready
   loadOverview();
   loadUsers();
+  // Retry after a short delay in case Firebase wasn't ready yet on first call
+  setTimeout(function() {
+    if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady()) {
+      loadOverview();
+      loadUsers();
+    }
+  }, 2000);
 
   // ── Service Availability ───────────────────────────
   function getAvailability() {
