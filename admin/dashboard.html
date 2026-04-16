@@ -6,8 +6,9 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"/>
   <meta http-equiv="Pragma" content="no-cache"/>
   <meta http-equiv="Expires" content="0"/>
-  <title>Admin Dashboard – MAJIA DIGITAL IDENTITY</title>
-  <link rel="stylesheet" href="../css/style.css"/>
+  <title>Admin Dashboard – TUGGA IT SOLUTIONS</title>
+  <link rel="stylesheet" href="../css/style.css?v=2.0"/>
+  <link rel="stylesheet" href="../css/color-override.css?v=2.0"/>
 </head>
 <body>
 
@@ -17,7 +18,7 @@
       <span></span><span></span><span></span>
     </button>
     <div class="logo" style="min-width:0;overflow:hidden;display:flex;align-items:center">
-      <img src="../img/logo.svg" alt="MAJIA" style="height:38px;width:auto;object-fit:contain;max-width:150px"/>
+      <img src="../img/tugga-logo-new.svg" alt="TUGGA" style="height:38px;width:auto;object-fit:contain;max-width:150px"/>
       <span style="font-size:0.62rem;background:var(--accent);color:var(--primary);padding:2px 7px;border-radius:4px;margin-left:6px;font-weight:700;white-space:nowrap;flex-shrink:0">ADMIN</span>
     </div>
   </div>
@@ -51,6 +52,10 @@
       <a href="#" data-section="sec-pricing" onclick="showSection('sec-pricing')"><span class="icon">💲</span> Pricing</a>
       <a href="#" data-section="sec-availability" onclick="showSection('sec-availability')"><span class="icon">🔧</span> Availability</a>
       <a href="#" data-section="sec-settings" onclick="showSection('sec-settings')"><span class="icon">⚙️</span> Settings</a>
+    </div>
+    <div class="menu-section" style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem; margin-top: 1rem;">
+      <h4>Quick Access</h4>
+      <a href="../user/dashboard.html" style="background: rgba(6,182,212,0.15); border-left: 3px solid var(--accent);"><span class="icon">👤</span> User Dashboard</a>
     </div>
   </aside>
 
@@ -582,7 +587,48 @@
 </div>
 
 <script src="../js/app.js?v=8"></script>
-<script type="module" src="../js/firebase.js"></script>
+
+<!-- NIMC API Integration -->
+<script src="../js/nimc-api.js"></script>
+<script src="../js/nimc-integration.js"></script>
+
+<!-- Firebase Services (ES6 Modules) -->
+<script type="module">
+  import { initializeFirebase, isFirebaseReady } from '../js/firebase-config.js';
+  import * as authService from '../js/auth-service.js';
+  import * as databaseService from '../js/database-service.js';
+  import * as walletService from '../js/wallet-service.js';
+  import { initOfflineDetection, initGlobalErrorHandler } from '../js/error-handler.js';
+
+  // Initialize Firebase on page load
+  (async () => {
+    try {
+      initGlobalErrorHandler();
+      initOfflineDetection();
+
+      const initialized = await initializeFirebase();
+      if (initialized) {
+        console.log('✅ Firebase initialized for admin dashboard');
+        window.firebaseInitialized = true;
+        // Load data from Firestore
+        if (window.loadFirebaseData) window.loadFirebaseData();
+      } else {
+        console.warn('⚠️ Firebase not configured - using localStorage fallback');
+        window.firebaseInitialized = false;
+      }
+    } catch (error) {
+      console.error('❌ Firebase initialization error:', error);
+      window.firebaseInitialized = false;
+    }
+  })();
+
+  // Make services available globally
+  window.authService = authService;
+  window.databaseService = databaseService;
+  window.walletService = walletService;
+  window.isFirebaseReady = isFirebaseReady;
+</script>
+
 <script>
   const admin = requireAuth("admin");
   if (admin) document.getElementById("adminName").textContent = admin.name;
@@ -617,8 +663,37 @@
   }
 
   function loadUsers() {
-    const users = window._fbUsers || MOCK_USERS;
+    // Try Firestore first
+    if (window.firebaseInitialized && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.getAllUsers()
+        .then(function(firestoreUsers) {
+          if (firestoreUsers && firestoreUsers.length > 0) {
+            window._fbUsers = firestoreUsers;
+            renderUsersTable(firestoreUsers);
+            document.getElementById("statUsers").textContent = firestoreUsers.filter(u => u.role !== 'admin').length;
+            return;
+          }
+          // Fall through to localStorage if no Firestore users
+          loadUsersFromLocalStorage();
+        })
+        .catch(function(e) {
+          console.error('Error loading users from Firestore:', e);
+          loadUsersFromLocalStorage();
+        });
+      return;
+    }
+    loadUsersFromLocalStorage();
+  }
+
+  function loadUsersFromLocalStorage() {
+    const lsUsers = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    const users = lsUsers.length ? lsUsers : (window._fbUsers || MOCK_USERS);
+    window._fbUsers = users;
+    renderUsersTable(users);
     document.getElementById("statUsers").textContent = users.filter(u => u.role !== 'admin').length;
+  }
+
+  function renderUsersTable(users) {
     document.getElementById("usersTable").innerHTML = users.map(u => {
       const uid = u.uid || u.id;
       const suspended = u.status === 'Suspended';
@@ -664,17 +739,26 @@
     const alertEl = document.getElementById('assignVAAlert');
     if (!bank || !number || !name) { alertEl.innerHTML = '<div class="alert alert-error">All fields are required.</div>'; return; }
     if (!/^\d{10}$/.test(number)) { alertEl.innerHTML = '<div class="alert alert-error">Account number must be 10 digits.</div>'; return; }
-    if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
-    window.fbSetDoc(window.fbDoc(window.fbDB, 'users', uid), {
-      virtualAccount: { bank, account_number: number, account_name: name }
-    }, { merge: true }).then(function() {
-      // Mark VA request as fulfilled
-      window.fbSetDoc(window.fbDoc(window.fbDB, 'va_requests', uid), { status: 'assigned' }, { merge: true });
-      closeModal('assignVAModal');
-      toast('Virtual account assigned to user.');
-    }).catch(function(e) {
-      alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>';
-    });
+
+    // Use Firebase wallet service if available
+    if (window.firebaseInitialized && window.isFirebaseReady() && window.walletService) {
+      alertEl.innerHTML = '<div class="alert alert-info">Assigning virtual account...</div>';
+      window.walletService.assignVirtualAccount(uid, {
+        bank: bank,
+        accountNumber: number,
+        accountName: name
+      }).then(function() {
+        closeModal('assignVAModal');
+        toast('Virtual account assigned to user.');
+        loadUsers(); // Refresh users list
+      }).catch(function(e) {
+        alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>';
+      });
+      return;
+    }
+
+    // Fallback: localStorage
+    alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready. Cannot assign virtual account.</div>';
   }
 
   function openFundWallet(uid, name) {
@@ -691,47 +775,85 @@
     const alertEl = document.getElementById('fundWalletAlert');
     if (!amount || amount < 1) { alertEl.innerHTML = '<div class="alert alert-error">Enter a valid amount.</div>'; return; }
     alertEl.innerHTML = '<div class="alert alert-info">Processing...</div>';
-    if (!window.fbReady) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
-    window.fbUpdateDoc(window.fbDoc(window.fbDB, 'users', uid), { wallet: window.fbIncrement(amount) })
-      .then(function() {
-        // Record funding transaction so it appears in stats and history
-        const txn = {
-          id: 'TXN' + Date.now(),
-          userId: uid,
-          service: 'Wallet Funding',
-          details: 'Admin Funding',
-          amount: amount,
-          status: 'success',
-          date: new Date().toLocaleString()
-        };
-        window.fbAddDoc(window.fbCollection(window.fbDB, 'transactions'), txn);
-        closeModal('fundWalletModal');
-        toast('Wallet funded successfully!');
-      })
-      .catch(function(e) { alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
+
+    // Use Firebase database service if available
+    if (window.firebaseInitialized && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.updateWalletBalance(uid, amount)
+        .then(function(newBalance) {
+          // Record funding transaction
+          return window.databaseService.createTransaction({
+            userId: uid,
+            service: 'Wallet Funding',
+            details: 'Admin Funding',
+            amount: amount,
+            status: 'success',
+            ref: 'ADMIN-TXN-' + Date.now()
+          });
+        })
+        .then(function() {
+          closeModal('fundWalletModal');
+          toast('Wallet funded successfully!');
+          loadUsers(); // Refresh users list
+        })
+        .catch(function(e) { alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>'; });
+      return;
+    }
+
+    // Fallback: localStorage
+    const users = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    const idx = users.findIndex(u => String(u.id) === String(uid) || u.uid === uid);
+    if (idx === -1) { alertEl.innerHTML = '<div class="alert alert-error">User not found.</div>'; return; }
+    users[idx].wallet = (users[idx].wallet || 0) + amount;
+    localStorage.setItem('tugga_all_users', JSON.stringify(users));
+    closeModal('fundWalletModal');
+    toast('Wallet funded successfully!');
+    loadUsers();
   }
 
   function suspendUser(uid) {
-    if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
-    window.fbSetDoc(window.fbDoc(window.fbDB, 'users', uid), { status: 'Suspended' }, { merge: true })
-      .then(function() { toast('User suspended.'); })
-      .catch(function(e) { toast('Suspend failed: ' + e.message, 'error'); console.error('suspendUser error:', e); });
+    if (window.firebaseInitialized && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.updateUser(uid, { status: 'Suspended' })
+        .then(function() { toast('User suspended.'); loadUsers(); })
+        .catch(function(e) { toast('Suspend failed: ' + e.message, 'error'); });
+      return;
+    }
+    // Fallback: localStorage
+    const users = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    const idx = users.findIndex(u => String(u.id) === String(uid) || u.uid === uid);
+    if (idx !== -1) { users[idx].status = 'Suspended'; localStorage.setItem('tugga_all_users', JSON.stringify(users)); }
+    toast('User suspended.'); loadUsers();
   }
 
   function unsuspendUser(uid) {
-    if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
-    window.fbSetDoc(window.fbDoc(window.fbDB, 'users', uid), { status: 'Active' }, { merge: true })
-      .then(function() { toast('User unsuspended.'); })
-      .catch(function(e) { toast('Unsuspend failed: ' + e.message, 'error'); console.error('unsuspendUser error:', e); });
+    if (window.firebaseInitialized && window.isFirebaseReady() && window.databaseService) {
+      window.databaseService.updateUser(uid, { status: 'Active' })
+        .then(function() { toast('User unsuspended.'); loadUsers(); })
+        .catch(function(e) { toast('Unsuspend failed: ' + e.message, 'error'); });
+      return;
+    }
+    // Fallback: localStorage
+    const users = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    const idx = users.findIndex(u => String(u.id) === String(uid) || u.uid === uid);
+    if (idx !== -1) { users[idx].status = 'Active'; localStorage.setItem('tugga_all_users', JSON.stringify(users)); }
+    toast('User unsuspended.'); loadUsers();
   }
 
   function deleteUser(uid, name) {
     const confirmed = prompt('Type DELETE to confirm removing user "' + name + '". This cannot be undone.');
     if (confirmed !== 'DELETE') { toast('Deletion cancelled.'); return; }
-    if (!window.fbReady) { toast('Firebase not ready', 'error'); return; }
-    window.fbDeleteDoc(window.fbDoc(window.fbDB, 'users', uid))
-      .then(function() { toast('User deleted successfully.'); })
-      .catch(function(e) { toast('Delete failed: ' + e.message, 'error'); console.error('deleteUser error:', e); });
+
+    if (window.firebaseInitialized && window.isFirebaseReady() && window.databaseService) {
+      // Note: deleteDoc is not in databaseService, use updateUser to mark as deleted
+      window.databaseService.updateUser(uid, { status: 'Deleted', deletedAt: new Date().toISOString() })
+        .then(function() { toast('User deleted successfully.'); loadUsers(); })
+        .catch(function(e) { toast('Delete failed: ' + e.message, 'error'); });
+      return;
+    }
+    // Fallback: localStorage
+    let users = JSON.parse(localStorage.getItem('tugga_all_users') || '[]');
+    users = users.filter(u => String(u.id) !== String(uid) && u.uid !== uid);
+    localStorage.setItem('tugga_all_users', JSON.stringify(users));
+    toast('User deleted successfully.'); loadUsers();
   }
 
   function loadAllTxns(filter = "") {
@@ -1540,6 +1662,26 @@
     }
     history.pushState({ page: 'admin-dashboard' }, '', window.location.href);
   });
+
+  // ── Firebase Data Loader ────────────────────────────
+  window.loadFirebaseData = function() {
+    if (!window.firebaseInitialized || !window.isFirebaseReady()) return;
+
+    // Set up real-time listener for users
+    try {
+      window.databaseService.subscribeToSettings(
+        (settings) => {
+          if (settings) {
+            localStorage.setItem('tugga_settings', JSON.stringify(settings));
+          }
+        },
+        (err) => console.error('Settings listener error:', err)
+      );
+      console.log('✅ Admin real-time listeners active');
+    } catch (e) {
+      console.error('Error setting up admin listeners:', e);
+    }
+  };
 
   // Initial load
   loadOverview();

@@ -1,0 +1,63 @@
+rules_version = '2';
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // ── Helper Functions ──────────────────────────────
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        firestore.get(/databases/(default)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    function isValidFileType() {
+      return request.resource.contentType.matches('image/.*') ||
+             request.resource.contentType == 'application/pdf';
+    }
+
+    function isValidFileSize() {
+      // 10MB limit
+      return request.resource.size <= 10 * 1024 * 1024;
+    }
+
+    // ── User Uploads ──────────────────────────────────
+    // Path: uploads/{userId}/{filename}
+    match /uploads/{userId}/{allPaths=**} {
+      // Owner can upload; owner and admin can read
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) && isValidFileType() && isValidFileSize();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+    // ── Fingerprint Uploads ───────────────────────────
+    // Path: fingerprints/{userId}/{filename}
+    match /fingerprints/{userId}/{allPaths=**} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) && isValidFileType() && isValidFileSize();
+      allow delete: if isAdmin();
+    }
+
+    // ── Document Uploads ──────────────────────────────
+    // Path: documents/{userId}/{filename}
+    match /documents/{userId}/{allPaths=**} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) && isValidFileType() && isValidFileSize();
+      allow delete: if isAdmin();
+    }
+
+    // ── Temp Uploads (auto-delete after 90 days) ──────
+    // Path: temp/{userId}/{filename}
+    match /temp/{userId}/{allPaths=**} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow write: if isOwner(userId) && isValidFileType() && isValidFileSize();
+      allow delete: if isOwner(userId) || isAdmin();
+    }
+
+  }
+}

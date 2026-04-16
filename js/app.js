@@ -11,23 +11,34 @@ function getCurrentUser() {
 let currentUser = getCurrentUser();
 
 function login(email, password) {
-  const user = USERS.find(u => u.email === email && u.password === password);
+  // Check hardcoded users first
+  let user = USERS.find(u => u.email === email && u.password === password);
+  
+  // If not found, check localStorage users
+  if (!user) {
+    const storedUsers = JSON.parse(localStorage.getItem("tugga_all_users") || "[]");
+    user = storedUsers.find(u => u.email === email && u.password === password);
+  }
+  
   if (!user) return null;
-  localStorage.setItem("tugga_user", JSON.stringify(user));
-  return user;
+  if (user.status === 'Suspended') return { suspended: true };
+  
+  // Don't store password in session
+  const userSession = { ...user };
+  delete userSession.password;
+  
+  localStorage.setItem("tugga_user", JSON.stringify(userSession));
+  return userSession;
 }
 
 function logout() {
-  localStorage.removeItem("tugga_user");
-  var goToLogin = function() {
-    window.location.href = window.location.pathname.includes('/admin/') || window.location.pathname.includes('/user/')
-      ? '../index.html' : 'index.html';
-  };
-  if (window.fbAuth && window.fbSignOut) {
-    window.fbSignOut(window.fbAuth).then(goToLogin).catch(goToLogin);
-  } else {
-    goToLogin();
+  // Sign out from Firebase if available
+  if (window.authService && window.authService.logout) {
+    window.authService.logout().catch(err => console.warn('Firebase logout error:', err));
   }
+  localStorage.removeItem("tugga_user");
+  window.location.href = window.location.pathname.includes('/admin/') || window.location.pathname.includes('/user/')
+    ? '../index.html' : 'index.html';
 }
 
 function requireAuth(role) {
@@ -36,7 +47,13 @@ function requireAuth(role) {
     window.location.href = "../index.html";
     return null;
   }
+  // Allow admins to access user dashboard, but not vice versa
   if (role && user.role !== role) {
+    // If requesting user role and user is admin, allow access
+    if (role === "user" && user.role === "admin") {
+      return user;
+    }
+    // Otherwise, redirect to login
     window.location.href = "../index.html";
     return null;
   }
@@ -52,18 +69,37 @@ function addTransaction(userId, service, details, amount, status = "success") {
     userId, service, details, amount, status,
     date: new Date().toLocaleString()
   };
+  // Save to localStorage always (offline support)
   transactions.unshift(txn);
   localStorage.setItem("tugga_txns", JSON.stringify(transactions));
-  // Save to Firebase if available
-  if (window.fbReady) {
-    window.fbAddDoc(window.fbCollection(window.fbDB, "transactions"), txn)
-      .catch(e => console.error("Firebase txn error:", e));
+
+  // Also save to Firestore if Firebase is ready
+  if (window.firebaseInitialized && window.isFirebaseReady && window.isFirebaseReady() && window.databaseService) {
+    window.databaseService.createTransaction({
+      userId, service, details, amount, status,
+      ref: txn.id,
+      date: new Date().toISOString()
+    }).catch(err => console.warn('Firestore transaction sync failed:', err));
   }
+
   return txn;
 }
 
 function getUserTransactions(userId) {
   return transactions.filter(t => t.userId === userId);
+}
+
+// Sync wallet balance to Firestore (called after local wallet changes)
+function syncWalletToFirebase() {
+  if (!window.firebaseInitialized || !window.isFirebaseReady || !window.isFirebaseReady()) return;
+  const user = getCurrentUser();
+  if (!user) return;
+  const userId = user.uid || user.id;
+  const wallet = user.wallet || 0;
+  if (window.databaseService) {
+    window.databaseService.updateUser(userId, { wallet })
+      .catch(err => console.warn('Wallet sync to Firestore failed:', err));
+  }
 }
 
 // ── Modal ─────────────────────────────────────────────

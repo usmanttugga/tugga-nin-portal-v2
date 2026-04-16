@@ -1,0 +1,84 @@
+/* FORCE NEW COLOR SCHEME - OVERRIDES ALL INLINE STYLES */
+
+/* Override all primary color references */
+[style*="#0f2044"],
+[style*="#1a3a6e"],
+[style*="background:#0f2044"],
+[style*="background: #0f2044"],
+[style*="color:#0f2044"],
+[style*="color: #0f2044"] {
+  background: #047857 !important;
+  color: #047857 !important;
+}
+
+/* Override all accent color references */
+[style*="#c9a84c"],
+[style*="#f0c96e"],
+[style*="background:#c9a84c"],
+[style*="color:#c9a84c"] {
+  background: #06b6d4 !important;
+  color: #06b6d4 !important;
+}
+
+/* Force gradient buttons */
+button[style*="linear-gradient"],
+.btn-primary,
+[class*="btn-"] {
+  background: linear-gradient(135deg, #047857 0%, #0891b2 50%, #0284c7 100%) !important;
+  color: #ffffff !important;
+}
+
+/* Force nav background */
+nav {
+  background: linear-gradient(135deg, #047857 0%, #0c4a6e 100%) !important;
+}
+
+/* Force sidebar background */
+.sidebar,
+aside {
+  background: linear-gradient(180deg, #047857 0%, #0c4a6e 100%) !important;
+}
+
+/* Force stat card hover colors */
+.stat-card:hover {
+  border-top: 4px solid #10b981 !important;
+}
+
+/* Force all primary text colors */
+.page-title,
+h1, h2, h3 {
+  color: #047857 !important;
+}
+
+/* Force accent text colors */
+.wallet-card .wallet-amount,
+[style*="color:var(--accent)"] {
+  color: #06b6d4 !important;
+}
+
+/* Override inline button styles */
+button[style*="#c9a84c"],
+button[style*="#e8c96a"] {
+  background: linear-gradient(135deg, #047857, #06b6d4) !important;
+}
+
+/* Force scrollbar colors */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #047857, #06b6d4) !important;
+}
+
+/* Force active sidebar links */
+.sidebar a.active {
+  background: linear-gradient(135deg, rgba(16,185,129,0.25), rgba(6,182,212,0.15)) !important;
+  border-left-color: #06b6d4 !important;
+}
+
+/* Force all var(--primary) references */
+* {
+  --primary: #047857 !important;
+  --primary-2: #059669 !important;
+  --primary-3: #0c4a6e !important;
+  --accent: #06b6d4 !important;
+  --accent-2: #0ea5e9 !important;
+  --accent-3: #22d3ee !important;
+}
