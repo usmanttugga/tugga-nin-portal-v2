@@ -1,103 +1,36 @@
-name: Deploy TUGGA NIN Portal
+name: Test and Validate
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allow manual trigger from GitHub Actions UI
+  workflow_dispatch:
 
 jobs:
-  deploy:
-    name: Build and Deploy
+  test:
+    name: Run Tests
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # Step 2: Set up Node.js
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
           cache: 'npm'
 
-      # Step 3: Install dependencies
       - name: Install dependencies
         run: npm ci
 
-      # Step 4: Run tests
       - name: Run tests
         run: npm test --if-present
-        continue-on-error: false
 
-      # Step 5: Validate HTML files
-      - name: Validate HTML files
+      - name: Validate key files exist
         run: |
-          echo "Checking HTML files exist..."
-          test -f index.html && echo "✅ index.html found" || echo "❌ index.html missing"
-          test -f user/dashboard.html && echo "✅ user/dashboard.html found" || echo "❌ user/dashboard.html missing"
-          test -f admin/dashboard.html && echo "✅ admin/dashboard.html found" || echo "❌ admin/dashboard.html missing"
-
-      # Step 6: Validate JavaScript files
-      - name: Validate JavaScript files
-        run: |
-          echo "Checking JS files exist..."
-          test -f js/firebase-config.js && echo "✅ firebase-config.js found" || echo "❌ firebase-config.js missing"
-          test -f js/auth-service.js && echo "✅ auth-service.js found" || echo "❌ auth-service.js missing"
-          test -f js/database-service.js && echo "✅ database-service.js found" || echo "❌ database-service.js missing"
-          test -f js/wallet-service.js && echo "✅ wallet-service.js found" || echo "❌ wallet-service.js missing"
-
-      # Step 7: Inject Firebase configuration from GitHub Secrets
-      - name: Inject Firebase configuration
-        env:
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          FIREBASE_AUTH_DOMAIN: ${{ secrets.FIREBASE_AUTH_DOMAIN }}
-          FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
-          FIREBASE_STORAGE_BUCKET: ${{ secrets.FIREBASE_STORAGE_BUCKET }}
-          FIREBASE_MESSAGING_SENDER_ID: ${{ secrets.FIREBASE_MESSAGING_SENDER_ID }}
-          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
-          PAYSTACK_PUBLIC_KEY: ${{ secrets.PAYSTACK_PUBLIC_KEY }}
-        run: |
-          if [ -n "$FIREBASE_API_KEY" ]; then
-            echo "Injecting Firebase configuration..."
-            sed -i "s|YOUR_API_KEY|$FIREBASE_API_KEY|g" js/firebase-config.js
-            sed -i "s|YOUR_PROJECT_ID.firebaseapp.com|$FIREBASE_AUTH_DOMAIN|g" js/firebase-config.js
-            sed -i "s|YOUR_PROJECT_ID|$FIREBASE_PROJECT_ID|g" js/firebase-config.js
-            sed -i "s|YOUR_PROJECT_ID.appspot.com|$FIREBASE_STORAGE_BUCKET|g" js/firebase-config.js
-            sed -i "s|YOUR_MESSAGING_SENDER_ID|$FIREBASE_MESSAGING_SENDER_ID|g" js/firebase-config.js
-            sed -i "s|YOUR_APP_ID|$FIREBASE_APP_ID|g" js/firebase-config.js
-            echo "✅ Firebase configuration injected"
-          else
-            echo "⚠️ Firebase secrets not configured - deploying without Firebase config"
-          fi
-          if [ -n "$PAYSTACK_PUBLIC_KEY" ]; then
-            sed -i "s|pk_test_YOUR_PAYSTACK_PUBLIC_KEY|$PAYSTACK_PUBLIC_KEY|g" js/wallet-service.js
-            echo "✅ Paystack key injected"
-          fi
-
-      # Step 8: Add deployment timestamp
-      - name: Add deployment timestamp
-        run: |
-          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
-          COMMIT_SHA="${{ github.sha }}"
-          echo "Deployed: $TIMESTAMP | Commit: $COMMIT_SHA" > DEPLOYED.txt
-          echo "<!-- Deployed: $TIMESTAMP -->" >> index.html
-          echo "✅ Deployment timestamp added: $TIMESTAMP"
-
-      # Step 9: Deploy to GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./
-          publish_branch: gh-pages
-          exclude_assets: '.github,node_modules,tests,*.md,*.rules,package*.json,.gitignore'
-          commit_message: 'Deploy: ${{ github.sha }} - ${{ github.event.head_commit.message }}'
-
-      # Step 10: Notify deployment success
-      - name: Deployment complete
-        run: |
-          echo "🚀 Deployment complete!"
-          echo "Your app is live at: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}"
+          test -f index.html && echo "✅ index.html" || exit 1
+          test -f user/dashboard.html && echo "✅ user/dashboard.html" || exit 1
+          test -f admin/dashboard.html && echo "✅ admin/dashboard.html" || exit 1
+          test -f js/firebase-config.js && echo "✅ firebase-config.js" || exit 1
+          echo "✅ All files validated"
