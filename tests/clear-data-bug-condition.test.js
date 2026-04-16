@@ -1,11 +1,11 @@
 /**
- * Bug Condition Exploration Test - Clear All Data Incomplete Clearing
+ * Bug Condition Exploration Test - Clear All Data
  *
- * **Property 1: Bug Condition** - Clear All Data Fails to Clear Firestore Transactions
+ * **Property 1** - clearAllData clears completed transactions and resets wallets,
+ * but preserves pending (submitted) requests so admins can still process them.
  *
  * NOTE: Firestore security rules block transaction deletion (audit trail protection).
- * The correct fix is to mark transactions as status:'cleared' via updateTransaction,
- * not to delete them. This test validates that behavior.
+ * The correct fix marks completed transactions as status:'cleared' via updateTransaction.
  *
  * **Validates: Requirements 1.1, 1.2, 1.3**
  */
@@ -17,24 +17,20 @@ const path = require('path');
 
 const mockFirestoreState = {
   transactions: [],
-  users: [],
-  settings: {}
+  users: []
 };
 
 const mockDatabaseService = {
   getAllTransactions: async (limitCount) => {
     return [...mockFirestoreState.transactions].slice(0, limitCount);
   },
-
   getAllUsers: async () => {
     return [...mockFirestoreState.users];
   },
-
   updateUser: async (uid, updates) => {
     const user = mockFirestoreState.users.find(u => (u.id || u.uid) === uid);
     if (user) Object.assign(user, updates);
   },
-
   updateTransaction: async (transactionId, updates) => {
     const txn = mockFirestoreState.transactions.find(t => t.id === transactionId);
     if (txn) Object.assign(txn, updates);
@@ -53,8 +49,6 @@ function loadClearAllDataFunction(promptFn) {
   const functionMatch = html.match(/async function clearAllData\(\)\s*{[\s\S]*?^  }/m);
   if (!functionMatch) throw new Error('clearAllData function not found in admin/dashboard.html');
 
-  const functionCode = functionMatch[0];
-
   const mockLocalStorage = {
     data: {},
     removeItem(key) { delete this.data[key]; },
@@ -69,7 +63,7 @@ function loadClearAllDataFunction(promptFn) {
   const wrappedFunction = new Function(
     'window', 'localStorage', 'document', 'fbReady', 'toast',
     'loadOverview', 'prompt', 'setTimeout', 'Promise',
-    `${functionCode}\nreturn clearAllData;`
+    `${functionMatch[0]}\nreturn clearAllData;`
   );
 
   return wrappedFunction(
@@ -92,16 +86,27 @@ function resetMockFirestore() {
   mockFirestoreState.users = [];
 }
 
-function seedMockFirestore(transactionCount, userCount) {
-  for (let i = 1; i <= transactionCount; i++) {
+function seedMockFirestore({ completedCount = 0, pendingCount = 0, userCount = 0 }) {
+  for (let i = 1; i <= completedCount; i++) {
     mockFirestoreState.transactions.push({
-      id: `txn-${i}`,
-      userId: `user-${(i % userCount) + 1}`,
+      id: `txn-completed-${i}`,
+      userId: `user-${(i % Math.max(userCount, 1)) + 1}`,
       service: 'NIN Verification',
       amount: 500,
-      status: 'completed',
+      status: 'success',
       date: new Date(),
-      ref: `TXN-REF-${i}`
+      ref: `TXN-DONE-${i}`
+    });
+  }
+  for (let i = 1; i <= pendingCount; i++) {
+    mockFirestoreState.transactions.push({
+      id: `txn-pending-${i}`,
+      userId: `user-${(i % Math.max(userCount, 1)) + 1}`,
+      service: 'Phone Number Modification',
+      amount: 500,
+      status: 'submitted',
+      date: new Date(),
+      ref: `TXN-PEND-${i}`
     });
   }
   for (let i = 1; i <= userCount; i++) {
@@ -113,100 +118,78 @@ function seedMockFirestore(transactionCount, userCount) {
   }
 }
 
-function allTransactionsCleared() {
-  return mockFirestoreState.transactions.every(t => t.status === 'cleared');
-}
-
-function allWalletBalancesReset() {
-  return mockFirestoreState.users.every(u => u.wallet === 0);
-}
-
 // ── Tests ─────────────────────────────────────────────────────────────────────
 
-describe('Bug Condition 1: Clear All Data Fails to Clear Firestore Transactions', () => {
+describe('clearAllData: clears history and balances, preserves pending requests', () => {
   beforeEach(() => resetMockFirestore());
   afterEach(() => jest.clearAllMocks());
 
   /**
-   * Property 1: clearAllData marks all transactions as cleared and resets wallets
-   *
-   * NOTE: Firestore rules block deletion, so the correct behavior is to mark
-   * transactions as status:'cleared' so they are hidden from admin views.
+   * Property 1: Completed transactions are marked cleared, wallets reset
    */
-  test('Property 1: clearAllData with confirmation marks all transactions as cleared', async () => {
-    const transactionCount = 47;
-    const userCount = 12;
-    seedMockFirestore(transactionCount, userCount);
-
-    expect(mockFirestoreState.transactions.length).toBe(transactionCount);
+  test('Property 1: clears completed transactions and resets all wallet balances', async () => {
+    seedMockFirestore({ completedCount: 47, pendingCount: 0, userCount: 12 });
 
     const clearAllData = loadClearAllDataFunction(() => 'CLEAR');
     await clearAllData();
 
-    // All transactions should be marked as cleared (not deleted — Firestore rules block that)
-    expect(allTransactionsCleared()).toBe(true);
-    mockFirestoreState.transactions.forEach(t => {
-      expect(t.status).toBe('cleared');
-    });
+    // All completed transactions should be marked as cleared
+    const completed = mockFirestoreState.transactions.filter(t => t.id.startsWith('txn-completed'));
+    completed.forEach(t => expect(t.status).toBe('cleared'));
 
     // All wallet balances should be reset to ₦0
-    expect(allWalletBalancesReset()).toBe(true);
     mockFirestoreState.users.forEach(u => expect(u.wallet).toBe(0));
   });
 
   /**
-   * Property 1 (Edge Case): Works with large transaction counts
+   * Property 2: Pending (submitted) requests are NOT cleared — admin must still process them
    */
-  test('Property 1 (Edge Case): clearAllData clears all transactions even with 1000+ transactions', async () => {
-    seedMockFirestore(1234, 50);
-    expect(mockFirestoreState.transactions.length).toBe(1234);
+  test('Property 2: pending (submitted) requests are preserved and not cleared', async () => {
+    seedMockFirestore({ completedCount: 20, pendingCount: 5, userCount: 8 });
 
     const clearAllData = loadClearAllDataFunction(() => 'CLEAR');
     await clearAllData();
 
-    // All fetched transactions (up to 1000 per call) should be cleared
+    // Pending requests must remain as 'submitted' — admin still needs to process them
+    const pending = mockFirestoreState.transactions.filter(t => t.id.startsWith('txn-pending'));
+    pending.forEach(t => expect(t.status).toBe('submitted'));
+
+    // Completed ones should be cleared
+    const completed = mockFirestoreState.transactions.filter(t => t.id.startsWith('txn-completed'));
+    completed.forEach(t => expect(t.status).toBe('cleared'));
+  });
+
+  /**
+   * Property 3: Works with large transaction counts
+   */
+  test('Property 3: clears all completed transactions even with large counts', async () => {
+    seedMockFirestore({ completedCount: 500, pendingCount: 10, userCount: 50 });
+
+    const clearAllData = loadClearAllDataFunction(() => 'CLEAR');
+    await clearAllData();
+
     const clearedCount = mockFirestoreState.transactions.filter(t => t.status === 'cleared').length;
-    expect(clearedCount).toBeGreaterThan(0);
-    expect(allWalletBalancesReset()).toBe(true);
+    expect(clearedCount).toBe(500);
+
+    const stillPending = mockFirestoreState.transactions.filter(t => t.status === 'submitted').length;
+    expect(stillPending).toBe(10);
+
+    mockFirestoreState.users.forEach(u => expect(u.wallet).toBe(0));
   });
 
   /**
-   * Property 1 (Counterexample): Documents the fix — transactions are cleared not deleted
+   * Preservation: Cancellation does not change anything
    */
-  test('Counterexample: clearAllData marks transactions as cleared and resets wallets', async () => {
-    const transactionCount = 47;
-    const userCount = 12;
-    seedMockFirestore(transactionCount, userCount);
-
-    const clearAllData = loadClearAllDataFunction(() => 'CLEAR');
-    await clearAllData();
-
-    const unclearedCount = mockFirestoreState.transactions.filter(t => t.status !== 'cleared').length;
-    if (unclearedCount > 0) {
-      console.log(`BUG: ${unclearedCount} transactions were not marked as cleared`);
-    }
-
-    expect(unclearedCount).toBe(0);
-    expect(allWalletBalancesReset()).toBe(true);
-  });
-
-  /**
-   * Preservation: Cancellation does not clear anything
-   */
-  test('Preservation: clearAllData cancelled does not clear transactions or reset wallets', async () => {
-    const transactionCount = 10;
-    const userCount = 5;
-    seedMockFirestore(transactionCount, userCount);
+  test('Preservation: cancellation does not clear transactions or reset wallets', async () => {
+    seedMockFirestore({ completedCount: 10, pendingCount: 3, userCount: 5 });
 
     const initialWallets = mockFirestoreState.users.map(u => u.wallet);
+    const initialStatuses = mockFirestoreState.transactions.map(t => t.status);
 
     const clearAllData = loadClearAllDataFunction(() => 'CANCEL');
     await clearAllData();
 
-    // Nothing should change
-    expect(mockFirestoreState.transactions.every(t => t.status === 'completed')).toBe(true);
-    mockFirestoreState.users.forEach((user, i) => {
-      expect(user.wallet).toBe(initialWallets[i]);
-    });
+    mockFirestoreState.transactions.forEach((t, i) => expect(t.status).toBe(initialStatuses[i]));
+    mockFirestoreState.users.forEach((u, i) => expect(u.wallet).toBe(initialWallets[i]));
   });
 });
