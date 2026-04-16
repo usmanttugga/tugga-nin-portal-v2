@@ -629,6 +629,20 @@
   const admin = requireAuth("admin");
   if (admin) document.getElementById("adminName").textContent = admin.name;
 
+  // ── Date Formatter ──────────────────────────────────
+  function formatDate(d) {
+    if (!d) return '—';
+    if (typeof d === 'string') {
+      const parsed = new Date(d);
+      return isNaN(parsed) ? d : parsed.toLocaleString();
+    }
+    if (typeof d === 'object') {
+      if (typeof d.toDate === 'function') return d.toDate().toLocaleString();
+      if (d.seconds) return new Date(d.seconds * 1000).toLocaleString();
+    }
+    return String(d);
+  }
+
   const MOCK_USERS = [
     { id: 1, name: "John Doe", email: "user@tugga.com", role: "user", wallet: 5000, status: "Active" }
   ];
@@ -668,7 +682,7 @@
       return `<tr><td>${t.id}</td><td>User #${t.userId}</td><td>${t.service}</td>
       <td>${fmt(t.amount)}</td>
       <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
-      <td>${t.date}</td></tr>`;
+      <td>${formatDate(t.date)}</td></tr>`;
     }).join("");
   }
 
@@ -895,7 +909,7 @@
         <td style="font-size:0.82rem">${t.details}</td>
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
-        <td style="font-size:0.75rem">${t.date}</td>
+        <td style="font-size:0.75rem">${formatDate(t.date)}</td>
         <td><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${viewBtn}</div></td>
       </tr>`;
     }).join("");
@@ -1016,7 +1030,7 @@
         <td style="font-size:0.82rem;max-width:120px;overflow:hidden;text-overflow:ellipsis">${t.details || '—'}</td>
         <td>${fmt(t.amount)}</td>
         <td><span class="badge badge-${badgeClass}">${displayStatus}</span></td>
-        <td style="font-size:0.75rem">${t.date}</td>
+        <td style="font-size:0.75rem">${formatDate(t.date)}</td>
         <td style="min-width:80px"><div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start">${viewBtn}${actionBtn}</div></td>
       </tr>`;
     }).join("");
@@ -1316,11 +1330,14 @@
     function formatDate(d) {
       if (!d) return '—';
       if (typeof d === 'string') {
+        // Try parsing ISO string
         const parsed = new Date(d);
         return isNaN(parsed) ? d : parsed.toLocaleString();
       }
       if (typeof d === 'object') {
+        // Firestore Timestamp has .toDate() method
         if (typeof d.toDate === 'function') return d.toDate().toLocaleString();
+        // Firestore Timestamp as plain object has .seconds
         if (d.seconds) return new Date(d.seconds * 1000).toLocaleString();
       }
       return String(d);
@@ -1335,9 +1352,13 @@
       `<span>Amount: <strong>${fmt(t.amount)}</strong></span>` +
       `<span>Status: <span class="badge badge-${badgeClass}">${displayStatus}</span></span>`;
 
+    // Build form data — merge formData object with top-level fields
     const formData = t.formData || {};
     const orderedKeys = SERVICE_FIELD_ORDER[t.service] || Object.keys(formData);
     const allData = Object.assign({}, formData || {});
+
+    // Check if this is a modification service
+    const isMod = MOD_SVCS.includes(t.service);
 
     // Also show top-level details if formData is empty
     if (Object.keys(allData).length === 0 && t.details) {
@@ -1349,16 +1370,15 @@
     if (t.retrievedEmail) allData['Retrieved Email'] = t.retrievedEmail;
     if (t.retrievedNin)   allData['Retrieved NIN']   = t.retrievedNin;
 
-    // For modification services show all fields; for others filter empty ones
-    const isMod = MOD_SVCS.includes(t.service);
     const displayKeys = isMod
-      ? orderedKeys
+      ? orderedKeys  // Show all fields for modification services
       : t.clearedTrackingId
         ? [...orderedKeys.filter(k => allData[k] && allData[k] !== '—'), 'Old Tracking ID', ...(t.clearedNin ? ['NIN'] : [])]
         : t.retrievedEmail
           ? [...orderedKeys.filter(k => allData[k] && allData[k] !== '—'), 'Retrieved Email', 'Retrieved NIN']
           : orderedKeys.filter(k => allData[k] && allData[k] !== '—');
 
+    // If still no keys, show all allData keys
     const finalKeys = displayKeys.length > 0 ? displayKeys : Object.keys(allData);
 
     const rows = finalKeys.map(k =>
@@ -1438,7 +1458,7 @@
     document.getElementById("bvnUserCount").textContent = bvn.filter(t => t.service === "BVN User").length;
     const tbody = document.getElementById("bvnTxnTable");
     if (!bvn.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No BVN transactions</td></tr>'; return; }
-    tbody.innerHTML = bvn.map(t => `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-success">${t.status}</span></td><td>${t.date}</td></tr>`).join("");
+    tbody.innerHTML = bvn.map(t => `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-success">${t.status}</span></td><td>${formatDate(t.date)}</td></tr>`).join("");
   }
 
   function loadUtilityStats() {
@@ -1460,7 +1480,7 @@
     document.getElementById("utilityRevenue").textContent = fmt(util.reduce((s, t) => s + t.amount, 0));
     const tbody = document.getElementById("utilityTxnTable");
     if (!util.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#999">No utility transactions</td></tr>'; return; }
-    tbody.innerHTML = util.map(t => `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-success">${t.status}</span></td><td>${t.date}</td></tr>`).join("");
+    tbody.innerHTML = util.map(t => `<tr><td>${t.id}</td><td>${t.service}</td><td>${t.details}</td><td>${fmt(t.amount)}</td><td><span class="badge badge-success">${t.status}</span></td><td>${formatDate(t.date)}</td></tr>`).join("");
   }
 
   function addUser() {
@@ -1640,17 +1660,17 @@
     alertEl.innerHTML = '<div class="alert alert-info">Clearing data, please wait...</div>';
     if (!fbReady()) { alertEl.innerHTML = '<div class="alert alert-error">Firebase not ready.</div>'; return; }
     try {
-      // Get all transactions and delete them
+      // Get all transactions and delete them from Firestore
       const txns = await window.databaseService.getAllTransactions(1000);
-      // We can't delete via databaseService directly, so mark as cleared
+      await Promise.all(txns.map(t => window.databaseService.deleteTransaction(t.id)));
       // Get all users and reset wallets
       const users = await window.databaseService.getAllUsers();
       await Promise.all(users.map(u => window.databaseService.updateUser(u.id || u.uid, { wallet: 0 })));
       localStorage.removeItem('tuggaNinPortalV2_tugga_txns');
-      alertEl.innerHTML = '<div class="alert alert-success">All wallet balances cleared successfully.</div>';
+      alertEl.innerHTML = `<div class="alert alert-success">Deleted ${txns.length} transaction(s) and reset ${users.length} user wallet balance(s) to ₦0.</div>`;
       setTimeout(() => { alertEl.innerHTML = ''; }, 4000);
       loadOverview();
-      toast('All data cleared.');
+      toast('All history and balances cleared.');
     } catch (e) {
       alertEl.innerHTML = '<div class="alert alert-error">Failed: ' + e.message + '</div>';
     }
