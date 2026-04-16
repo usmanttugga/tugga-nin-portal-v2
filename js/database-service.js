@@ -147,9 +147,22 @@ export async function getAllUsers() {
   if (!db) throw new Error('Firestore not initialized');
 
   return retryOperation(async () => {
-    const usersQuery = query(collection(db, 'users'), orderBy('registeredAt', 'desc'));
-    const snapshot = await getDocs(usersQuery);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    try {
+      // Try with orderBy first
+      const usersQuery = query(collection(db, 'users'), orderBy('registeredAt', 'desc'));
+      const snapshot = await getDocs(usersQuery);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (e) {
+      // Fallback: fetch all without ordering (works even without index or missing fields)
+      console.warn('getAllUsers orderBy failed, fetching without sort:', e.message);
+      const snapshot = await getDocs(collection(db, 'users'));
+      const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return users.sort((a, b) => {
+        const aTime = a.registeredAt ? (typeof a.registeredAt === 'object' ? (a.registeredAt.seconds || 0) : new Date(a.registeredAt).getTime() / 1000) : 0;
+        const bTime = b.registeredAt ? (typeof b.registeredAt === 'object' ? (b.registeredAt.seconds || 0) : new Date(b.registeredAt).getTime() / 1000) : 0;
+        return bTime - aTime;
+      });
+    }
   });
 }
 
@@ -230,14 +243,31 @@ export async function getUserTransactions(userId, limitCount = 100) {
   if (!db) throw new Error('Firestore not initialized');
 
   return retryOperation(async () => {
-    const txnQuery = query(
-      collection(db, 'transactions'),
-      where('userId', '==', userId),
-      orderBy('date', 'desc'),
-      limit(limitCount)
-    );
-    const snapshot = await getDocs(txnQuery);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    try {
+      const txnQuery = query(
+        collection(db, 'transactions'),
+        where('userId', '==', userId),
+        orderBy('date', 'desc'),
+        limit(limitCount)
+      );
+      const snapshot = await getDocs(txnQuery);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (e) {
+      // Fallback without orderBy
+      console.warn('getUserTransactions orderBy failed, fetching without sort:', e.message);
+      const txnQuery = query(
+        collection(db, 'transactions'),
+        where('userId', '==', userId),
+        limit(limitCount)
+      );
+      const snapshot = await getDocs(txnQuery);
+      const txns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return txns.sort((a, b) => {
+        const aTime = a.date ? (typeof a.date === 'object' ? (a.date.seconds || 0) : new Date(a.date).getTime() / 1000) : 0;
+        const bTime = b.date ? (typeof b.date === 'object' ? (b.date.seconds || 0) : new Date(b.date).getTime() / 1000) : 0;
+        return bTime - aTime;
+      });
+    }
   });
 }
 
@@ -251,13 +281,27 @@ export async function getAllTransactions(limitCount = 200) {
   if (!db) throw new Error('Firestore not initialized');
 
   return retryOperation(async () => {
-    const txnQuery = query(
-      collection(db, 'transactions'),
-      orderBy('date', 'desc'),
-      limit(limitCount)
-    );
-    const snapshot = await getDocs(txnQuery);
-    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    try {
+      // Try with orderBy first
+      const txnQuery = query(
+        collection(db, 'transactions'),
+        orderBy('date', 'desc'),
+        limit(limitCount)
+      );
+      const snapshot = await getDocs(txnQuery);
+      return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    } catch (e) {
+      // Fallback: fetch without ordering
+      console.warn('getAllTransactions orderBy failed, fetching without sort:', e.message);
+      const txnQuery = query(collection(db, 'transactions'), limit(limitCount));
+      const snapshot = await getDocs(txnQuery);
+      const txns = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      return txns.sort((a, b) => {
+        const aTime = a.date ? (typeof a.date === 'object' ? (a.date.seconds || 0) : new Date(a.date).getTime() / 1000) : 0;
+        const bTime = b.date ? (typeof b.date === 'object' ? (b.date.seconds || 0) : new Date(b.date).getTime() / 1000) : 0;
+        return bTime - aTime;
+      });
+    }
   });
 }
 
